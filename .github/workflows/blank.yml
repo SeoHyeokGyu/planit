@@ -1,14 +1,230 @@
-# .github/workflows/project-automation.yml
-name: Add issues to project
+# .github/workflows/project-status-monitor.yml
+name: Project Status Monitor
+
 on:
-  issues:
-    types: [opened]
+  schedule:
+    # 매 10분마다 실행 (필요에 따라 조정)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # 수동 실행도 가능
 
 jobs:
-  add-to-project:
+  monitor-project:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/add-to-project@v0.4.0
-      with:
-        project-url: https://github.com/users/SeoHyeokGyu/projects/2
-        github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Monitor Project Changes
+        id: monitor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // 프로젝트 ID 설정 (프로젝트 URL에서 확인 가능)
+            const PROJECT_ID = 'planit'; // 실제 프로젝트 ID로 변경 필요
+            
+            const query = `
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    title
+                    items(first: 100) {
+                      nodes {
+                        id
+                        content {
+                          ... on DraftIssue {
+                            title
+                            body
+                          }
+                          ... on Issue {
+                            title
+                            number
+                            url
+                          }
+                          ... on PullRequest {
+                            title
+                            number
+                            url
+                          }
+                        }
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                              field {
+                                ... on ProjectV2SingleSelectField {
+                                  name
+                                }
+                              }
+                            }
+                            ... on ProjectV2ItemFieldTextValue {
+                              text
+                              field {
+                                ... on ProjectV2FieldCommon {
+                                  name
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            try {
+              const result = await github.graphql(query, {
+                projectId: PROJECT_ID
+              });
+
+              const project = result.node;
+              const items = project.items.nodes;
+
+              // 현재 상태 구성
+              const currentState = {};
+              items.forEach(item => {
+                const title = item.content?.title || 'Untitled';
+                const statusField = item.fieldValues.nodes.find(
+                  field => field.field?.name === 'Status'
+                );
+                const status = statusField?.name || 'No Status';
+                
+                currentState[item.id] = {
+                  title,
+                  status,
+                  url: item.content?.url || null
+                };
+              });
+
+              // 이전 상태 파일 읽기
+              let previousState = {};
+              try {
+                if (fs.existsSync('project-state.json')) {
+                  previousState = JSON.parse(fs.readFileSync('project-state.json', 'utf8'));
+                }
+              } catch (error) {
+                console.log('이전 상태 파일을 읽을 수 없습니다:', error.message);
+              }
+
+              // 변경사항 감지
+              const changes = [];
+              for (const [itemId, currentItem] of Object.entries(currentState)) {
+                const previousItem = previousState[itemId];
+                
+                if (!previousItem) {
+                  // 새로운 항목
+                  changes.push({
+                    type: 'new',
+                    title: currentItem.title,
+                    status: currentItem.status,
+                    url: currentItem.url
+                  });
+                } else if (previousItem.status !== currentItem.status) {
+                  // 상태 변경
+                  changes.push({
+                    type: 'status_change',
+                    title: currentItem.title,
+                    oldStatus: previousItem.status,
+                    newStatus: currentItem.status,
+                    url: currentItem.url
+                  });
+                }
+              }
+
+              // 삭제된 항목 확인
+              for (const [itemId, previousItem] of Object.entries(previousState)) {
+                if (!currentState[itemId]) {
+                  changes.push({
+                    type: 'deleted',
+                    title: previousItem.title,
+                    status: previousItem.status
+                  });
+                }
+              }
+
+              // 현재 상태 저장
+              fs.writeFileSync('project-state.json', JSON.stringify(currentState, null, 2));
+
+              return { changes, hasChanges: changes.length > 0 };
+            } catch (error) {
+              console.error('프로젝트 모니터링 중 오류:', error);
+              return { changes: [], hasChanges: false, error: error.message };
+            }
+
+      - name: Send Discord Notifications
+        if: fromJson(steps.monitor.outputs.result).hasChanges
+        run: |
+          CHANGES='${{ steps.monitor.outputs.result }}'
+          
+          echo "$CHANGES" | jq -r '.changes[] | @json' | while IFS= read -r change; do
+            TYPE=$(echo "$change" | jq -r '.type')
+            TITLE=$(echo "$change" | jq -r '.title')
+            
+            case "$TYPE" in
+              "new")
+                STATUS=$(echo "$change" | jq -r '.status')
+                EMOJI="🆕"
+                COLOR="3447003"  # 파랑
+                DESCRIPTION="새로운 항목이 추가되었습니다: **$STATUS**"
+                ;;
+              "status_change")
+                OLD_STATUS=$(echo "$change" | jq -r '.oldStatus')
+                NEW_STATUS=$(echo "$change" | jq -r '.newStatus')
+                EMOJI="🔄"
+                case "$NEW_STATUS" in
+                  "Done") COLOR="65280" ;;      # 초록
+                  "In progress") COLOR="16776960" ;; # 노랑
+                  "Todo") COLOR="16711680" ;;   # 빨강
+                  *) COLOR="8421504" ;;         # 회색
+                esac
+                DESCRIPTION="상태가 **$OLD_STATUS** → **$NEW_STATUS**로 변경되었습니다"
+                ;;
+              "deleted")
+                EMOJI="🗑️"
+                COLOR="8421504"  # 회색
+                DESCRIPTION="항목이 삭제되었습니다"
+                ;;
+            esac
+            
+            URL=$(echo "$change" | jq -r '.url // empty')
+            URL_FIELD=""
+            if [ "$URL" != "" ] && [ "$URL" != "null" ]; then
+              URL_FIELD=", \"url\": \"$URL\""
+            fi
+            
+            curl -H "Content-Type: application/json" \
+                 -X POST \
+                 -d "{
+                   \"embeds\": [{
+                     \"title\": \"$EMOJI $TITLE\",
+                     \"description\": \"$DESCRIPTION\",
+                     \"color\": $COLOR,
+                     \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
+                     \"footer\": {
+                       \"text\": \"GitHub Project Monitor\"
+                     }$URL_FIELD
+                   }]
+                 }" \
+                 ${{ secrets.DISCORD_WEBHOOK }}
+            
+            # API 요청 간 잠시 대기
+            sleep 1
+          done
+
+      - name: Commit state file
+        run: |
+          if [ -f "project-state.json" ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add project-state.json
+            git diff --staged --quiet || git commit -m "Update project state"
+            git push
+          fi
