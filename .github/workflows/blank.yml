@@ -1,17 +1,14 @@
-name: Project Updates to Discord
+# .github/workflows/project-automation.yml
+name: Add issues to project
 on:
   issues:
-    types: [opened, closed, edited]
-  pull_request:
-    types: [opened, closed, merged]
+    types: [opened]
 
 jobs:
-  notify-discord:
+  add-to-project:
     runs-on: ubuntu-latest
     steps:
-    - name: Get Project Status
-      uses: actions/github-script@v6
+    - uses: actions/add-to-project@v0.4.0
       with:
-        script: |
-          // Projects API를 통해 카드 상태 확인
-          // Discord 웹훅으로 알림 전송
+        project-url: https://github.com/users/SeoHyeokGyu/projects/2
+        github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
