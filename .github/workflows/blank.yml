@@ -1,0 +1,20 @@
+# 워크플로우의 이름
+name: Project Board Discord Notifier
+
+# 실행 조건: 프로젝트의 아이템(카드)이 생성, 수정, 삭제될 때 실행
+on:
+  project_v2_item:
+    types: [created, edited, deleted]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      # r-J-S-S/action-discord-notification 이라는 공개된 Action을 사용하여 알림을 보냅니다.
+      - name: Send notification for status change
+        # 카드가 '수정'되고, 변경된 필드가 'Status'일 때만 이 스텝을 실행
+        if: github.event.action == 'edited' && github.event.changes.field_value.field_name == 'Status'
+        uses: r-J-S-S/action-discord-notification@v1
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }} # 저장해 둔 디스코드 웹훅 주소
+          message: "🔄 **상태 변경**: `${{ github.actor }}`님이 `${{ github.event.projects_v2_item.content.title }}` 카드를 **`${{ github.event.projects_v2_item.field_value.name }}`**(으)로 옮겼습니다."
