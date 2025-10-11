@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Send Discord Issue Notification
         # 널리 사용되는 범용 Discord Webhook Action을 사용합니다.
-        uses: appleboy/discord-action@v1.0.1 
+        uses: appleboy/discord-action@v1 
         with:
           # 🚨 Discord 웹훅 URL을 Secrets에 저장하여 사용해야 합니다. (필수)
           webhook_id: 1390181392800940145
