@@ -39,11 +39,11 @@ jobs:
                   "description": "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
                   
                   "color": ${{ 
-                    github.event.action == 'opened'    && 16711680 || /* Red */
-                    github.event.action == 'closed'    && 65280 ||    /* Green */
-                    github.event.action == 'reopened'  && 16761088 || /* Orange */
-                    github.event.action == 'edited'    && 16776960 || /* Yellow */
-                    4390561                            /* Default Blue/Gray */
+                    github.event.action == 'opened'    && 16711680 || 
+                    github.event.action == 'closed'    && 65280 ||    
+                    github.event.action == 'reopened'  && 16761088 || 
+                    github.event.action == 'edited'    && 16776960 || 
+                    4390561                            
                   }},
                   
                   "timestamp": "${{ github.event.issue.updated_at }}"
