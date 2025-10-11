@@ -3,12 +3,12 @@ name: Discord Issue All Event Notifier
 on:
   issues:
     types: [opened, edited, deleted, transferred, closed, reopened, assigned, unassigned, labeled, unlabeled, milestoned, demilestoned, locked, unlocked]
-    
+
 jobs:
   notify_discord:
     runs-on: ubuntu-latest
     steps:
-      # 1단계: 동적 데이터를 환경 변수로 설정
+      # 1단계: 제목과 색상 미리 계산
       - name: Prepare dynamic variables
         id: vars
         run: |
@@ -37,20 +37,12 @@ jobs:
           echo "title=$TITLE" >> $GITHUB_OUTPUT
           echo "color=$COLOR" >> $GITHUB_OUTPUT
 
-      # 2단계: 위에서 만든 변수를 사용하여 Discord에 알림 전송
+      # 2단계: 'tsg-adv/discord-webhook-action'을 사용하여 알림 전송
       - name: Send Discord Issue Notification
-        uses: appleboy/discord-action@master
+        uses: tsg-adv/discord-webhook-action@v5
         with:
-          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
-          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-          message: |
-            {
-              "embeds": [
-                {
-                  "title": "${{ steps.vars.outputs.title }}",
-                  "description": "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
-                  "color": ${{ steps.vars.outputs.color }},
-                  "timestamp": "${{ github.event.issue.updated_at }}"
-                }
-              ]
-            }
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: "${{ steps.vars.outputs.title }}"
+          description: "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})"
+          color: "${{ steps.vars.outputs.color }}"
+          timestamp: "${{ github.event.issue.updated_at }}"
