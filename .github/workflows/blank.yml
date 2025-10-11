@@ -16,6 +16,7 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
           SENDER_LOGIN: ${{ github.event.sender.login }}
+          SENDER_AVATAR: ${{ github.event.sender.avatar_url }}
           REPO_NAME: ${{ github.repository }}
         run: |
           set -e
@@ -48,8 +49,10 @@ jobs:
             *) TITLE="⚙️ 이슈 업데이트"; COLOR=4390561 ;;
           esac
           
-          # JSON 생성 및 전송 (description을 더 간결하게)
+          # JSON 생성 및 전송
           jq -n \
+            --arg username "$SENDER_LOGIN" \
+            --arg avatar_url "$SENDER_AVATAR" \
             --arg title "$TITLE" \
             --arg issue_title "${ISSUE_TITLE:-제목 없음}" \
             --arg issue_number "$ISSUE_NUMBER" \
@@ -60,6 +63,8 @@ jobs:
             --argjson color "$COLOR" \
             --arg timestamp "$TIMESTAMP" \
             '{
+              username: $username,
+              avatar_url: $avatar_url,
               embeds: [{
                 title: $title,
                 description: $issue_title,
