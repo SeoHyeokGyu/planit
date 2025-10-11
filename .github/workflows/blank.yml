@@ -21,6 +21,121 @@ jobs:
         run: |
           set -e
           
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "❌ Error: DISCORD_WEBHOOK_URL is not set"
+            exit 1
+          fi
+          
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
+          case $ACTION in
+            "opened") TITLE="🚨 새로운 이슈 발생"; COLOR=16711680 ;;
+            "closed") TITLE="✅ 이슈 해결"; COLOR=65280 ;;
+            "reopened") TITLE="⚠️ 이슈 재개"; COLOR=16761088 ;;
+            "labeled") TITLE="🏷️ 라벨 추가"; COLOR=4390561 ;;
+            "unlabeled") TITLE="🏷️ 라벨 제거"; COLOR=4390561 ;;
+            "assigned") TITLE="👤 담당자 지정"; COLOR=4390561 ;;
+            "unassigned") TITLE="👤 담당자 해제"; COLOR=4390561 ;;
+            "edited") TITLE="✏️ 이슈 내용 수정"; COLOR=16776960 ;;
+            "locked") TITLE="🔒 이슈 잠금"; COLOR=4390561 ;;
+            "unlocked") TITLE="🔓 이슈 잠금 해제"; COLOR=4390561 ;;
+            "transferred") TITLE="📤 이슈 이전"; COLOR=4390561 ;;
+            "milestoned") TITLE="🎯 마일스톤 설정"; COLOR=4390561 ;;
+            "demilestoned") TITLE="🎯 마일스톤 해제"; COLOR=4390561 ;;
+            "deleted") TITLE="🗑️ 이슈 삭제"; COLOR=8421504 ;;
+            *) TITLE="⚙️ 이슈 업데이트"; COLOR=4390561 ;;
+          esac
+          
+          # sender 필드를 최상위에 추가
+          jq -n \
+            --arg username "$SENDER_LOGIN" \
+            --arg avatar_url "$SENDER_AVATAR" \
+            --arg sender "$SENDER_LOGIN" \
+            --arg title "$TITLE" \
+            --arg issue_title "${ISSUE_TITLE:-제목 없음}" \
+            --arg issue_number "$ISSUE_NUMBER" \
+            --arg action "$ACTION" \
+            --arg url "$ISSUE_URL" \
+            --arg repo "$REPO_NAME" \
+            --argjson color "$COLOR" \
+            --arg timestamp "$TIMESTAMP" \
+            '{
+              username: $username,
+              avatar_url: $avatar_url,
+              sender: $sender,
+              embeds: [{
+                title: $title,
+                description: $issue_title,
+                color: $color,
+                timestamp: $timestamp,
+                fields: [
+                  {
+                    name: "이슈 번호",
+                    value: ("#" + $issue_number),
+                    inline: true
+                  },
+                  {
+                    name: "액션",
+                    value: $action,
+                    inline: true
+                  },
+                  {
+                    name: "처리자",
+                    value: $sender,
+                    inline: true
+                  },
+                  {
+                    name: "저장소",
+                    value: $repo,
+                    inline: false
+                  }
+                ],
+                url: $url
+              }]
+            }' > payload.json
+          
+          echo "📤 Sending payload:"
+          cat payload.json
+          
+          HTTP_RESPONSE=$(curl -X POST \
+            -H "Content-Type: application/json" \
+            -d @payload.json \
+            -w "\n%{http_code}" \
+            -s \
+            "$DISCORD_WEBHOOK_URL")
+          
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n1)
+          RESPONSE_BODY=$(echo "$HTTP_RESPONSE" | head -n-1)
+          
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Discord notification sent successfully (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Failed to send Discord notification (HTTP $HTTP_STATUS)"
+            echo "Response: $RESPONSE_BODY"
+            exit 1
+          finame: Discord Issue All Event Notifier
+
+on:
+  issues:
+    types: [opened, edited, deleted, transferred, closed, reopened, assigned, unassigned, labeled, unlabeled, milestoned, demilestoned, locked, unlocked]
+
+jobs:
+  notify_discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ACTION: ${{ github.event.action }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          SENDER_AVATAR: ${{ github.event.sender.avatar_url }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          set -e
+          
           # Webhook URL 검증
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
             echo "❌ Error: DISCORD_WEBHOOK_URL is not set"
