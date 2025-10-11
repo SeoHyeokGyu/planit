@@ -1,10 +1,35 @@
-            - name: Discord Status
-  # You may pin to the exact commit or the version.
-  # uses: CompeyDev/discord-status-action@6ba1282e94bc457da012754bc54f8c168d5368cb
-  uses: CompeyDev/discord-status-action@0.3.2
-  with:
-    # File to write to
-    file: # default is README.md
-    # Discord ID of the user whose status you want to fetch.
-    id: 
+name: Discord Issue Notifier
+
+on:
+  # 🚨 이슈 관련 이벤트가 발생할 때 이 워크플로우를 실행합니다.
+  issues:
+    types: [opened, reopened, closed, labeled]
+  # (선택) PR이 열리거나 닫힐 때 알림을 받고 싶다면 추가합니다.
+  # pull_request:
+  #   types: [opened, closed]
+    
+jobs:
+  notify_discord:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send Discord Issue Notification
+        # 널리 사용되는 범용 Discord Webhook Action을 사용합니다.
+        uses: appleboy/discord-action@v1.0.1 
+        with:
+          # 🚨 Discord 웹훅 URL을 Secrets에 저장하여 사용해야 합니다. (필수)
+          webhook_id: 1390181392800940145
+          webhook_token: K5k-A5YQayuyJgRHyooOeIfltrWkGpEU3kQb-xltZrJ4GajT4slhYG4lNbDiUvpR9jGT
           
+          # Discord에 표시될 메시지 제목 (이슈 제목 활용)
+          title: "🚨 새로운 이슈 발생: #${{ github.event.issue.number }}"
+          
+          # Discord에 표시될 메시지 내용 (이슈 제목, 작성자, 링크 등 활용)
+          message: |
+            **이슈 제목:** ${{ github.event.issue.title }}
+            **작성자:** ${{ github.event.issue.user.login }}
+            **상태:** ${{ github.event.action }}
+            **링크:** ${{ github.event.issue.html_url }}
+          
+          # Discord 임베드 메시지의 색상 (이벤트에 따라 색상 변경 가능)
+          color: "FF0000" # 빨간색 (새로운 이슈 알림용)
