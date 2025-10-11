@@ -8,41 +8,85 @@ jobs:
   notify_discord:
     runs-on: ubuntu-latest
     steps:
-      # 1단계: 제목과 색상 미리 계산
-      - name: Prepare dynamic variables
-        id: vars
+      - name: Send Discord Notification
+        env:
+          # GitHub Secrets를 환경 변수로 가져와 스크립트에서 사용
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          # GitHub 컨텍스트 변수들을 환경 변수로 설정
+          ACTION: ${{ github.event.action }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          UPDATED_AT: ${{ github.event.issue.updated_at }}
         run: |
-          TITLE=$(echo "${{
-            (github.event.action == 'opened'    && '🚨 새로운 이슈 발생:') ||
-            (github.event.action == 'closed'    && '✅ 이슈 해결:') ||
-            (github.event.action == 'reopened'  && '⚠️ 이슈 재개:') ||
-            (github.event.action == 'labeled'   && '🏷️ 라벨 추가:') ||
-            (github.event.action == 'unlabeled' && '🏷️ 라벨 제거:') ||
-            (github.event.action == 'assigned'  && '👤 담당자 지정:') ||
-            (github.event.action == 'unassigned' && '👤 담당자 해제:') ||
-            (github.event.action == 'edited'    && '✏️ 이슈 내용 수정:') ||
-            (github.event.action == 'locked'    && '🔒 이슈 잠금:') ||
-            (github.event.action == 'unlocked'  && '🔓 이슈 잠금 해제:') ||
-            '⚙️ 이슈 업데이트:'
-          }} #${{ github.event.issue.number }}")
-          
-          COLOR=$(echo "${{
-            (github.event.action == 'opened'    && 16711680) ||
-            (github.event.action == 'closed'    && 65280) ||
-            (github.event.action == 'reopened'  && 16761088) ||
-            (github.event.action == 'edited'    && 16776960) ||
-            4390561
-          }}")
+          # 1. 상황에 맞는 제목과 색상 설정
+          case $ACTION in
+            "opened")
+              TITLE="🚨 새로운 이슈 발생: #$ISSUE_NUMBER"
+              COLOR=16711680
+              ;;
+            "closed")
+              TITLE="✅ 이슈 해결: #$ISSUE_NUMBER"
+              COLOR=65280
+              ;;
+            "reopened")
+              TITLE="⚠️ 이슈 재개: #$ISSUE_NUMBER"
+              COLOR=16761088
+              ;;
+            "labeled")
+              TITLE="🏷️ 라벨 추가: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+            "unlabeled")
+              TITLE="🏷️ 라벨 제거: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+            "assigned")
+              TITLE="👤 담당자 지정: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+            "unassigned")
+              TITLE="👤 담당자 해제: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+            "edited")
+              TITLE="✏️ 이슈 내용 수정: #$ISSUE_NUMBER"
+              COLOR=16776960
+              ;;
+            "locked")
+              TITLE="🔒 이슈 잠금: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+            "unlocked")
+              TITLE="🔓 이슈 잠금 해제: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+            *)
+              TITLE="⚙️ 이슈 업데이트: #$ISSUE_NUMBER"
+              COLOR=4390561
+              ;;
+          esac
 
-          echo "title=$TITLE" >> $GITHUB_OUTPUT
-          echo "color=$COLOR" >> $GITHUB_OUTPUT
+          # 2. JSON 데이터 생성 (heredoc 문법 사용)
+          # 특수문자 문제를 피하기 위해 변수를 임시 파일에 저장하는 방식을 사용
+          echo "$ISSUE_TITLE" > issue_title.txt
+          DESCRIPTION=$(printf '**액션:** %s\n**제목:** %s\n**처리자:** %s\n\n[이슈 바로가기](%s)' "$ACTION" "$(cat issue_title.txt)" "$SENDER_LOGIN" "$ISSUE_URL")
 
-      # 2단계: 'tsg-adv/discord-webhook-action'을 사용하여 알림 전송
-      - name: Send Discord Issue Notification
-        uses: tsg-adv/discord-webhook-action@v5
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          title: "${{ steps.vars.outputs.title }}"
-          description: "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})"
-          color: "${{ steps.vars.outputs.color }}"
-          timestamp: "${{ github.event.issue.updated_at }}"
+          # JSON 페이로드 생성
+          JSON_PAYLOAD=$(cat <<EOF
+          {
+            "embeds": [
+              {
+                "title": "$TITLE",
+                "description": "$DESCRIPTION",
+                "color": $COLOR,
+                "timestamp": "$UPDATED_AT"
+              }
+            ]
+          }
+          EOF
+          )
+
+          # 3. curl로 웹훅 전송
+          curl -X POST -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK_URL"
