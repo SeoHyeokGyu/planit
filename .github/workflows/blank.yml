@@ -10,27 +10,42 @@ on:
     
 jobs:
   notify_discord:
+    # 🚨 이슈 이벤트 전체에 대해 실행되도록 if 조건을 steps 내에서 처리
     runs-on: ubuntu-latest
     
     steps:
       - name: Send Discord Issue Notification
-        # 널리 사용되는 범용 Discord Webhook Action을 사용합니다.
-        uses: appleboy/discord-action@master 
+        # master 브랜치는 그대로 유지합니다.
+        uses: appleboy/discord-action@master
         with:
-          # 🚨 Discord 웹훅 URL을 Secrets에 저장하여 사용해야 합니다. (필수)
-          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
-          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          # 🟢 인증 방식 수정: 웹훅 URL 전체를 Secret에 저장하고 사용합니다.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           
-          
-          # Discord에 표시될 메시지 제목 (이슈 제목 활용)
-          title: "🚨 새로운 이슈 발생: #${{ github.event.issue.number }}"
-          
-          # Discord에 표시될 메시지 내용 (이슈 제목, 작성자, 링크 등 활용)
-          message: |
-            **이슈 제목:** ${{ github.event.issue.title }}
-            **작성자:** ${{ github.event.issue.user.login }}
-            **상태:** ${{ github.event.action }}
-            **링크:** ${{ github.event.issue.html_url }}
-          
-          # Discord 임베드 메시지의 색상 (이벤트에 따라 색상 변경 가능)
-          color: "FF0000" # 빨간색 (새로운 이슈 알림용)
+          # 🟢 모든 메시지 내용을 'args'로 통합하여 Embed JSON을 생성합니다.
+          #    이슈 액션(opened, closed, reopened)에 따라 메시지가 달라지도록 합니다.
+          args: |
+            {
+              "embeds": [
+                {
+                  "title": "${{ 
+                    # 이슈 상태에 따른 제목/이모지 변경
+                    github.event.action == 'opened'    && '🚨 새로운 이슈 발생: #' ||
+                    github.event.action == 'closed'    && '✅ 이슈 해결: #' ||
+                    github.event.action == 'reopened'  && '⚠️ 이슈 재개: #' ||
+                    '🔔 이슈 업데이트: #' 
+                  }}${{ github.event.issue.number }}",
+                  
+                  "description": "**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
+                  
+                  "color": ${{ 
+                    # 이슈 상태에 따른 색상 변경 (10진수)
+                    github.event.action == 'opened'    && 16711680 || /* Red (FF0000) */
+                    github.event.action == 'closed'    && 65280    || /* Green (00FF00) */
+                    github.event.action == 'reopened'  && 16761088 || /* Orange (FFA500) */
+                    10066329                           /* Default Blue (99AAB5) */
+                  }},
+                  
+                  "timestamp": "${{ github.event.issue.updated_at }}"
+                }
+              ]
+            }
