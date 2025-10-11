@@ -1,12 +1,9 @@
-name: Discord Issue Notifier
+name: Discord Issue All Event Notifier
 
 on:
-  # 🚨 이슈 관련 이벤트가 발생할 때 이 워크플로우를 실행합니다.
   issues:
-    types: [opened, reopened, closed, labeled]
-  # (선택) PR이 열리거나 닫힐 때 알림을 받고 싶다면 추가합니다.
-  # pull_request:
-  #   types: [opened, closed]
+    # 이슈와 관련된 대부분의 주요 이벤트를 모두 포함합니다.
+    types: [opened, edited, deleted, transferred, closed, reopened, assigned, unassigned, labeled, unlabeled, milestoned, demilestoned, locked, unlocked]
     
 jobs:
   notify_discord:
@@ -16,29 +13,39 @@ jobs:
       - name: Send Discord Issue Notification
         uses: appleboy/discord-action@master
         with:
-          # 🚨 webhook_url 대신 ID와 Token Secrets을 사용합니다.
+          # 🚨 최종 오류 해결: ID와 Token을 분리된 Secrets로 전달합니다.
           webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
           webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
           
-          # args 필드는 이전의 수정된 JSON 구조를 유지합니다.
+          # 모든 알림 내용을 args(Embed JSON)로 처리합니다.
           args: |
             {
               "embeds": [
                 {
                   "title": "${{ 
-                    github.event.action == 'opened' && '🚨 새로운 이슈 발생: #' ||
-                    github.event.action == 'closed' && '✅ 이슈 해결: #' ||
-                    github.event.action == 'reopened' && '⚠️ 이슈 재개: #' ||
-                    '🔔 이슈 업데이트: #' 
+                    # 이슈 상태(Action)에 따른 동적 제목 설정
+                    github.event.action == 'opened'    && '🚨 새로운 이슈 발생: #' ||
+                    github.event.action == 'closed'    && '✅ 이슈 해결: #' ||
+                    github.event.action == 'reopened'  && '⚠️ 이슈 재개: #' ||
+                    github.event.action == 'labeled'   && '🏷️ 라벨 추가: #' ||
+                    github.event.action == 'unlabeled' && '🏷️ 라벨 제거: #' ||
+                    github.event.action == 'assigned'  && '👤 담당자 지정: #' ||
+                    github.event.action == 'unassigned' && '👤 담당자 해제: #' ||
+                    github.event.action == 'edited'    && '✏️ 이슈 내용 수정: #' ||
+                    github.event.action == 'locked'    && '🔒 이슈 잠금: #' ||
+                    github.event.action == 'unlocked'  && '🔓 이슈 잠금 해제: #' ||
+                    '⚙️ 이슈 업데이트: #' 
                   }}${{ github.event.issue.number }}",
                   
-                  "description": "**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
+                  "description": "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
                   
                   "color": ${{ 
-                    github.event.action == 'opened' && 16711680 || 
-                    github.event.action == 'closed' && 65280 ||    
-                    github.event.action == 'reopened' && 16761088 || 
-                    10066329                           
+                    # 이슈 상태(Action)에 따른 동적 색상 설정 (10진수)
+                    github.event.action == 'opened'    && 16711680 || /* Red */
+                    github.event.action == 'closed'    && 65280 ||    /* Green */
+                    github.event.action == 'reopened'  && 16761088 || /* Orange */
+                    github.event.action == 'edited'    && 16776960 || /* Yellow */
+                    4390561                            /* Default Blue/Gray */
                   }},
                   
                   "timestamp": "${{ github.event.issue.updated_at }}"
