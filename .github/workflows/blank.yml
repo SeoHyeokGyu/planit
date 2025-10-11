@@ -23,7 +23,6 @@ jobs:
               "embeds": [
                 {
                   "title": "${{ 
-                    # 주석 제거 후, 조건문을 한 줄로 연결
                     github.event.action == 'opened' && '🚨 새로운 이슈 발생: #' ||
                     github.event.action == 'closed' && '✅ 이슈 해결: #' ||
                     github.event.action == 'reopened' && '⚠️ 이슈 재개: #' ||
@@ -33,14 +32,14 @@ jobs:
                   "description": "**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
                   
                   "color": ${{ 
-                    # 주석 제거 후, 조건문을 한 줄로 연결
-                    github.event.action == 'opened' && 16711680 || /* Red */
-                    github.event.action == 'closed' && 65280 ||    /* Green */
-                    github.event.action == 'reopened' && 16761088 || /* Orange */
-                    10066329                           /* Default Blue */
+                    github.event.action == 'opened' && 16711680 || 
+                    github.event.action == 'closed' && 65280 ||    
+                    github.event.action == 'reopened' && 16761088 || 
+                    10066329                           
                   }},
                   
                   "timestamp": "${{ github.event.issue.updated_at }}"
                 }
               ]
+            }
             }
