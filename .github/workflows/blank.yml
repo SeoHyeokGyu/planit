@@ -1,31 +1,31 @@
-name: Discord Projects V2 Notifier
+name: Discord Projects Status Change
 
 on:
   issues:
-    types: [opened, closed, reopened, assigned, unassigned, labeled, unlabeled]
-  # Issue가 수정될 때도 감지하려면:
-  # issue_comment:
-  #   types: [created]
+    types: [edited, labeled, unlabeled]
 
 jobs:
-  notify:
+  detect-status-change:
     runs-on: ubuntu-latest
     steps:
-      - name: Get Project Status
-        id: project_status
+      - name: Checkout for state storage
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/project-state
+          
+      - name: Get Current Project Status
+        id: current
         env:
           GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
-          PROJECT_NUMBER: 2
-          OWNER: SeoHyeokGyu
         run: |
-          # GraphQL로 Issue의 현재 Project 상태 조회
-          QUERY=$(cat <<'GQL'
-          query($nodeId: ID!, $owner: String!, $number: Int!) {
+          QUERY='query($nodeId: ID!) {
             node(id: $nodeId) {
               ... on Issue {
+                number
                 projectItems(first: 10) {
                   nodes {
+                    id
                     project {
                       number
                       title
@@ -46,117 +46,114 @@ jobs:
                 }
               }
             }
-          }
-          GQL
-          )
+          }'
           
-          RESPONSE=$(gh api graphql \
-            -f query="$QUERY" \
-            -f nodeId="$ISSUE_NODE_ID" \
-            -f owner="$OWNER" \
-            -F number=$PROJECT_NUMBER)
+          RESPONSE=$(gh api graphql -f query="$QUERY" -f nodeId="$ISSUE_NODE_ID")
           
-          echo "Response: $RESPONSE"
-          
-          # Status 필드 추출
           STATUS=$(echo "$RESPONSE" | jq -r '
             .data.node.projectItems.nodes[]? |
             select(.project.number == 2) |
             .fieldValues.nodes[]? |
             select(.field.name == "Status") |
-            .name // "Unknown"
+            .name // "None"
           ' | head -n1)
           
           echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Current Status: $STATUS"
-      
+          echo "Current status: $STATUS"
+          
+      - name: Load Previous Status
+        id: previous
+        continue-on-error: true
+        run: |
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          STATE_FILE=".github/project-state/issue-${ISSUE_NUM}.txt"
+          
+          if [ -f "$STATE_FILE" ]; then
+            PREV_STATUS=$(cat "$STATE_FILE")
+            echo "status=$PREV_STATUS" >> $GITHUB_OUTPUT
+            echo "Previous status: $PREV_STATUS"
+          else
+            echo "status=None" >> $GITHUB_OUTPUT
+            echo "No previous status found"
+          fi
+          
+      - name: Detect Status Change
+        id: change
+        run: |
+          CURRENT="${{ steps.current.outputs.status }}"
+          PREVIOUS="${{ steps.previous.outputs.status }}"
+          
+          if [ "$CURRENT" != "$PREVIOUS" ] && [ "$CURRENT" != "None" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Status changed: $PREVIOUS → $CURRENT"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Send Discord Notification
+        if: steps.change.outputs.changed == 'true'
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          PROJECT_STATUS: ${{ steps.project_status.outputs.status }}
         run: |
-          ACTION="${{ github.event.action }}"
+          CURRENT="${{ steps.current.outputs.status }}"
+          PREVIOUS="${{ steps.previous.outputs.status }}"
           ISSUE_NUM="${{ github.event.issue.number }}"
           TITLE="${{ github.event.issue.title }}"
           URL="${{ github.event.issue.html_url }}"
           USER="${{ github.event.sender.login }}"
-          REPO="${{ github.repository }}"
           
-          # 기본 이벤트 처리
-          case $ACTION in
-            "opened")
-              EMOJI="🚨"
-              MSG="새 이슈 생성"
-              COLOR=15158332
+          # 상태별 이모지와 색상
+          case $CURRENT in
+            "Todo")
+              EMOJI="📋"
+              COLOR=11184810
               ;;
-            "closed")
+            "In Progress")
+              EMOJI="🔄"
+              COLOR=16776960
+              ;;
+            "Done")
               EMOJI="✅"
-              MSG="이슈 해결"
               COLOR=3066993
               ;;
-            "reopened")
-              EMOJI="🔄"
-              MSG="이슈 재개"
-              COLOR=15105570
-              ;;
-            "assigned")
-              EMOJI="👤"
-              MSG="담당자 지정"
-              COLOR=5763719
-              ;;
-            "unassigned")
-              EMOJI="👤"
-              MSG="담당자 해제"
-              COLOR=9807270
-              ;;
-            "labeled")
-              LABEL="${{ github.event.label.name }}"
-              EMOJI="🏷️"
-              MSG="라벨 추가: $LABEL"
-              COLOR=3447003
-              ;;
-            "unlabeled")
-              LABEL="${{ github.event.label.name }}"
-              EMOJI="🏷️"
-              MSG="라벨 제거: $LABEL"
-              COLOR=10070709
-              ;;
             *)
-              exit 0
+              EMOJI="📌"
+              COLOR=5814783
               ;;
           esac
           
-          # Projects 상태 정보 추가
-          if [ -n "$PROJECT_STATUS" ] && [ "$PROJECT_STATUS" != "Unknown" ] && [ "$PROJECT_STATUS" != "null" ]; then
-            STATUS_FIELD=",{\"name\": \"📊 프로젝트 상태\", \"value\": \"$PROJECT_STATUS\", \"inline\": true}"
+          if [ "$PREVIOUS" == "None" ]; then
+            DESCRIPTION="**$TITLE**\n\n➕ **$CURRENT** 상태로 추가됨"
           else
-            STATUS_FIELD=""
+            DESCRIPTION="**$TITLE**\n\n$PREVIOUS ➡️ **$CURRENT**"
           fi
           
-          # Discord 전송
           curl -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d "{
-              \"username\": \"GitHub\",
-              \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+              \"username\": \"GitHub Projects\",
               \"embeds\": [{
-                \"title\": \"$EMOJI $MSG #$ISSUE_NUM\",
-                \"description\": \"**$TITLE**\",
+                \"title\": \"$EMOJI 프로젝트 상태 변경 #$ISSUE_NUM\",
+                \"description\": \"$DESCRIPTION\",
                 \"url\": \"$URL\",
                 \"color\": $COLOR,
-                \"fields\": [
-                  {
-                    \"name\": \"📁 저장소\",
-                    \"value\": \"$REPO\",
-                    \"inline\": true
-                  },
-                  {
-                    \"name\": \"👤 작업자\",
-                    \"value\": \"$USER\",
-                    \"inline\": true
-                  }
-                  $STATUS_FIELD
-                ],
+                \"footer\": {\"text\": \"$USER\"},
                 \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
               }]
             }"
+          
+      - name: Save Current Status
+        run: |
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          CURRENT="${{ steps.current.outputs.status }}"
+          STATE_DIR=".github/project-state"
+          STATE_FILE="$STATE_DIR/issue-${ISSUE_NUM}.txt"
+          
+          mkdir -p "$STATE_DIR"
+          echo "$CURRENT" > "$STATE_FILE"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$STATE_FILE"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update project status for issue #$ISSUE_NUM"
+          git push || echo "No changes to push"
