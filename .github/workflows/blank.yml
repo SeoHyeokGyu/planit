@@ -2,7 +2,6 @@ name: Discord Issue All Event Notifier
 
 on:
   issues:
-    # 이슈와 관련된 대부분의 주요 이벤트를 모두 포함합니다.
     types: [opened, edited, deleted, transferred, closed, reopened, assigned, unassigned, labeled, unlabeled, milestoned, demilestoned, locked, unlocked]
     
 jobs:
@@ -13,11 +12,9 @@ jobs:
       - name: Send Discord Issue Notification
         uses: appleboy/discord-action@master
         with:
-          # 🚨 최종 오류 해결: ID와 Token을 분리된 Secrets로 전달합니다.
           webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
           webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
           
-          # 모든 알림 내용을 args(Embed JSON)로 처리합니다.
           args: |
             {
               "embeds": [
@@ -43,7 +40,7 @@ jobs:
                     github.event.action == 'closed'    && 65280 ||    
                     github.event.action == 'reopened'  && 16761088 || 
                     github.event.action == 'edited'    && 16776960 || 
-                    4390561                            
+                    4390561                           
                   }},
                   
                   "timestamp": "${{ github.event.issue.updated_at }}"
