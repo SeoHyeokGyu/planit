@@ -16,8 +16,11 @@ jobs:
       - name: Send Discord Issue Notification
         uses: appleboy/discord-action@master
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          # 🚨 webhook_url 대신 ID와 Token Secrets을 사용합니다.
+          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
           
+          # args 필드는 이전의 수정된 JSON 구조를 유지합니다.
           args: |
             {
               "embeds": [
@@ -41,5 +44,4 @@ jobs:
                   "timestamp": "${{ github.event.issue.updated_at }}"
                 }
               ]
-            }
             }
