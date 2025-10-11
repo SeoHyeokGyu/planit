@@ -16,9 +16,9 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
           SENDER_LOGIN: ${{ github.event.sender.login }}
-          UPDATED_AT: ${{ github.event.issue.updated_at }}
+          REPO_NAME: ${{ github.repository }}
         run: |
-          set -e  # 에러 발생 시 즉시 종료
+          set -e
           
           # Webhook URL 검증
           if [ -z "$DISCORD_WEBHOOK_URL" ]; then
@@ -26,57 +26,91 @@ jobs:
             exit 1
           fi
           
+          # 현재 시간을 ISO 8601 형식으로 생성
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          
           # 상황에 맞는 제목과 색상 설정
           case $ACTION in
-            "opened") TITLE="🚨 새로운 이슈 발생: #$ISSUE_NUMBER"; COLOR=16711680 ;;
-            "closed") TITLE="✅ 이슈 해결: #$ISSUE_NUMBER"; COLOR=65280 ;;
-            "reopened") TITLE="⚠️ 이슈 재개: #$ISSUE_NUMBER"; COLOR=16761088 ;;
-            "labeled") TITLE="🏷️ 라벨 추가: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "unlabeled") TITLE="🏷️ 라벨 제거: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "assigned") TITLE="👤 담당자 지정: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "unassigned") TITLE="👤 담당자 해제: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "edited") TITLE="✏️ 이슈 내용 수정: #$ISSUE_NUMBER"; COLOR=16776960 ;;
-            "locked") TITLE="🔒 이슈 잠금: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "unlocked") TITLE="🔓 이슈 잠금 해제: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "transferred") TITLE="📤 이슈 이전: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "milestoned") TITLE="🎯 마일스톤 설정: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            "demilestoned") TITLE="🎯 마일스톤 해제: #$ISSUE_NUMBER"; COLOR=4390561 ;;
-            *) TITLE="⚙️ 이슈 업데이트: #$ISSUE_NUMBER"; COLOR=4390561 ;;
+            "opened") TITLE="🚨 새로운 이슈 발생"; COLOR=16711680 ;;
+            "closed") TITLE="✅ 이슈 해결"; COLOR=65280 ;;
+            "reopened") TITLE="⚠️ 이슈 재개"; COLOR=16761088 ;;
+            "labeled") TITLE="🏷️ 라벨 추가"; COLOR=4390561 ;;
+            "unlabeled") TITLE="🏷️ 라벨 제거"; COLOR=4390561 ;;
+            "assigned") TITLE="👤 담당자 지정"; COLOR=4390561 ;;
+            "unassigned") TITLE="👤 담당자 해제"; COLOR=4390561 ;;
+            "edited") TITLE="✏️ 이슈 내용 수정"; COLOR=16776960 ;;
+            "locked") TITLE="🔒 이슈 잠금"; COLOR=4390561 ;;
+            "unlocked") TITLE="🔓 이슈 잠금 해제"; COLOR=4390561 ;;
+            "transferred") TITLE="📤 이슈 이전"; COLOR=4390561 ;;
+            "milestoned") TITLE="🎯 마일스톤 설정"; COLOR=4390561 ;;
+            "demilestoned") TITLE="🎯 마일스톤 해제"; COLOR=4390561 ;;
+            "deleted") TITLE="🗑️ 이슈 삭제"; COLOR=8421504 ;;
+            *) TITLE="⚙️ 이슈 업데이트"; COLOR=4390561 ;;
           esac
           
-          # 설명 텍스트 준비 (특수문자 이스케이프는 jq가 자동 처리)
-          DESCRIPTION=$(printf '**액션:** %s\n**제목:** %s\n**처리자:** %s\n\n[이슈 바로가기](%s)' \
-            "$ACTION" \
-            "${ISSUE_TITLE:-제목 없음}" \
-            "${SENDER_LOGIN:-알 수 없음}" \
-            "$ISSUE_URL")
-          
-          # JSON 생성 및 Discord로 전송
-          HTTP_STATUS=$(jq -n \
+          # JSON 생성 및 전송 (description을 더 간결하게)
+          jq -n \
             --arg title "$TITLE" \
-            --arg description "$DESCRIPTION" \
+            --arg issue_title "${ISSUE_TITLE:-제목 없음}" \
+            --arg issue_number "$ISSUE_NUMBER" \
+            --arg action "$ACTION" \
+            --arg sender "$SENDER_LOGIN" \
+            --arg url "$ISSUE_URL" \
+            --arg repo "$REPO_NAME" \
             --argjson color "$COLOR" \
-            --arg timestamp "$UPDATED_AT" \
+            --arg timestamp "$TIMESTAMP" \
             '{
               embeds: [{
                 title: $title,
-                description: $description,
+                description: $issue_title,
                 color: $color,
-                timestamp: $timestamp
+                timestamp: $timestamp,
+                fields: [
+                  {
+                    name: "이슈 번호",
+                    value: ("#" + $issue_number),
+                    inline: true
+                  },
+                  {
+                    name: "액션",
+                    value: $action,
+                    inline: true
+                  },
+                  {
+                    name: "처리자",
+                    value: $sender,
+                    inline: true
+                  },
+                  {
+                    name: "저장소",
+                    value: $repo,
+                    inline: false
+                  }
+                ],
+                url: $url
               }]
-            }' | \
-            curl -X POST \
-              -H "Content-Type: application/json" \
-              -d @- \
-              -w "%{http_code}" \
-              -o /dev/null \
-              -s \
-              "$DISCORD_WEBHOOK_URL")
+            }' > payload.json
           
-          # HTTP 응답 코드 확인
+          # 디버깅: payload 출력
+          echo "📤 Sending payload:"
+          cat payload.json
+          
+          # Discord로 전송
+          HTTP_RESPONSE=$(curl -X POST \
+            -H "Content-Type: application/json" \
+            -d @payload.json \
+            -w "\n%{http_code}" \
+            -s \
+            "$DISCORD_WEBHOOK_URL")
+          
+          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tail -n1)
+          RESPONSE_BODY=$(echo "$HTTP_RESPONSE" | head -n-1)
+          
+          # 응답 확인
           if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
             echo "✅ Discord notification sent successfully (HTTP $HTTP_STATUS)"
           else
             echo "❌ Failed to send Discord notification (HTTP $HTTP_STATUS)"
+            echo "Response: $RESPONSE_BODY"
             exit 1
           fi
