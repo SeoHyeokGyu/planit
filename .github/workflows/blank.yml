@@ -18,8 +18,9 @@ jobs:
         uses: appleboy/discord-action@v1 
         with:
           # 🚨 Discord 웹훅 URL을 Secrets에 저장하여 사용해야 합니다. (필수)
-          webhook_id: 1390181392800940145
-          webhook_token: K5k-A5YQayuyJgRHyooOeIfltrWkGpEU3kQb-xltZrJ4GajT4slhYG4lNbDiUvpR9jGT
+          webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+          webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+          
           
           # Discord에 표시될 메시지 제목 (이슈 제목 활용)
           title: "🚨 새로운 이슈 발생: #${{ github.event.issue.number }}"
