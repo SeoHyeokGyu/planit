@@ -18,7 +18,15 @@ jobs:
           SENDER_LOGIN: ${{ github.event.sender.login }}
           UPDATED_AT: ${{ github.event.issue.updated_at }}
         run: |
-          # 1단계: 상황에 맞는 제목과 색상 설정
+          set -e  # 에러 발생 시 즉시 종료
+          
+          # Webhook URL 검증
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "❌ Error: DISCORD_WEBHOOK_URL is not set"
+            exit 1
+          fi
+          
+          # 상황에 맞는 제목과 색상 설정
           case $ACTION in
             "opened") TITLE="🚨 새로운 이슈 발생: #$ISSUE_NUMBER"; COLOR=16711680 ;;
             "closed") TITLE="✅ 이슈 해결: #$ISSUE_NUMBER"; COLOR=65280 ;;
@@ -30,19 +38,45 @@ jobs:
             "edited") TITLE="✏️ 이슈 내용 수정: #$ISSUE_NUMBER"; COLOR=16776960 ;;
             "locked") TITLE="🔒 이슈 잠금: #$ISSUE_NUMBER"; COLOR=4390561 ;;
             "unlocked") TITLE="🔓 이슈 잠금 해제: #$ISSUE_NUMBER"; COLOR=4390561 ;;
+            "transferred") TITLE="📤 이슈 이전: #$ISSUE_NUMBER"; COLOR=4390561 ;;
+            "milestoned") TITLE="🎯 마일스톤 설정: #$ISSUE_NUMBER"; COLOR=4390561 ;;
+            "demilestoned") TITLE="🎯 마일스톤 해제: #$ISSUE_NUMBER"; COLOR=4390561 ;;
             *) TITLE="⚙️ 이슈 업데이트: #$ISSUE_NUMBER"; COLOR=4390561 ;;
           esac
-
-          # 2단계: 설명 텍스트 준비
-          DESCRIPTION=$(printf '**액션:** %s\n**제목:** %s\n**처리자:** %s\n\n[이슈 바로가기](%s)' "$ACTION" "$ISSUE_TITLE" "$SENDER_LOGIN" "$ISSUE_URL")
-
-          # 3단계: jq로 JSON 생성 후 파이프로 curl에 바로 전달
-          # "content": "" 필드를 추가하여 payload 구조를 안정화합니다.
-          jq -n \
-            --arg content "" \
+          
+          # 설명 텍스트 준비 (특수문자 이스케이프는 jq가 자동 처리)
+          DESCRIPTION=$(printf '**액션:** %s\n**제목:** %s\n**처리자:** %s\n\n[이슈 바로가기](%s)' \
+            "$ACTION" \
+            "${ISSUE_TITLE:-제목 없음}" \
+            "${SENDER_LOGIN:-알 수 없음}" \
+            "$ISSUE_URL")
+          
+          # JSON 생성 및 Discord로 전송
+          HTTP_STATUS=$(jq -n \
             --arg title "$TITLE" \
             --arg description "$DESCRIPTION" \
             --argjson color "$COLOR" \
             --arg timestamp "$UPDATED_AT" \
-            '{content: $content, embeds: [{title: $title, description: $description, color: $color, timestamp: $timestamp}]}' | \
-            curl -X POST -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
+            '{
+              embeds: [{
+                title: $title,
+                description: $description,
+                color: $color,
+                timestamp: $timestamp
+              }]
+            }' | \
+            curl -X POST \
+              -H "Content-Type: application/json" \
+              -d @- \
+              -w "%{http_code}" \
+              -o /dev/null \
+              -s \
+              "$DISCORD_WEBHOOK_URL")
+          
+          # HTTP 응답 코드 확인
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Discord notification sent successfully (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Failed to send Discord notification (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
