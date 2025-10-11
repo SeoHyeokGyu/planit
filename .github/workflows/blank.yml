@@ -1,153 +1,162 @@
-name: Discord Issue & Project Notifier
+name: Discord Projects V2 Notifier
 
 on:
   issues:
-    types: [opened, edited, deleted, closed, reopened, assigned, unassigned, labeled, unlabeled, locked, unlocked, milestoned, demilestoned]
-  project_card:
-    types: [created, moved, converted, deleted]
+    types: [opened, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  # Issue가 수정될 때도 감지하려면:
+  # issue_comment:
+  #   types: [created]
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Get Project Status
+        id: project_status
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
+          PROJECT_NUMBER: 2
+          OWNER: SeoHyeokGyu
+        run: |
+          # GraphQL로 Issue의 현재 Project 상태 조회
+          QUERY=$(cat <<'GQL'
+          query($nodeId: ID!, $owner: String!, $number: Int!) {
+            node(id: $nodeId) {
+              ... on Issue {
+                projectItems(first: 10) {
+                  nodes {
+                    project {
+                      number
+                      title
+                    }
+                    fieldValues(first: 10) {
+                      nodes {
+                        ... on ProjectV2ItemFieldSingleSelectValue {
+                          name
+                          field {
+                            ... on ProjectV2SingleSelectField {
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          GQL
+          )
+          
+          RESPONSE=$(gh api graphql \
+            -f query="$QUERY" \
+            -f nodeId="$ISSUE_NODE_ID" \
+            -f owner="$OWNER" \
+            -F number=$PROJECT_NUMBER)
+          
+          echo "Response: $RESPONSE"
+          
+          # Status 필드 추출
+          STATUS=$(echo "$RESPONSE" | jq -r '
+            .data.node.projectItems.nodes[]? |
+            select(.project.number == 2) |
+            .fieldValues.nodes[]? |
+            select(.field.name == "Status") |
+            .name // "Unknown"
+          ' | head -n1)
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Current Status: $STATUS"
+      
       - name: Send Discord Notification
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PROJECT_STATUS: ${{ steps.project_status.outputs.status }}
         run: |
-          # 이벤트 타입 확인
-          EVENT_NAME="${{ github.event_name }}"
+          ACTION="${{ github.event.action }}"
+          ISSUE_NUM="${{ github.event.issue.number }}"
+          TITLE="${{ github.event.issue.title }}"
+          URL="${{ github.event.issue.html_url }}"
+          USER="${{ github.event.sender.login }}"
+          REPO="${{ github.repository }}"
           
-          if [ "$EVENT_NAME" == "issues" ]; then
-            # Issues 이벤트 처리
-            ACTION="${{ github.event.action }}"
-            ISSUE_NUM="${{ github.event.issue.number }}"
-            TITLE="${{ github.event.issue.title }}"
-            URL="${{ github.event.issue.html_url }}"
-            USER="${{ github.event.sender.login }}"
-            REPO="${{ github.repository }}"
-            
-            case $ACTION in
-              "opened") EMOJI="🚨"; MSG="새 이슈"; COLOR=15158332 ;;
-              "closed") EMOJI="✅"; MSG="이슈 해결"; COLOR=3066993 ;;
-              "reopened") EMOJI="🔄"; MSG="이슈 재개"; COLOR=15105570 ;;
-              "labeled") EMOJI="🏷️"; MSG="라벨 추가"; COLOR=3447003 ;;
-              "unlabeled") EMOJI="🏷️"; MSG="라벨 제거"; COLOR=10070709 ;;
-              "assigned") EMOJI="👤"; MSG="담당자 지정"; COLOR=5763719 ;;
-              "unassigned") EMOJI="👤"; MSG="담당자 해제"; COLOR=9807270 ;;
-              "edited") EMOJI="✏️"; MSG="이슈 수정"; COLOR=16776960 ;;
-              "locked") EMOJI="🔒"; MSG="이슈 잠금"; COLOR=7506394 ;;
-              "unlocked") EMOJI="🔓"; MSG="잠금 해제"; COLOR=1752220 ;;
-              "milestoned") EMOJI="🎯"; MSG="마일스톤 설정"; COLOR=5793266 ;;
-              "demilestoned") EMOJI="🎯"; MSG="마일스톤 해제"; COLOR=10070709 ;;
-              "deleted") EMOJI="🗑️"; MSG="이슈 삭제"; COLOR=8421504 ;;
-              *) EMOJI="📌"; MSG="이슈 업데이트"; COLOR=3447003 ;;
-            esac
-            
-            curl -X POST "$WEBHOOK_URL" \
-              -H "Content-Type: application/json" \
-              -d "{
-                \"username\": \"GitHub Issues\",
-                \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
-                \"embeds\": [{
-                  \"title\": \"$EMOJI $MSG #$ISSUE_NUM\",
-                  \"description\": \"$TITLE\",
-                  \"url\": \"$URL\",
-                  \"color\": $COLOR,
-                  \"fields\": [
-                    {
-                      \"name\": \"📁 저장소\",
-                      \"value\": \"$REPO\",
-                      \"inline\": true
-                    },
-                    {
-                      \"name\": \"👤 작업자\",
-                      \"value\": \"$USER\",
-                      \"inline\": true
-                    }
-                  ],
-                  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                }]
-              }"
-              
-          elif [ "$EVENT_NAME" == "project_card" ]; then
-            # Project Card 이벤트 처리
-            ACTION="${{ github.event.action }}"
-            USER="${{ github.event.sender.login }}"
-            REPO="${{ github.repository }}"
-            CARD_URL="${{ github.event.project_card.url }}"
-            
-            # 카드 내용 가져오기 (issue 또는 note)
-            if [ -n "${{ github.event.project_card.content_url }}" ]; then
-              CONTENT_TYPE="Issue"
-              # Issue 번호 추출 (content_url에서)
-              ISSUE_NUM=$(echo "${{ github.event.project_card.content_url }}" | grep -oP 'issues/\K\d+')
-              TITLE="Issue #$ISSUE_NUM"
-            else
-              CONTENT_TYPE="Note"
-              TITLE="${{ github.event.project_card.note }}"
-            fi
-            
-            case $ACTION in
-              "created") 
-                EMOJI="➕"
-                MSG="프로젝트 카드 추가"
-                COLOR=3066993
-                DESCRIPTION="새로운 카드가 프로젝트에 추가되었습니다"
-                ;;
-              "moved")
-                EMOJI="📦"
-                MSG="프로젝트 카드 이동"
-                COLOR=5814783
-                FROM_COLUMN="${{ github.event.changes.column_id.from }}"
-                DESCRIPTION="카드가 다른 컬럼으로 이동되었습니다"
-                ;;
-              "converted")
-                EMOJI="🔄"
-                MSG="카드 변환"
-                COLOR=16776960
-                DESCRIPTION="Note가 Issue로 변환되었습니다"
-                ;;
-              "deleted")
-                EMOJI="🗑️"
-                MSG="프로젝트 카드 삭제"
-                COLOR=15158332
-                DESCRIPTION="카드가 프로젝트에서 제거되었습니다"
-                ;;
-              *)
-                EMOJI="📌"
-                MSG="프로젝트 업데이트"
-                COLOR=3447003
-                DESCRIPTION="프로젝트가 업데이트되었습니다"
-                ;;
-            esac
-            
-            curl -X POST "$WEBHOOK_URL" \
-              -H "Content-Type: application/json" \
-              -d "{
-                \"username\": \"GitHub Projects\",
-                \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
-                \"embeds\": [{
-                  \"title\": \"$EMOJI $MSG\",
-                  \"description\": \"$DESCRIPTION\n\n**$TITLE**\",
-                  \"color\": $COLOR,
-                  \"fields\": [
-                    {
-                      \"name\": \"📁 저장소\",
-                      \"value\": \"$REPO\",
-                      \"inline\": true
-                    },
-                    {
-                      \"name\": \"👤 작업자\",
-                      \"value\": \"$USER\",
-                      \"inline\": true
-                    },
-                    {
-                      \"name\": \"📋 타입\",
-                      \"value\": \"$CONTENT_TYPE\",
-                      \"inline\": true
-                    }
-                  ],
-                  \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                }]
-              }"
+          # 기본 이벤트 처리
+          case $ACTION in
+            "opened")
+              EMOJI="🚨"
+              MSG="새 이슈 생성"
+              COLOR=15158332
+              ;;
+            "closed")
+              EMOJI="✅"
+              MSG="이슈 해결"
+              COLOR=3066993
+              ;;
+            "reopened")
+              EMOJI="🔄"
+              MSG="이슈 재개"
+              COLOR=15105570
+              ;;
+            "assigned")
+              EMOJI="👤"
+              MSG="담당자 지정"
+              COLOR=5763719
+              ;;
+            "unassigned")
+              EMOJI="👤"
+              MSG="담당자 해제"
+              COLOR=9807270
+              ;;
+            "labeled")
+              LABEL="${{ github.event.label.name }}"
+              EMOJI="🏷️"
+              MSG="라벨 추가: $LABEL"
+              COLOR=3447003
+              ;;
+            "unlabeled")
+              LABEL="${{ github.event.label.name }}"
+              EMOJI="🏷️"
+              MSG="라벨 제거: $LABEL"
+              COLOR=10070709
+              ;;
+            *)
+              exit 0
+              ;;
+          esac
+          
+          # Projects 상태 정보 추가
+          if [ -n "$PROJECT_STATUS" ] && [ "$PROJECT_STATUS" != "Unknown" ] && [ "$PROJECT_STATUS" != "null" ]; then
+            STATUS_FIELD=",{\"name\": \"📊 프로젝트 상태\", \"value\": \"$PROJECT_STATUS\", \"inline\": true}"
+          else
+            STATUS_FIELD=""
           fi
+          
+          # Discord 전송
+          curl -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"username\": \"GitHub\",
+              \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+              \"embeds\": [{
+                \"title\": \"$EMOJI $MSG #$ISSUE_NUM\",
+                \"description\": \"**$TITLE**\",
+                \"url\": \"$URL\",
+                \"color\": $COLOR,
+                \"fields\": [
+                  {
+                    \"name\": \"📁 저장소\",
+                    \"value\": \"$REPO\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"👤 작업자\",
+                    \"value\": \"$USER\",
+                    \"inline\": true
+                  }
+                  $STATUS_FIELD
+                ],
+                \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+              }]
+            }"
