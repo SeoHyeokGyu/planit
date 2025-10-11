@@ -7,43 +7,36 @@ on:
 jobs:
   notify_discord:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Send Discord Issue Notification
         uses: appleboy/discord-action@master
         with:
           webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
           webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-          
-          message: |
-            {
-              "embeds": [
-                {
-                  "title": "${{ 
-                    github.event.action == 'opened'    && '🚨 새로운 이슈 발생: #' ||
-                    github.event.action == 'closed'    && '✅ 이슈 해결: #' ||
-                    github.event.action == 'reopened'  && '⚠️ 이슈 재개: #' ||
-                    github.event.action == 'labeled'   && '🏷️ 라벨 추가: #' ||
-                    github.event.action == 'unlabeled' && '🏷️ 라벨 제거: #' ||
-                    github.event.action == 'assigned'  && '👤 담당자 지정: #' ||
-                    github.event.action == 'unassigned' && '👤 담당자 해제: #' ||
-                    github.event.action == 'edited'    && '✏️ 이슈 내용 수정: #' ||
-                    github.event.action == 'locked'    && '🔒 이슈 잠금: #' ||
-                    github.event.action == 'unlocked'  && '🔓 이슈 잠금 해제: #' ||
-                    '⚙️ 이슈 업데이트: #' 
-                  }}${{ github.event.issue.number }}",
-                  
-                  "description": "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
-                  
-                  "color": ${{ 
-                    github.event.action == 'opened'    && 16711680 || 
-                    github.event.action == 'closed'    && 65280 ||    
-                    github.event.action == 'reopened'  && 16761088 || 
-                    github.event.action == 'edited'    && 16776960 || 
-                    4390561                           
-                  }},
-                  
-                  "timestamp": "${{ github.event.issue.updated_at }}"
-                }
-              ]
-            }
+          message: ${{ toJSON({
+            "embeds": [
+              {
+                "title": format('{0} #{1}',
+                  (github.event.action == 'opened'    && '🚨 새로운 이슈 발생:') ||
+                  (github.event.action == 'closed'    && '✅ 이슈 해결:') ||
+                  (github.event.action == 'reopened'  && '⚠️ 이슈 재개:') ||
+                  (github.event.action == 'labeled'   && '🏷️ 라벨 추가:') ||
+                  (github.event.action == 'unlabeled' && '🏷️ 라벨 제거:') ||
+                  (github.event.action == 'assigned'  && '👤 담당자 지정:') ||
+                  (github.event.action == 'unassigned' && '👤 담당자 해제:') ||
+                  (github.event.action == 'edited'    && '✏️ 이슈 내용 수정:') ||
+                  (github.event.action == 'locked'    && '🔒 이슈 잠금:') ||
+                  (github.event.action == 'unlocked'  && '🔓 이슈 잠금 해제:') ||
+                  '⚙️ 이슈 업데이트:',
+                  github.event.issue.number),
+                "description": format('**액션:** {0}\n**제목:** {1}\n**처리자:** {2}\n\n[이슈 바로가기]({3})', github.event.action, github.event.issue.title, github.event.sender.login, github.event.issue.html_url),
+                "color":
+                  (github.event.action == 'opened'    && 16711680) ||
+                  (github.event.action == 'closed'    && 65280) ||
+                  (github.event.action == 'reopened'  && 16761088) ||
+                  (github.event.action == 'edited'    && 16776960) ||
+                  4390561,
+                "timestamp": github.event.issue.updated_at
+              }
+            ]
+          }) }}
