@@ -23,7 +23,6 @@ jobs:
               "embeds": [
                 {
                   "title": "${{ 
-                    # 이슈 상태(Action)에 따른 동적 제목 설정
                     github.event.action == 'opened'    && '🚨 새로운 이슈 발생: #' ||
                     github.event.action == 'closed'    && '✅ 이슈 해결: #' ||
                     github.event.action == 'reopened'  && '⚠️ 이슈 재개: #' ||
@@ -40,7 +39,6 @@ jobs:
                   "description": "**액션:** ${{ github.event.action }}\n**제목:** ${{ github.event.issue.title }}\n**처리자:** ${{ github.event.sender.login }}\n\n[이슈 바로가기](${{ github.event.issue.html_url }})",
                   
                   "color": ${{ 
-                    # 이슈 상태(Action)에 따른 동적 색상 설정 (10진수)
                     github.event.action == 'opened'    && 16711680 || /* Red */
                     github.event.action == 'closed'    && 65280 ||    /* Green */
                     github.event.action == 'reopened'  && 16761088 || /* Orange */
