@@ -1,159 +1,134 @@
-name: Discord Projects Status Change
+name: Discord Issue Notifier
 
 on:
   issues:
-    types: [edited, labeled, unlabeled]
+    types: [opened, closed, reopened, assigned, unassigned, labeled, unlabeled, edited, deleted, milestoned, demilestoned, locked, unlocked]
 
 jobs:
-  detect-status-change:
+  notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout for state storage
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: .github/project-state
-          
-      - name: Get Current Project Status
-        id: current
-        env:
-          GITHUB_TOKEN: ${{ secrets.PROJECT_TOKEN }}
-          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
-        run: |
-          QUERY='query($nodeId: ID!) {
-            node(id: $nodeId) {
-              ... on Issue {
-                number
-                projectItems(first: 10) {
-                  nodes {
-                    id
-                    project {
-                      number
-                      title
-                    }
-                    fieldValues(first: 10) {
-                      nodes {
-                        ... on ProjectV2ItemFieldSingleSelectValue {
-                          name
-                          field {
-                            ... on ProjectV2SingleSelectField {
-                              name
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }'
-          
-          RESPONSE=$(gh api graphql -f query="$QUERY" -f nodeId="$ISSUE_NODE_ID")
-          
-          STATUS=$(echo "$RESPONSE" | jq -r '
-            .data.node.projectItems.nodes[]? |
-            select(.project.number == 2) |
-            .fieldValues.nodes[]? |
-            select(.field.name == "Status") |
-            .name // "None"
-          ' | head -n1)
-          
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          echo "Current status: $STATUS"
-          
-      - name: Load Previous Status
-        id: previous
-        continue-on-error: true
-        run: |
-          ISSUE_NUM="${{ github.event.issue.number }}"
-          STATE_FILE=".github/project-state/issue-${ISSUE_NUM}.txt"
-          
-          if [ -f "$STATE_FILE" ]; then
-            PREV_STATUS=$(cat "$STATE_FILE")
-            echo "status=$PREV_STATUS" >> $GITHUB_OUTPUT
-            echo "Previous status: $PREV_STATUS"
-          else
-            echo "status=None" >> $GITHUB_OUTPUT
-            echo "No previous status found"
-          fi
-          
-      - name: Detect Status Change
-        id: change
-        run: |
-          CURRENT="${{ steps.current.outputs.status }}"
-          PREVIOUS="${{ steps.previous.outputs.status }}"
-          
-          if [ "$CURRENT" != "$PREVIOUS" ] && [ "$CURRENT" != "None" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Status changed: $PREVIOUS → $CURRENT"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-          
       - name: Send Discord Notification
-        if: steps.change.outputs.changed == 'true'
         env:
           WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          CURRENT="${{ steps.current.outputs.status }}"
-          PREVIOUS="${{ steps.previous.outputs.status }}"
+          ACTION="${{ github.event.action }}"
           ISSUE_NUM="${{ github.event.issue.number }}"
           TITLE="${{ github.event.issue.title }}"
           URL="${{ github.event.issue.html_url }}"
           USER="${{ github.event.sender.login }}"
+          REPO="${{ github.repository }}"
           
-          # 상태별 이모지와 색상
-          case $CURRENT in
-            "Todo")
-              EMOJI="📋"
-              COLOR=11184810
+          # 액션별 이모지와 색상 설정
+          case $ACTION in
+            "opened")
+              EMOJI="🚨"
+              MSG="새 이슈 생성"
+              COLOR=15158332
               ;;
-            "In Progress")
+            "closed")
+              EMOJI="✅"
+              MSG="이슈 해결"
+              COLOR=3066993
+              ;;
+            "reopened")
               EMOJI="🔄"
+              MSG="이슈 재개"
+              COLOR=15105570
+              ;;
+            "assigned")
+              EMOJI="👤"
+              MSG="담당자 지정"
+              ASSIGNEE="${{ github.event.assignee.login }}"
+              COLOR=5763719
+              ;;
+            "unassigned")
+              EMOJI="👤"
+              MSG="담당자 해제"
+              COLOR=9807270
+              ;;
+            "labeled")
+              LABEL="${{ github.event.label.name }}"
+              EMOJI="🏷️"
+              MSG="라벨 추가: $LABEL"
+              COLOR=3447003
+              ;;
+            "unlabeled")
+              LABEL="${{ github.event.label.name }}"
+              EMOJI="🏷️"
+              MSG="라벨 제거: $LABEL"
+              COLOR=10070709
+              ;;
+            "edited")
+              EMOJI="✏️"
+              MSG="이슈 수정"
               COLOR=16776960
               ;;
-            "Done")
-              EMOJI="✅"
-              COLOR=3066993
+            "deleted")
+              EMOJI="🗑️"
+              MSG="이슈 삭제"
+              COLOR=8421504
+              ;;
+            "milestoned")
+              MILESTONE="${{ github.event.milestone.title }}"
+              EMOJI="🎯"
+              MSG="마일스톤 설정: $MILESTONE"
+              COLOR=5793266
+              ;;
+            "demilestoned")
+              EMOJI="🎯"
+              MSG="마일스톤 해제"
+              COLOR=10070709
+              ;;
+            "locked")
+              EMOJI="🔒"
+              MSG="이슈 잠금"
+              COLOR=7506394
+              ;;
+            "unlocked")
+              EMOJI="🔓"
+              MSG="이슈 잠금 해제"
+              COLOR=1752220
               ;;
             *)
               EMOJI="📌"
-              COLOR=5814783
+              MSG="이슈 업데이트"
+              COLOR=3447003
               ;;
           esac
           
-          if [ "$PREVIOUS" == "None" ]; then
-            DESCRIPTION="**$TITLE**\n\n➕ **$CURRENT** 상태로 추가됨"
-          else
-            DESCRIPTION="**$TITLE**\n\n$PREVIOUS ➡️ **$CURRENT**"
-          fi
+          echo "Sending notification: $MSG for issue #$ISSUE_NUM"
           
+          # Discord 전송
           curl -X POST "$WEBHOOK_URL" \
             -H "Content-Type: application/json" \
             -d "{
-              \"username\": \"GitHub Projects\",
+              \"username\": \"GitHub Issues\",
+              \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
               \"embeds\": [{
-                \"title\": \"$EMOJI 프로젝트 상태 변경 #$ISSUE_NUM\",
-                \"description\": \"$DESCRIPTION\",
+                \"title\": \"$EMOJI $MSG #$ISSUE_NUM\",
+                \"description\": \"**$TITLE**\",
                 \"url\": \"$URL\",
                 \"color\": $COLOR,
-                \"footer\": {\"text\": \"$USER\"},
+                \"fields\": [
+                  {
+                    \"name\": \"📁 저장소\",
+                    \"value\": \"$REPO\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"👤 작업자\",
+                    \"value\": \"$USER\",
+                    \"inline\": true
+                  }
+                ],
                 \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
               }]
             }"
           
-      - name: Save Current Status
-        run: |
-          ISSUE_NUM="${{ github.event.issue.number }}"
-          CURRENT="${{ steps.current.outputs.status }}"
-          STATE_DIR=".github/project-state"
-          STATE_FILE="$STATE_DIR/issue-${ISSUE_NUM}.txt"
-          
-          mkdir -p "$STATE_DIR"
-          echo "$CURRENT" > "$STATE_FILE"
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$STATE_FILE"
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update project status for issue #$ISSUE_NUM"
-          git push || echo "No changes to push"
+          if [ $? -eq 0 ]; then
+            echo "✅ Notification sent successfully!"
+          else
+            echo "❌ Failed to send notification"
+            exit 1
+          fi
