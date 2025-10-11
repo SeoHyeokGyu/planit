@@ -18,7 +18,7 @@ jobs:
           SENDER_LOGIN: ${{ github.event.sender.login }}
           UPDATED_AT: ${{ github.event.issue.updated_at }}
         run: |
-          # 1. 상황에 맞는 제목과 색상 설정 (이전과 동일)
+          # Step 1: Set title and color based on the event action
           case $ACTION in
             "opened") TITLE="🚨 새로운 이슈 발생: #$ISSUE_NUMBER"; COLOR=16711680 ;;
             "closed") TITLE="✅ 이슈 해결: #$ISSUE_NUMBER"; COLOR=65280 ;;
@@ -33,17 +33,14 @@ jobs:
             *) TITLE="⚙️ 이슈 업데이트: #$ISSUE_NUMBER"; COLOR=4390561 ;;
           esac
 
-          # 2. 설명 텍스트 준비
+          # Step 2: Prepare the description text
           DESCRIPTION=$(printf '**액션:** %s\n**제목:** %s\n**처리자:** %s\n\n[이슈 바로가기](%s)' "$ACTION" "$ISSUE_TITLE" "$SENDER_LOGIN" "$ISSUE_URL")
 
-          # 3. jq를 사용하여 안전하게 JSON 페이로드 생성
-          # jq가 모든 특수문자(줄바꿈, 따옴표 등)를 자동으로 처리해줍니다.
-          JSON_PAYLOAD=$(jq -n \
+          # Step 3: Generate JSON with jq and pipe it directly to curl for sending
+          jq -n \
             --arg title "$TITLE" \
             --arg description "$DESCRIPTION" \
             --argjson color "$COLOR" \
             --arg timestamp "$UPDATED_AT" \
-            '{embeds: [{title: $title, description: $description, color: $color, timestamp: $timestamp}]}')
-
-          # 4. curl로 웹훅 전송
-          curl -X POST -H "Content-Type: application/json" -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK_URL"
+            '{embeds: [{title: $title, description: $description, color: $color, timestamp: $timestamp}]}' | \
+            curl -X POST -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
