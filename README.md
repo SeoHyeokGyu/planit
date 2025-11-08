@@ -1,392 +1,334 @@
-# planit
-# 여행 플래너 개발 계획 (API별 주차 분산, 12주)
+# AI 기반 소셜 챌린지 트래커
 
-## 개발 환경
-- **백엔드**: 3명 개발자 (Spring Boot + PostgreSQL + Redis) - 우선 개발
-- **프론트엔드**: AI 도구 활용 (Next.js + TypeScript) - 백엔드 완성 후 연동
-- **배포**: 상시 배포 (CI/CD 파이프라인) - 단일 프로덕션 환경
+> 작은 성취를 실시간으로 공유하고, AI가 다음 도전을 추천해주는 동기부여 플랫폼 (웹 기반)
 
 ---
 
-## Week 1: 프로젝트 기반 구축
+## 프로젝트 개요
 
-### 백엔드 (3명 공동 작업)
-- [ ] Spring Boot 프로젝트 초기 설정
-- [ ] 데이터베이스 스키마 설계 (User, Destination, TripPlan)
-- [ ] Docker 개발 환경 구성 (PostgreSQL, Redis)
-- [ ] Git 브랜치 전략 및 코드 리뷰 룰 수립
-- [ ] **전체 API 명세서 작성 (Swagger) ← 프론트엔드 개발 기준 문서**
+**챌린지 트래커**는 사용자들이 개인의 작은 성취를 실시간으로 공유하며 함께 성장하는 소셜 플랫폼입니다.
 
-### 프론트엔드 준비
-- [ ] Next.js 프로젝트 초기 설정
-- [ ] AI 도구 선택 및 설정 (v0.dev, Claude, Cursor)
-- [ ] 기술 스택 확정 (Tailwind, Shadcn/ui, Zustand, React Query)
-- [ ] 컴포넌트 구조 설계
-- [ ] **백엔드 API 명세서 기반 AI 프롬프트 템플릿 작성**
+### 핵심 기능
+- **실시간 피드**: SSE 기반 실시간 인증 알림 ("OO님이 방금 인증했습니다!")
+- **AI 추천 엔진**: 5가지 알고리즘으로 맞춤 챌린지 추천
+- **AI 챌린지 생성기**: 키워드만 입력하면 GPT가 챌린지 자동 생성
+- **AI 인증 분석**: Google Cloud Vision으로 인증 사진 자동 검증
+- **AI 동기부여 코치**: 개인화된 격려 메시지 생성
+- **게임화**: 포인트, 레벨, 배지, 스트릭 시스템
 
-### 팀 협업 및 알림 설정
-- [ ] **디스코드 서버 생성 및 목적별 채널 설정**
-- [ ] **GitHub 리포지토리 활동-디스코드 웹훅 연동**
-- [ ] **GitHub Projects-디스코드 연동 (Marketplace 앱 또는 Actions 활용)**
+### 기술 스택
 
-**완료 목표**: 개발 환경 완성 + 전체 API 설계 + 고도화된 팀 협업 환경 구축
+**백엔드** (85% 비중)
+- Spring Boot 3.x + Java 17
+- PostgreSQL (주 데이터베이스)
+- Redis (캐싱 + Pub/Sub)
+- Spring Security + JWT
+- SSE (Server-Sent Events)
+- OpenAI GPT API
+- Google Cloud Vision API
 
----
+**프론트엔드**
+- Next.js 14 + TypeScript
+- Tailwind CSS + Shadcn/ui
+- Zustand (상태 관리)
+- React Query (데이터 페칭)
+- EventSource API (SSE 클라이언트)
 
-## Week 2: CI/CD 파이프라인
-
-### CI/CD 파이프라인 구축 (3명 공동 작업)
-- [ ] GitHub Actions 워크플로우 설정
-- [ ] 자동 테스트 파이프라인 구축
-- [ ] Docker 이미지 자동 빌드
-- [ ] 프로덕션 서버 자동 배포 설정 (Render 활용)
-- [ ] 헬스체크 및 롤백 자동화
-- [ ] 배포 알림 시스템 (슬랙/이메일)
-
-**완료 목표**: 상시 배포 시스템 완성
-
----
-
-## Week 3: 사용자 관리 API
-
-### 사용자 관리 API
-- [ ] User 엔티티 구현
-- [ ] UserPreference 엔티티 구현
-- [ ] 회원가입 API (POST /api/auth/register)
-- [ ] 로그인 API (POST /api/auth/login) - JWT 없이
-- [ ] 사용자 프로필 CRUD API
-- [ ] 선호도 설정 API (POST /api/users/preferences)
-- [ ] 단위 테스트 작성
-
-### 첫 프론트엔드 연동
-- [ ] 회원가입 페이지 (AI 생성)
-- [ ] 로그인 페이지 (AI 생성)
-- [ ] 프로필 설정 페이지 (AI 생성)
-
-### AI 프롬프트 예시
-```
-"사용자 회원가입 페이지 만들어줘.
-API: POST /api/auth/register
-요청: {email, password, name}
-응답: {success: boolean, message: string, userId: string}
-Next.js + TypeScript + Tailwind + React Hook Form 사용해서."
-```
-
-**완료 목표**: 사용자 관리 완성 + 첫 화면 동작
+**인프라**
+- Docker + Docker Compose
+- GitHub Actions (CI/CD)
+- AWS S3 (이미지 저장)
+- Render (배포)
 
 ---
 
-## Week 4: 여행지 관리 API
+## 주요 기능 (26개 섹션)
 
-### 여행지 관리 API
-- [ ] Destination 엔티티 구현
-- [ ] DestinationFeature 엔티티 구현
-- [ ] 여행지 목록 조회 API (GET /api/destinations)
-- [ ] 여행지 상세 조회 API (GET /api/destinations/{id})
-- [ ] 여행지 검색 API (GET /api/destinations/search)
-- [ ] 키워드 기반 검색 기능
-- [ ] 더미 데이터 50개 입력
-- [ ] 단위 테스트 작성
+### 1-2. 기본 UI
+- 홈/랜딩 페이지
+- 네비게이션
 
-### 여행지 UI 연동
-- [ ] 여행지 목록 페이지 (AI 생성)
-- [ ] 여행지 상세 페이지 (AI 생성)
-- [ ] 검색 기능 UI (AI 생성)
+### 3-5. 핵심 API
+- 사용자 관리 (JWT 인증)
+- 챌린지 관리 (생성, 조회, 검색, 통계)
+- 인증 작성/관리 (이미지 업로드, 리사이징, S3)
 
-### AI 프롬프트 예시
-```
-"여행지 목록 페이지 만들어줘.
-API: GET /api/destinations?page=0&size=20
-응답: {destinations: [{id, name, country, city, categories, imageUrl, rating}], totalPages}
-카드 형태로 표시하고 페이지네이션 포함해줘."
-```
+### 6-7. 실시간 & AI ⭐
+- **실시간 피드** (SSE + Redis Pub/Sub)
+- **AI 추천 엔진** (5가지 알고리즘)
 
-**완료 목표**: 여행지 조회 + 검색 완성
+### 8-10. 소셜 기능
+- 팔로우/팔로워
+- 댓글 & 좋아요
+- 알림 시스템 (SSE 기반)
 
----
+### 11-14. 게임화
+- 포인트/레벨 시스템
+- 배지 시스템
+- 스트릭 (연속 인증 추적)
+- 랭킹 (Redis Sorted Set)
 
-## Week 5: 일정 관리 API
+### 15-18. 분석 & 관리
+- 통계/분석
+- 고급 검색 (Full-Text Search)
+- 개인 대시보드
+- 관리자 기능
 
-### 일정 관리 API 
-- [ ] TripPlan 엔티티 구현
-- [ ] TripPlanItem 엔티티 구현
-- [ ] 일정 생성 API (POST /api/trip-plans)
-- [ ] 일정 조회 API (GET /api/trip-plans/{id})
-- [ ] 일정 수정 API (PUT /api/trip-plans/{id})
-- [ ] 일정 삭제 API (DELETE /api/trip-plans/{id})
-- [ ] 일정 아이템 CRUD API
-- [ ] 단위 테스트 작성
+### 19-23. 백엔드 인프라
+- 에러 처리 (전역 예외 처리)
+- Redis 캐싱 전략 (TTL, 무효화, 히트율)
+- 보안 시스템 (Rate Limiting, IP 차단, 암호화)
+- API 성능 최적화 (쿼리 최적화, 인덱싱, 커넥션 풀)
+- 배치 작업/스케줄링 (6개 배치 작업)
 
-### 일정 관리 UI 연동
-- [ ] 일정 생성 페이지 (AI 생성)
-- [ ] 일정 목록 페이지 (AI 생성)
-- [ ] 일정 상세 관리 페이지 (AI 생성)
-- [ ] 드래그앤드롭 일정 편집 (AI 생성)
-
-### AI 프롬프트 예시
-```
-"일정 관리 페이지 만들어줘.
-API: GET /api/trip-plans/{id}
-응답: {id, title, startDate, endDate, items: [{day, order, placeName, startTime, endTime}]}
-드래그앤드롭으로 일정 순서 변경 가능하게 해줘."
-```
-
-**완료 목표**: 기본 일정 관리 완성
+### 24-26. AI 기능 ⭐
+- **AI 인증 분석** (Google Cloud Vision)
+- **AI 동기부여 코치** (OpenAI GPT)
+- **AI 챌린지 생성기** (OpenAI GPT)
 
 ---
 
-## Week 6: JWT 인증 API
+## AI 기능 상세
 
-### JWT 인증 시스템
-- [ ] JWT 토큰 생성 서비스 구현
-- [ ] JWT 토큰 검증 필터 구현
-- [ ] Spring Security 설정
-- [ ] 로그인 API 수정 (JWT 토큰 반환)
-- [ ] 토큰 갱신 API (POST /api/auth/refresh)
-- [ ] 로그아웃 API (POST /api/auth/logout)
-- [ ] 인증 관련 통합 테스트
-
-### JWT 프론트엔드 연동
-- [ ] JWT 토큰 관리 커스텀 훅 (AI 생성)
-- [ ] 인증이 필요한 페이지 보안 처리
-- [ ] 자동 로그인/로그아웃 처리
-- [ ] 토큰 만료 처리
-
-### AI 프롬프트 예시
+### 1. AI 챌린지 생성기
 ```
-"JWT 토큰 관리하는 React 커스텀 훅 만들어줘.
-로그인 API: POST /api/auth/login 응답: {token, refreshToken, user}
-- 토큰을 localStorage에 저장
-- API 호출시 자동으로 Authorization 헤더 추가
-- 토큰 만료시 자동 갱신 또는 로그아웃"
+입력: "매일 책 읽기"
+
+출력:
+{
+  title: "매일 책 읽기 30분 챌린지",
+  description: "바쁜 일상 속에서도 독서 습관을 만들어보세요...",
+  tags: ["#독서", "#자기계발", "#습관"],
+  category: "STUDY"
+}
 ```
 
-**완료 목표**: 완전한 인증 시스템
+### 2. AI 인증샷 분석기
+```
+사진 업로드 시 자동 분석
+- 운동 사진 → "운동 인증이 확인되었습니다!"
+- 물 마시기 사진 → "물 마시기 인증이 확인되었습니다!"
+- 신뢰도 80% 이상 시 "AI 인증" 배지 부여
+```
+
+### 3. AI 동기부여 코치
+```
+사용자 인증 후 자동 메시지 생성
+- "5km 완주했군요! 꾸준함이 멋집니다!"
+- 레벨, 스트릭 기반 개인화
+- 다양한 표현으로 매번 다른 메시지
+```
+
+### 4. AI 추천 엔진 (5가지 알고리즘)
+- 쿼리 기반: 참가자 수 TOP
+- 콘텐츠 기반: 태그 유사도 (코사인 유사도)
+- 협업 필터링: 공통 참여 챌린지 (User-Based CF)
+- 개인화: 행동 로그 분석
+- 트렌드: 24시간 급상승 (Redis Sorted Set)
 
 ---
 
-## Week 7: Google Maps 연동 API
+## 실시간 피드 아키텍처
 
-### Google Maps 연동 API
-- [ ] Google Maps API 설정
-- [ ] 거리 계산 API (POST /api/maps/distance)
-- [ ] 경로 조회 API (POST /api/maps/directions)
-- [ ] 장소 검색 API (GET /api/maps/places)
-- [ ] 위치 정보 저장/조회 기능
-- [ ] 지오코딩/리버스 지오코딩 API
-- [ ] 외부 API 통합 테스트
-
-### 지도 기능 UI 연동
-- [ ] Google Maps 컴포넌트 구현 (AI 생성)
-- [ ] 경로 표시 기능 (AI 생성)
-- [ ] 장소 마커 표시 (AI 생성)
-- [ ] 거리/시간 정보 표시 (AI 생성)
-
-### AI 프롬프트 예시
 ```
-"Google Maps 컴포넌트 만들어줘.
-- 여러 여행지를 마커로 표시
-- 경로를 라인으로 연결 표시
-- 각 마커 클릭시 여행지 정보 팝업
-- 거리와 예상 시간 정보 표시"
+사용자 A가 인증 작성
+    ↓
+백엔드: POST /api/certifications
+    ↓
+Redis Publish (인증 이벤트)
+    ↓
+모든 구독자에게 SSE로 브로드캐스트
+    ↓
+프론트엔드: EventSource로 수신
+    ↓
+토스트 알림: "OO님이 방금 인증했습니다!" (3초 후 자동 사라짐)
 ```
-
-**완료 목표**: 지도 기능 완성
 
 ---
 
-## Week 8: 추천 시스템 고도화 및 개인화
+## 주요 API 엔드포인트 (100+)
 
-### 추천 시스템 API
-- [ ] UserBehavior 엔티티 구현 (클릭, 찜 등 행동 추적)
-- [ ] **Survey, Question, Answer, UserSurveyResponse 엔티티 구현**
-- [ ] **외부 날씨 API 연동**
-- [ ] 개인화 추천 API (GET /api/recommendations/personal)
-- [ ] 유사 여행지 추천 API (GET /api/destinations/{id}/similar)
-- [ ] 인기 여행지 API (GET /api/destinations/popular)
-- [ ] 찜하기 API (POST /api/users/favorites)
-- [ ] **콘텐츠 기반 + 연령, 시기, 날씨, 설문 기반 추천 알고리즘 구현**
-- [ ] 추천 시스템 단위 테스트
+### 사용자 관리
+- `POST /api/auth/register` - 회원가입
+- `POST /api/auth/login` - 로그인 (JWT 반환)
+- `POST /api/auth/refresh` - 토큰 갱신
+- `GET /api/users/{id}` - 프로필 조회
+- `PUT /api/users/{id}` - 프로필 수정
 
-### 추천 기능 UI 연동
-- [ ] **상세/간편 타입별 설문 페이지 (AI 생성)**
-- [ ] 개인화 추천 페이지 (AI 생성)
-- [ ] 찜하기 기능 UI (AI 생성)
-- [ ] 유사 여행지 표시 (AI 생성)
-- [ ] 인기 여행지 섹션 (AI 생성)
-- [ ] **날씨, 시기, 연령 기반 추천 결과 UI (AI 생성)**
+### 챌린지 관리
+- `POST /api/challenges` - 챌린지 생성
+- `GET /api/challenges` - 목록 조회 (페이징, 필터링)
+- `GET /api/challenges/{id}` - 상세 조회
+- `POST /api/challenges/{id}/join` - 참여
+- `GET /api/challenges/search` - 검색 (Full-Text Search)
 
-### AI 프롬프트 예시
-```
-"개인화 추천 페이지 만들어줘.
-API: GET /api/recommendations/personal?age=30&season=summer
-응답: [{id, name, category, price, rating, imageUrl, reason}]
-카드 형태로 표시하고, '30대 여름 여행으로 추천' 같은 이유도 함께 보여줘."
-```
+### 인증 관리
+- `POST /api/certifications` - 인증 생성
+- `POST /api/certifications/upload` - 이미지 업로드 (S3)
+- `GET /api/certifications` - 목록 조회
+- `GET /api/certifications/{id}` - 상세 조회
 
-**완료 목표**: 다양한 변수를 고려하는 지능형 추천 시스템 완성
+### 실시간 피드
+- `GET /api/feed/stream` - SSE 스트림
+- `GET /api/feed` - 피드 조회 (페이징)
+- `GET /api/feed/following` - 팔로잉 피드
 
----
+### AI 기능
+- `POST /api/ai/challenges/generate` - AI 챌린지 생성
+- `POST /api/ai/certifications/analyze` - AI 인증 분석
+- `POST /api/ai/motivate` - AI 격려 메시지
+- `GET /api/ai/recommendations` - AI 추천 (5가지)
 
-## Week 9: 소셜 로그인 API
+### 소셜 기능
+- `POST /api/users/{id}/follow` - 팔로우
+- `POST /api/certifications/{id}/comments` - 댓글 작성
+- `POST /api/certifications/{id}/like` - 좋아요
 
-### 소셜 로그인 API
-- [ ] OAuth2 설정 (구글, 카카오)
-- [ ] 소셜 로그인 콜백 API (GET /api/auth/oauth/{provider}/callback)
-- [ ] 소셜 회원가입 처리
-- [ ] 기존 계정 연동 기능
-- [ ] 프로필 이미지 업로드 API (POST /api/users/profile-image)
-- [ ] 소셜 계정 연동 해제 API
-- [ ] 소셜 로그인 통합 테스트
-
-### 소셜 로그인 UI 연동
-- [ ] 구글 로그인 버튼 (AI 생성)
-- [ ] 카카오 로그인 버튼 (AI 생성)
-- [ ] 소셜 로그인 콜백 페이지 (AI 생성)
-- [ ] 프로필 이미지 업로드 UI (AI 생성)
-
-### AI 프롬프트 예시
-```
-"소셜 로그인 버튼들 만들어줘.
-구글 로그인: GET /api/auth/oauth/google (리다이렉트)
-카카오 로그인: GET /api/auth/oauth/kakao (리다이렉트)
-각각의 브랜드 컬러와 아이콘 사용해서 버튼 디자인해줘."
-```
-
-**완료 목표**: 소셜 로그인 완성
+### 게임화
+- `GET /api/users/{id}/stats` - 통계 조회
+- `GET /api/rankings` - 랭킹 조회
+- `GET /api/badges` - 배지 목록
+- `GET /api/streaks/{userId}` - 스트릭 조회
 
 ---
 
-## Week 10: 고급 검색 및 필터링 API
+## Redis 캐싱 전략
 
-### 고급 검색 API 
-- [ ] 고급 검색 API (POST /api/destinations/advanced-search)
-- [ ] 필터링 기능 (카테고리, 가격, 평점, 지역)
-- [ ] 정렬 기능 (인기도, 평점, 가격, 거리)
-- [ ] 검색 결과 캐싱 (Redis)
-- [ ] 실시간 인기도 업데이트 시스템
-- [ ] 조회수 기반 트렌딩 API
-- [ ] 검색 성능 최적화
-
-### 고급 검색 UI 연동
-- [ ] 고급 검색 필터 컴포넌트 (AI 생성)
-- [ ] 실시간 검색 결과 업데이트 (AI 생성)
-- [ ] 필터 태그 표시 (AI 생성)
-- [ ] 정렬 옵션 UI (AI 생성)
-
-### AI 프롬프트 예시
-```
-"고급 검색 필터 컴포넌트 만들어줘.
-- 카테고리 체크박스 (문화, 자연, 도시, 해변 등)
-- 가격대 슬라이더 (1-5단계)
-- 평점 선택 (3점 이상, 4점 이상 등)
-- 지역 선택 드롭다운
-필터 변경시 실시간으로 검색 결과 업데이트"
-```
-
-**완료 목표**: 고급 검색 완성
+| 데이터 | TTL | 용도 |
+|--------|-----|------|
+| 랭킹 | 1시간 | Redis Sorted Set |
+| 추천 결과 | 1시간 | 추천 성능 향상 |
+| 조회수/좋아요 | 실시간 | Redis Counter |
+| 검색 결과 | 10분 | 검색 성능 향상 |
+| 대시보드 | 5분 | 빠른 로딩 |
 
 ---
 
-## Week 11: 사용자 참여 기능 및 고급 기능
+## 배치 작업 (6개)
 
-### 예산 관리 및 리뷰 API
-- [ ] Budget 엔티티 구현 및 관련 API
-- [ ] Review 엔티티 구현 및 관련 API
-- [ ] 리뷰 평점 집계 시스템
-
-### 뱃지, 챌린지, 랭킹 API
-- [ ] **Badge, Challenge, UserBadge 엔티티 구현**
-- [ ] **뱃지/챌린지 획득 조건 로직 및 부여 API**
-- [ ] **여행지 랭킹 집계 로직 (Redis 활용)**
-- [ ] **여행지 랭킹 API (GET /api/rankings/destinations)**
-
-### UI 연동
-- [ ] 예산 관리 대시보드 (AI 생성)
-- [ ] 리뷰 작성/표시 컴포넌트 (AI 생성)
-- [ ] **뱃지/챌린지 목록 및 '나의 뱃지' 페이지 (AI 생성)**
-- [ ] **여행지 랭킹 리더보드 페이지 (AI 생성)**
-
-### AI 프롬프트 예시
-```
-"여행지 랭킹 리더보드 페이지 만들어줘.
-API: GET /api/rankings/destinations?period=weekly
-응답: [{rank, name, country, score, imageUrl}]
-- 1위부터 100위까지 순위 표시
-- 주간/월간 필터링 기능 포함"
-```
-
-**완료 목표**: 예산 관리, 리뷰, 뱃지, 랭킹 등 사용자 참여 기능 완성
+| 작업 | 실행 주기 | 설명 |
+|------|-----------|------|
+| 스트릭 검증 | 매일 자정 | 연속 인증일 수 갱신 |
+| 랭킹 갱신 | 1시간마다 | Redis Sorted Set 갱신 |
+| 통계 집계 | 매일 새벽 2시 | 일별 통계 데이터 생성 |
+| 만료 알림 삭제 | 매주 일요일 | 30일 지난 알림 삭제 |
+| 챌린지 종료 처리 | 매시간 | 종료된 챌린지 상태 변경 |
+| 주간 리포트 발송 | 매주 월요일 | 이메일 발송 |
 
 ---
 
-## Week 12: 성능 최적화 및 런칭 준비
+## 보안 시스템
 
-### 성능 최적화 (3명 공동 작업)
-**백엔드 최적화**
-- [ ] 데이터베이스 인덱스 최적화
-- [ ] Redis 캐싱 전략 구현 
-- [ ] API 응답 시간 개선 (목표: 500ms 이하)
-- [ ] N+1 문제 해결
-- [ ] API Rate Limiting 구현
+### Rate Limiting (Bucket4j)
+- API별 요청 제한: 분당 100회
+- 사용자별 요청 제한: 분당 50회
+- IP별 요청 제한: 분당 200회
 
-**프론트엔드 최적화**
-- [ ] 코드 스플리팅 적용 (AI 생성)
-- [ ] 이미지 lazy loading (AI 생성)
-- [ ] API 호출 최적화 (React Query 활용)
-- [ ] 불필요한 리렌더링 방지
-
-### 최종 완성
-- [ ] 전체 E2E 테스트
-- [ ] 사용자 대시보드 완성 (AI 생성)
-- [ ] 사용자 가이드 작성
-- [ ] 정식 서비스 런칭
-
-### AI 프롬프트 예시
-```
-"사용자 대시보드 페이지 만들어줘.
-- 나의 여행 계획 목록
-- 찜한 여행지 목록
-- 작성한 리뷰 목록  
-- 여행 통계 (총 여행 수, 방문 국가 수 등)
-깔끔하고 직관적인 레이아웃으로 구성해줘."
-```
-
-**완료 목표**: 완전한 여행 플래너 서비스 정식 런칭
+### 보안 기능
+- JWT 토큰 검증 필터
+- IP 차단 시스템 (Redis 블랙리스트)
+- XSS 방지 (HTML 이스케이프)
+- SQL Injection 방지 (Prepared Statement)
+- CSRF 토큰 검증
+- 비밀번호 암호화 (BCrypt)
+- 민감 정보 암호화 (AES-256)
 
 ---
 
-## API 개발 타임라인 요약
+## 프로젝트 통계
 
+| 항목 | 수치 |
+|------|------|
+| **총 기능 섹션** | 26개 |
+| **총 API 엔드포인트** | 100+ |
+| **백엔드 기능 비중** | 85% |
+| **프론트엔드 페이지** | 25+ |
+| **전체 체크리스트** | 210+ |
+| **배치 작업** | 6개 |
+| **외부 API 연동** | 4개 (OpenAI GPT, Google Cloud Vision, Google OAuth, Kakao OAuth) |
+
+---
+
+## 개발 환경 설정
+
+### 필수 요구사항
+- Java 17+
+- Node.js 18+
+- Docker & Docker Compose
+- PostgreSQL 15+
+- Redis 7+
+
+### 백엔드 실행
+```bash
+# Docker로 PostgreSQL, Redis 실행
+docker-compose up -d
+
+# 프로젝트 빌드
+./gradlew build
+
+# 애플리케이션 실행
+./gradlew bootRun
 ```
-Week 1-2: 기반 구축 (환경 + CI/CD)
-Week 3: 사용자 관리 API + 첫 UI
-Week 4: 여행지 관리 API + UI
-Week 5: 일정 관리 API + UI  
-Week 6: JWT 인증 API + UI
-Week 7: Google Maps API + UI
-Week 8: 추천 시스템 고도화 API + UI
-Week 9: 소셜 로그인 API + UI
-Week 10: 고급 검색 API + UI
-Week 11: 사용자 참여(뱃지, 랭킹) 및 고급 기능(예산, 리뷰) API + UI
-Week 12: 성능 최적화 + 런칭
+
+### 프론트엔드 실행
+```bash
+cd frontend
+
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
 ```
 
-## 주차별 API 집중의 장점
+### 환경 변수 설정
+```env
+# 데이터베이스
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/planit
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=password
 
-### ✅ **깊이 있는 개발**
-- 각 API 영역에 충분한 시간 할당
-- 단위 테스트와 통합 테스트 시간 확보
-- 완성도 높은 API 구현 가능
+# Redis
+SPRING_REDIS_HOST=localhost
+SPRING_REDIS_PORT=6379
 
-### ✅ **안정적인 연동**
-- 각 주차마다 백엔드 API 완성 후 즉시 프론트엔드 연동
-- AI를 활용한 빠른 UI 개발
-- 단계별 테스트로 안정성 확보
+# JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRATION=86400000
 
-### ✅ **체계적인 학습**
-- 각 기술 영역을 집중적으로 학습
-- 점진적 복잡도 증가
-- 팀원별 전문성 향상
+# AWS S3
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_S3_BUCKET=your-bucket-name
 
-**12주로 완성되는 고품질 여행 플래너 서비스!** 🚀
+# OpenAI
+OPENAI_API_KEY=your-openai-api-key
+
+# Google Cloud Vision
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+```
+
+---
+
+## API 문서
+
+Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+---
+
+## 팀 협업
+
+- **Discord**: GitHub 웹훅 연동 (이슈, PR, 커밋 알림)
+- **GitHub Projects**: 칸반 보드로 작업 관리
+- **코드 리뷰**: 모든 PR 필수 리뷰
+- **브랜치 전략**: Git Flow
+
+---
+
+## 라이선스
+
+MIT License
+
+---
+
+**백엔드 중심 AI 기반 소셜 챌린지 트래커** 🚀
