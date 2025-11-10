@@ -30,6 +30,7 @@ class SecurityConfig {
                         "/swagger-resources/**"
                     ).permitAll()
                     // Health check 엔드포인트 허용
+                    .requestMatchers("/api/health").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
                     // 인증 없이 접근 가능한 엔드포인트 (초기 개발 단계)
                     .requestMatchers("/api/**").permitAll()
