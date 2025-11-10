@@ -35,8 +35,8 @@ dependencies {
     // PostgreSQL
     runtimeOnly("org.postgresql:postgresql")
 
-    // Redis
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    // H2 Database (for testing)
+    testImplementation("com.h2database:h2")
 
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")

@@ -1,10 +1,45 @@
 spring:
+  # Render에서 제공하는 DATABASE_URL 환경 변수 사용
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/planit}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: validate  # 프로덕션에서는 validate만 사용 (자동 스키마 변경 금지)
     show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: Asia/Seoul
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+
+server:
+  port: ${PORT:8080}  # Render가 자동으로 PORT 환경 변수 설정
+  tomcat:
+    max-connections: 200
+    threads:
+      max: 50
+      min-spare: 10
 
 logging:
   level:
     com.planit: INFO
     org.springframework: WARN
+    org.hibernate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
