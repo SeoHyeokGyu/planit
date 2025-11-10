@@ -23,6 +23,7 @@ class SecurityConfig {
                 ).permitAll()
                 .anyRequest().authenticated()
             }
+            .formLogin { }
         return http.build()
     }
 }
