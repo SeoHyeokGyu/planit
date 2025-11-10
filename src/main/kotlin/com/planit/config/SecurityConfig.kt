@@ -15,8 +15,17 @@ class SecurityConfig {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests {
-                it.anyRequest().permitAll()
+                it.requestMatchers(
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**",
+                    "/api/health",
+                    "/api/beans"
+                ).permitAll()
+                .anyRequest().authenticated()
             }
+            .formLogin { }
         return http.build()
     }
 }

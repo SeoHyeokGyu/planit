@@ -28,6 +28,10 @@ spring:
 server:
   port: 8080
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
 jwt:
   secret: ${JWT_SECRET:your-secret-key-change-this-in-production}
   expiration: 86400000 # 24 hours
