@@ -46,9 +46,6 @@ dependencies {
     // Swagger/OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
-    // OAuth2
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")

@@ -23,18 +23,6 @@ services:
         generateValue: true
         sync: false
 
-      # OAuth2 - Google
-      - key: GOOGLE_CLIENT_ID
-        sync: false
-      - key: GOOGLE_CLIENT_SECRET
-        sync: false
-
-      # OAuth2 - Kakao
-      - key: KAKAO_CLIENT_ID
-        sync: false
-      - key: KAKAO_CLIENT_SECRET
-        sync: false
-
       # Google Maps API
       - key: GOOGLE_MAPS_API_KEY
         sync: false

@@ -21,12 +21,6 @@ spring:
       repositories:
         enabled: false
 
-  # Disable OAuth2 for tests
-  security:
-    oauth2:
-      client:
-        registration: {}
-
 logging:
   level:
     com.planit: DEBUG
