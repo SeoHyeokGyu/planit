@@ -16,10 +16,9 @@ services:
       - key: DATABASE_URL
         sync: false
 
-      # JWT Secret (Render Secret에서 생성)
+      # JWT Secret (Render에서 자동 생성)
       - key: JWT_SECRET
         generateValue: true
-        sync: false
 
       # Google Maps API
       - key: GOOGLE_MAPS_API_KEY
