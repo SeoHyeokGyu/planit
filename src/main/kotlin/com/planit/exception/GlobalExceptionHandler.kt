@@ -20,9 +20,7 @@ class GlobalExceptionHandler {
       ex: MethodArgumentNotValidException
   ): ResponseEntity<ApiResponse<Unit>> {
     val errors =
-        ex.bindingResult.fieldErrors.joinToString(", ") { fieldError ->
-          "${fieldError.field}: ${fieldError.defaultMessage}"
-        }
+        ex.bindingResult.fieldErrors.joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
     log.warn("유효성 검사 오류: {}", errors)
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(ApiResponse.error("INVALID_INPUT", "입력 값 유효성 검사 실패: $errors"))

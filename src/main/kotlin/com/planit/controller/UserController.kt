@@ -27,8 +27,7 @@ class UserController(val userService: UserService) {
   ): ResponseEntity<ApiResponse<UserProfileResponse>> {
 
     // userDetails 객체에서 User 엔티티와 ID를 편하게 꺼내 씀
-    val user = userDetails.user
-    val profile = UserProfileResponse.of(user)
+    val profile = UserProfileResponse.of(userDetails.user)
 
     return ResponseEntity.ok(ApiResponse.success(profile))
   }
