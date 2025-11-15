@@ -1,0 +1,52 @@
+package com.planit.controller
+
+import com.planit.dto.ApiResponse
+import com.planit.dto.CustomUserDetails
+import com.planit.dto.UserPasswordUpdateRequest
+import com.planit.dto.UserProfileResponse
+import com.planit.dto.UserUpdateRequest
+import com.planit.service.UserService
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/api/users")
+class UserController(val userService: UserService) {
+
+  @GetMapping("/me")
+  fun getMyProfile(
+      // SecurityContext에서 principal(CustomUserDetails)을 바로 주입받음
+      @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<UserProfileResponse>> {
+
+    // userDetails 객체에서 User 엔티티와 ID를 편하게 꺼내 씀
+    val profile = UserProfileResponse.of(userDetails.user)
+
+    return ResponseEntity.ok(ApiResponse.success(profile))
+  }
+
+  @PatchMapping("/me/password")
+  fun updateMyPassword(
+      @AuthenticationPrincipal userDetails: CustomUserDetails,
+      @Valid @RequestBody request: UserPasswordUpdateRequest,
+  ): ResponseEntity<ApiResponse<Unit>> {
+    userService.updatePassword(userDetails.user.loginId, request)
+    return ResponseEntity.ok(ApiResponse.success())
+  }
+
+  @PutMapping("/me/update-profile")
+  fun updateMyProfile(
+      @AuthenticationPrincipal userDetails: CustomUserDetails,
+      @Valid @RequestBody request: UserUpdateRequest,
+  ): ResponseEntity<ApiResponse<UserProfileResponse>> {
+    val updatedProfile = userService.updateUser(userDetails.user, request)
+    return ResponseEntity.ok(ApiResponse.success(updatedProfile))
+  }
+}

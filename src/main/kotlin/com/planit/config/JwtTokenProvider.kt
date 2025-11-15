@@ -1,0 +1,86 @@
+package com.planit.config
+
+import com.planit.service.CustomUserDetailsService
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SignatureException
+import jakarta.annotation.PostConstruct
+import java.util.*
+import javax.crypto.SecretKey
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.stereotype.Component
+
+@Component
+class JwtTokenProvider(
+    @param:Value("${"$"}{jwt.secret}") private val secretString: String,
+    @param:Value("${"$"}{jwt.expiration}") private val validityInMilliseconds: Long,
+    private val customUserDetailsService: CustomUserDetailsService,
+) {
+  companion object {
+    private val logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
+  }
+
+  private lateinit var secretKey: SecretKey
+
+  @PostConstruct
+  private fun init() {
+    secretKey = Keys.hmacShaKeyFor(secretString.toByteArray())
+  }
+
+  /** 인증 정보(email)를 기반으로 JWT를 생성합니다. */
+  fun createToken(loginId: String): String {
+    val now = Date()
+    val validity = Date(now.time + validityInMilliseconds)
+
+    // (4) JWT 생성
+    return Jwts.builder()
+        .subject(loginId)
+        .issuedAt(now)
+        .expiration(validity)
+        .signWith(secretKey) // (5) 비밀 키로 서명
+        .compact()
+  }
+
+  /** 토큰을 파싱하여 클레임(Payload)을 추출합니다. (검증과 추출을 동시에 수행) */
+  private fun getClaims(token: String): Claims {
+    return Jwts.parser()
+        .verifyWith(secretKey) // (8) verifyWith: 검증에 사용할 키
+        .build()
+        .parseSignedClaims(token) // (9) parseSignedClaims: 서명된 토큰 파싱
+        .payload
+  }
+
+  /** 토큰에서 인증(Authentication) 객체를 추출합니다. (JWT 필터에서 사용) */
+  fun getAuthentication(token: String): Authentication {
+    val claims = getClaims(token)
+    val userDetails = customUserDetailsService.loadUserByUsername(claims.subject)
+    return UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+  }
+
+  /** 토큰의 유효성을 검증합니다. (만료, 서명 위조 등) */
+  fun validateToken(token: String): Boolean {
+    try {
+      getClaims(token) // (13) 파싱 시도 (실패 시 예외 발생)
+      return true
+    } catch (e: Exception) {
+      // (14) 다양한 예외 처리
+      when (e) {
+        is SecurityException,
+        is MalformedJwtException -> logger.warn("잘못된 JWT 서명입니다.")
+        is ExpiredJwtException -> logger.warn("만료된 JWT 토큰입니다.")
+        is UnsupportedJwtException -> logger.warn("지원되지 않는 JWT 토큰입니다.")
+        is IllegalArgumentException -> logger.warn("JWT 클레임이 비어있습니다.")
+        is SignatureException -> logger.warn("JWT 서명 검증에 실패했습니다.")
+        else -> logger.warn("JWT 토큰 처리 중 알 수 없는 오류 발생: ${e.message}")
+      }
+      return false
+    }
+  }
+}
