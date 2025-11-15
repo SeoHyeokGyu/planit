@@ -26,13 +26,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    // PostgreSQL
+  // PostgreSQL
     runtimeOnly("org.postgresql:postgresql")
 
     // H2 Database (for testing)

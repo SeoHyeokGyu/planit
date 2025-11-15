@@ -1,0 +1,36 @@
+###
+# @name 회원가입
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "loginId": "{{$random.name.username}}",
+  "password": "{{$random.internet.password}}",
+  "nickname": "{{$random.superhero.name}}"
+}
+> {%
+    const requestBody = JSON.parse(request.body());
+    client.global.set("loginId", requestBody.loginId);
+    client.global.set("password", requestBody.password);
+%}
+
+###
+# @name 로그인
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "{{loginId}}",
+  "password": "{{password}}"
+}
+
+> {%
+    console.log("response body", response.body);
+    client.global.set("auth_token", response.body.data.accessToken);
+%}
+
+###
+# @name 가입한 정보 확인
+GET http://localhost:8080/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
