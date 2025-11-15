@@ -41,7 +41,7 @@ server:
 
 logging:
   level:
-    com.planit: INFO
+    com.planit: DEBUG
     org.springframework: WARN
     org.hibernate: WARN
   pattern:
