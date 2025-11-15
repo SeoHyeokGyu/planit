@@ -3,7 +3,9 @@ spring:
     lazy-initialization: true
   # Render에서 제공하는 DATABASE_URL 환경 변수 사용
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/planit}
+    url: jdbc:postgresql://ep-gentle-rain-a17vm76u-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+    username: neondb_owner
+    password: npg_E8grzvON4UwY
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
