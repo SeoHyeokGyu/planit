@@ -16,7 +16,7 @@ export default function Home() {
             API 테스트 →
           </Link>
           <a
-            href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/swagger-ui/index.html`}
+            href={`${process.env.NEXT_PUBLIC_API_URL}/swagger-ui/index.html`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-semibold"
@@ -28,7 +28,7 @@ export default function Home() {
         <div className="mt-12 p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
           <p className="text-sm text-gray-600 mb-2">백엔드 서버:</p>
           <code className="text-xs bg-gray-100 px-3 py-1 rounded">
-            {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}
+            {process.env.NEXT_PUBLIC_API_URL}
           </code>
         </div>
       </div>
