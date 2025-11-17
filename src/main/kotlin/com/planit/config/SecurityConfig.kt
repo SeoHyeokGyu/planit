@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +25,7 @@ class SecurityConfig {
   fun filterChain(http: HttpSecurity, jwtAuthFilter: JwtAuthenticationFilter): SecurityFilterChain {
     http
         .csrf { it.disable() }
+        .cors { it.configurationSource(corsConfigurationSource()) }
         .formLogin { it.disable() } // 폼 로그인 비활성화 (JWT 등 토큰 기반 인증 시)
         .httpBasic { it.disable() } // HTTP Basic 인증 비활성화
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
@@ -53,5 +57,22 @@ class SecurityConfig {
       authenticationConfiguration: AuthenticationConfiguration
   ): AuthenticationManager {
     return authenticationConfiguration.authenticationManager
+  }
+
+  @Bean
+  fun corsConfigurationSource(): CorsConfigurationSource {
+    val configuration = CorsConfiguration()
+    configuration.allowedOrigins = listOf(
+      "https://planit-frontend-dn9b.onrender.com",
+      "http://localhost:3000"
+    )
+    configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+    configuration.allowedHeaders = listOf("*")
+    configuration.allowCredentials = true
+    configuration.maxAge = 3600L
+
+    val source = UrlBasedCorsConfigurationSource()
+    source.registerCorsConfiguration("/**", configuration)
+    return source
   }
 }
