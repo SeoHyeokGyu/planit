@@ -1,7 +1,7 @@
 # Multi-stage build for optimal image size
 
 # Stage 1: Build
-FROM gradle:8.5-jdk17-alpine AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
@@ -11,22 +11,25 @@ COPY gradle gradle
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 
+# Make gradlew executable
+RUN chmod +x gradlew
+
 # Download dependencies (cached layer)
-RUN gradle dependencies --no-daemon || true
+RUN ./gradlew dependencies --no-daemon || true
 
 # Copy source code
 COPY src src
 
 # Build application (skip tests for faster build)
-RUN gradle clean build -x test --no-daemon
+RUN ./gradlew clean build -x test --no-daemon
 
 # Stage 2: Runtime
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd -r spring && useradd -r -g spring spring
 
 # Copy JAR from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar

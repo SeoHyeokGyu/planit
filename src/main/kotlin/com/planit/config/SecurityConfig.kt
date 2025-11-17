@@ -39,6 +39,18 @@ class SecurityConfig {
                   "/api/beans",
               )
               .permitAll()
+              // 프론트엔드 정적 파일 허용 (통합 배포)
+              .requestMatchers(
+                  "/",
+                  "/index.html",
+                  "/*.ico",
+                  "/*.json",
+                  "/*.png",
+                  "/*.svg",
+                  "/_next/**",
+                  "/api-test/**",
+              )
+              .permitAll()
               // 인증 관련 엔드포인트 허용
               .requestMatchers("/api/auth/**")
               .permitAll()

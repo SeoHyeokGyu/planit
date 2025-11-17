@@ -47,3 +47,19 @@ services:
 
     # 시작 명령어 (Dockerfile에서 정의)
     # startCommand: java -jar build/libs/planit-0.0.1-SNAPSHOT.jar
+
+  # Next.js 프론트엔드
+  - type: web
+    name: planit-frontend
+    runtime: node
+    region: singapore
+    plan: free
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      # API URL (백엔드 서비스 URL)
+      - key: NEXT_PUBLIC_API_URL
+        value: https://planit-api-y2ie.onrender.com
+    autoDeploy: true

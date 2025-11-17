@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 
-const API_BASE_URL = 'https://planit-api-y2ie.onrender.com';
+// 통합 배포: 같은 도메인에서 서빙되므로 상대 경로 사용
+const API_BASE_URL = typeof window !== 'undefined' ? window.location.origin : '';
 
 interface ApiResponse {
   status: number;
