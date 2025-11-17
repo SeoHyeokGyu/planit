@@ -5,6 +5,13 @@ FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
 
+# Install Node.js (for frontend build)
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy Gradle wrapper and build files
 COPY gradlew .
 COPY gradle gradle
@@ -17,10 +24,11 @@ RUN chmod +x gradlew
 # Download dependencies (cached layer)
 RUN ./gradlew dependencies --no-daemon || true
 
-# Copy source code
+# Copy source code and frontend
 COPY src src
+COPY frontend frontend
 
-# Build application (skip tests for faster build)
+# Build application (includes frontend build)
 RUN ./gradlew clean build -x test --no-daemon
 
 # Stage 2: Runtime
