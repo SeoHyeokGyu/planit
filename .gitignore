@@ -28,3 +28,8 @@ Thumbs.db
 
 # CLAUDE.md - AI 가이드 파일 (필요시 포함)
 /CLAUDE.md
+
+# Frontend build artifacts (통합 배포)
+frontend/out/
+frontend/.next/
+src/main/resources/static/

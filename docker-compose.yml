@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     container_name: planit-postgres
@@ -20,6 +21,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: planit-redis
@@ -34,6 +36,66 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # Spring Boot Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: planit-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/planit
+      SPRING_DATASOURCE_USERNAME: planit
+      SPRING_DATASOURCE_PASSWORD: planit123
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: local-dev-secret-key-change-in-production
+    ports:
+      - "8080:8080"
+    networks:
+      - planit-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: planit-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    ports:
+      - "3000:3000"
+    networks:
+      - planit-network
+    depends_on:
+      - backend
+
+  # Dozzle - Docker Log Viewer
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: planit-logs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "9999:8080"
+    networks:
+      - planit-network
+    environment:
+      DOZZLE_LEVEL: info
+      DOZZLE_TAILSIZE: 300
+      DOZZLE_FILTER: "name=planit-*"
 
 volumes:
   postgres_data:

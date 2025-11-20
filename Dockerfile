@@ -1,9 +1,16 @@
 # Multi-stage build for optimal image size
 
 # Stage 1: Build
-FROM gradle:8.5-jdk17-alpine AS builder
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
+
+# Install Node.js (for frontend build)
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy Gradle wrapper and build files
 COPY gradlew .
@@ -11,22 +18,26 @@ COPY gradle gradle
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 
+# Make gradlew executable
+RUN chmod +x gradlew
+
 # Download dependencies (cached layer)
-RUN gradle dependencies --no-daemon || true
+RUN ./gradlew dependencies --no-daemon || true
 
-# Copy source code
+# Copy source code and frontend
 COPY src src
+COPY frontend frontend
 
-# Build application (skip tests for faster build)
-RUN gradle clean build -x test --no-daemon
+# Build application (includes frontend build)
+RUN ./gradlew clean build -x test --no-daemon
 
 # Stage 2: Runtime
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd -r spring && useradd -r -g spring spring
 
 # Copy JAR from builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar

@@ -29,8 +29,8 @@ class SwaggerConfig {
                             .email("team@planit.com")
                     )
             )
+            .addServersItem(Server().url("https://planit-api-y2ie.onrender.com").description("Production Server"))
             .addServersItem(Server().url("http://localhost:8080").description("Local Server"))
-            .addServersItem(Server().url("https://api.planit.com").description("Production Server"))
             .addSecurityItem(SecurityRequirement().addList(securitySchemeName))
             .components(
                 Components()
