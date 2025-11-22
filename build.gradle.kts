@@ -71,6 +71,8 @@ tasks.register<Exec>("installFrontend") {
     description = "Install frontend dependencies"
     workingDir = file("frontend")
     commandLine("npm", "install")
+    // '-PskipFrontend' 프로퍼티가 없을 때만 실행
+    onlyIf { !project.hasProperty("skipFrontend") }
 }
 
 tasks.register<Exec>("buildFrontend") {
@@ -79,6 +81,8 @@ tasks.register<Exec>("buildFrontend") {
     dependsOn("installFrontend")
     workingDir = file("frontend")
     commandLine("npm", "run", "build")
+    // '-PskipFrontend' 프로퍼티가 없을 때만 실행
+    onlyIf { !project.hasProperty("skipFrontend") }
 }
 
 tasks.register<Copy>("copyFrontend") {
@@ -87,6 +91,8 @@ tasks.register<Copy>("copyFrontend") {
     dependsOn("buildFrontend")
     from("frontend/out")
     into("src/main/resources/static")
+    // '-PskipFrontend' 프로퍼티가 없을 때만 실행
+    onlyIf { !project.hasProperty("skipFrontend") }
 }
 
 tasks.register<Delete>("cleanFrontend") {
@@ -97,7 +103,10 @@ tasks.register<Delete>("cleanFrontend") {
 
 // processResources 전에 프론트엔드 복사
 tasks.named("processResources") {
-    dependsOn("copyFrontend")
+    // '-PskipFrontend' 프로퍼티가 없을 때만 프론트엔드 빌드에 의존
+    if (!project.hasProperty("skipFrontend")) {
+        dependsOn("copyFrontend")
+    }
 }
 
 // clean 시 프론트엔드도 정리
