@@ -3,7 +3,6 @@ import {
   SignUpRequest,
   LoginRequest,
   LoginResponse,
-  UserProfile,
   ApiResponse,
 } from "@/types/auth";
 
@@ -16,14 +15,8 @@ export const authService = {
     return api.post("/api/auth/login", data);
   },
 
-  async getProfile(): Promise<ApiResponse<UserProfile>> {
-    return api.get("/api/users/me");
-  },
-
   async logout(): Promise<void> {
-    // 로컬 스토리지에서 토큰 제거
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("access_token");
-    }
+    // 로컬 스토리지에서 토큰 제거는 useAuthStore의 clearToken에서 처리됩니다.
+    // 백엔드에 로그아웃 요청이 필요한 경우 여기에 추가합니다.
   },
 };

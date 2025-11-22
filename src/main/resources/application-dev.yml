@@ -1,4 +1,8 @@
 spring:
+  output:
+    ansi:
+      enabled: always
+
   # Neon PostgreSQL (로컬 테스트)
   datasource:
     url: jdbc:postgresql://ep-gentle-rain-a17vm76u-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require

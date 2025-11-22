@@ -1,3 +1,5 @@
+import { useAuthStore } from "@/stores/authStore"; // Import useAuthStore
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export const api = {
@@ -8,7 +10,7 @@ export const api = {
     options: RequestInit = {}
   ): Promise<T> {
     const token = typeof window !== "undefined"
-      ? localStorage.getItem("access_token")
+      ? useAuthStore.getState().token // Get token from Zustand store
       : null;
 
     const headers: HeadersInit = {
@@ -48,6 +50,14 @@ export const api = {
     return this.fetch<T>(endpoint, {
       ...options,
       method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  patch<T>(endpoint: string, data?: unknown, options?: RequestInit): Promise<T> {
+    return this.fetch<T>(endpoint, {
+      ...options,
+      method: "PATCH",
       body: JSON.stringify(data),
     });
   },

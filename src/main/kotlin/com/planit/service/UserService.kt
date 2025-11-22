@@ -5,6 +5,7 @@ import com.planit.dto.UserProfileResponse
 import com.planit.dto.UserUpdateRequest
 import com.planit.entity.User
 import com.planit.repository.UserRepository
+import java.util.NoSuchElementException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,12 +17,17 @@ class UserService(
     private val passwordEncoder: PasswordEncoder,
 ) {
   fun updateUser(user: User, updateRequest: UserUpdateRequest): UserProfileResponse {
-    if (updateRequest.nickname != null) {
-      user.changeNickname(updateRequest.nickname)
-    }
-    // 다른 속성 추가시 추가작성.
+    // ID로 사용자를 다시 조회하여 영속 상태(Managed)로 만듭니다.
+    val managedUser =
+        userRepository.findByLoginId(user.loginId)
+            ?: throw NoSuchElementException("ID ${user.loginId}에 해당하는 사용자를 찾을 수 없습니다.")
 
-    return UserProfileResponse.of(user)
+    if (!updateRequest.nickname.isNullOrBlank()) {
+      managedUser.changeNickname(updateRequest.nickname)
+    }
+
+    // 다른 속성 추가시 추가작성.
+    return UserProfileResponse.of(managedUser)
   }
 
   fun updatePassword(loginId: String, request: UserPasswordUpdateRequest) {
