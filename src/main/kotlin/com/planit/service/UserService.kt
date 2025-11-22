@@ -16,7 +16,7 @@ class UserService(
     private val passwordEncoder: PasswordEncoder,
 ) {
   fun updateUser(user: User, updateRequest: UserUpdateRequest): UserProfileResponse {
-    if (updateRequest.nickname != null) {
+    if (!updateRequest.nickname.isNullOrBlank()) {
       user.changeNickname(updateRequest.nickname)
     }
     // 다른 속성 추가시 추가작성.
