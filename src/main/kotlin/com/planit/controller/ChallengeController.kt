@@ -3,7 +3,6 @@ package com.planit.controller
 import com.planit.dto.*
 import com.planit.service.ChallengeService
 import jakarta.validation.Valid
-import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -22,13 +21,13 @@ class ChallengeController(
      */
     @PostMapping
     fun createChallenge(
-        @Valid @RequestBody request: ChallengeCreateRequest,
+        @Valid @RequestBody request: ChallengeRequest,
         @RequestHeader("X-User-Id") userId: Long
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
         val challenge = challengeService.createChallenge(request, userId)
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(ApiResponse.success(challenge, "챌린지가 생성되었습니다"))
+            .body(ApiResponse.success(challenge))
     }
 
     /**
@@ -42,28 +41,26 @@ class ChallengeController(
     }
 
     /**
-     * 챌린지 목록 조회 (페이징, 필터링, 정렬)
+     * 챌린지 목록 조회 (필터링)
      * GET /api/v1/challenges
      */
     @GetMapping
     fun getChallenges(
-        @Valid @ModelAttribute request: ChallengeSearchRequest
-    ): ResponseEntity<ApiResponse<PageResponse<ChallengeListResponse>>> {
+        @ModelAttribute request: ChallengeSearchRequest
+    ): ResponseEntity<ApiResponse<List<ChallengeListResponse>>> {
         val challenges = challengeService.getChallenges(request)
         return ResponseEntity.ok(ApiResponse.success(challenges))
     }
 
     /**
-     * 챌린지 검색 (Full-Text Search)
+     * 챌린지 검색 (키워드)
      * GET /api/v1/challenges/search
      */
     @GetMapping("/search")
     fun searchChallenges(
-        @RequestParam keyword: String,
-        @RequestParam(defaultValue = "0") @Min(0) page: Int,
-        @RequestParam(defaultValue = "20") @Min(1) size: Int
-    ): ResponseEntity<ApiResponse<PageResponse<ChallengeListResponse>>> {
-        val challenges = challengeService.searchChallenges(keyword, page, size)
+        @RequestParam keyword: String
+    ): ResponseEntity<ApiResponse<List<ChallengeListResponse>>> {
+        val challenges = challengeService.searchChallenges(keyword)
         return ResponseEntity.ok(ApiResponse.success(challenges))
     }
 
@@ -74,15 +71,15 @@ class ChallengeController(
     @PutMapping("/{id}")
     fun updateChallenge(
         @PathVariable id: Long,
-        @Valid @RequestBody request: ChallengeUpdateRequest,
+        @Valid @RequestBody request: ChallengeRequest,
         @RequestHeader("X-User-Id") userId: Long
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
         val challenge = challengeService.updateChallenge(id, request, userId)
-        return ResponseEntity.ok(ApiResponse.success(challenge, "챌린지가 수정되었습니다"))
+        return ResponseEntity.ok(ApiResponse.success(challenge))
     }
 
     /**
-     * 챌린지 삭제 (소프트 삭제)
+     * 챌린지 삭제
      * DELETE /api/v1/challenges/{id}
      */
     @DeleteMapping("/{id}")
@@ -91,7 +88,7 @@ class ChallengeController(
         @RequestHeader("X-User-Id") userId: Long
     ): ResponseEntity<ApiResponse<Unit>> {
         challengeService.deleteChallenge(id, userId)
-        return ResponseEntity.ok(ApiResponse.success("챌린지가 삭제되었습니다"))
+        return ResponseEntity.ok(ApiResponse.success())
     }
 
     /**
@@ -102,11 +99,11 @@ class ChallengeController(
     fun joinChallenge(
         @PathVariable id: Long,
         @RequestHeader("X-User-Id") userId: Long
-    ): ResponseEntity<ApiResponse<ParticipantResponse>> {
+    ): ResponseEntity<ApiResponse<ParticipateResponse>> {
         val participant = challengeService.joinChallenge(id, userId)
         return ResponseEntity
             .status(HttpStatus.CREATED)
-            .body(ApiResponse.success(participant, "챌린지에 참여했습니다"))
+            .body(ApiResponse.success(participant))
     }
 
     /**
@@ -119,7 +116,7 @@ class ChallengeController(
         @RequestHeader("X-User-Id") userId: Long
     ): ResponseEntity<ApiResponse<Unit>> {
         challengeService.withdrawChallenge(id, userId)
-        return ResponseEntity.ok(ApiResponse.success("챌린지에서 탈퇴했습니다"))
+        return ResponseEntity.ok(ApiResponse.success())
     }
 
     /**
@@ -129,7 +126,7 @@ class ChallengeController(
     @PostMapping("/{id}/view")
     fun incrementViewCount(@PathVariable id: Long): ResponseEntity<ApiResponse<Unit>> {
         challengeService.incrementViewCount(id)
-        return ResponseEntity.ok(ApiResponse.success("조회수가 증가했습니다"))
+        return ResponseEntity.ok(ApiResponse.success())
     }
 
     /**
@@ -138,11 +135,9 @@ class ChallengeController(
      */
     @GetMapping("/{id}/participants")
     fun getParticipants(
-        @PathVariable id: Long,
-        @RequestParam(defaultValue = "0") @Min(0) page: Int,
-        @RequestParam(defaultValue = "20") @Min(1) size: Int
-    ): ResponseEntity<ApiResponse<PageResponse<ParticipantResponse>>> {
-        val participants = challengeService.getParticipants(id, page, size)
+        @PathVariable id: Long
+    ): ResponseEntity<ApiResponse<List<ParticipateResponse>>> {
+        val participants = challengeService.getParticipants(id)
         return ResponseEntity.ok(ApiResponse.success(participants))
     }
 

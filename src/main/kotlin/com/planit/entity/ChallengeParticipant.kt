@@ -1,5 +1,6 @@
 package com.planit.entity
 
+import com.planit.enum.ParticipantStatusEnum
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -20,19 +21,18 @@ data class ChallengeParticipant(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "challenge_id", nullable = false)
-    val challenge: Challenge,
+    @Column(nullable = false)
+    val challengeId: String,
 
     @Column(nullable = false)
-    val userId: Long,
+    val loginId: Long,
 
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    var status: ParticipantStatus = ParticipantStatus.ACTIVE,
+    var status: ParticipantStatusEnum = ParticipantStatusEnum.ACTIVE,
 
     @Column(nullable = false)
-    var certificationCount: Int = 0,
+    var certificationCnt: Int = 0,
 
     @Column(nullable = false)
     val joinedAt: LocalDateTime = LocalDateTime.now(),
@@ -44,22 +44,17 @@ data class ChallengeParticipant(
     var withdrawnAt: LocalDateTime? = null
 ) {
     fun complete() {
-        status = ParticipantStatus.COMPLETED
+        status = ParticipantStatusEnum.COMPLETED
         completedAt = LocalDateTime.now()
     }
 
     fun withdraw() {
-        status = ParticipantStatus.WITHDRAWN
+        status = ParticipantStatusEnum.WITHDRAWN
         withdrawnAt = LocalDateTime.now()
     }
 
     fun isActive(): Boolean {
-        return status == ParticipantStatus.ACTIVE
+        return status == ParticipantStatusEnum.ACTIVE
     }
 }
 
-enum class ParticipantStatus {
-    ACTIVE,      // 참여중
-    COMPLETED,   // 완료
-    WITHDRAWN    // 탈퇴
-}

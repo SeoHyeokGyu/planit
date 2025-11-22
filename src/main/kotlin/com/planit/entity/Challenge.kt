@@ -1,9 +1,8 @@
 package com.planit.entity
 
 import jakarta.persistence.*
-import org.hibernate.annotations.SQLDelete
-import org.hibernate.annotations.Where
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Entity
 @Table(
@@ -12,99 +11,81 @@ import java.time.LocalDateTime
         Index(name = "idx_category", columnList = "category"),
         Index(name = "idx_difficulty", columnList = "difficulty"),
         Index(name = "idx_start_date", columnList = "startDate"),
-        Index(name = "idx_end_date", columnList = "endDate"),
-        Index(name = "idx_deleted", columnList = "deleted")
+        Index(name = "idx_end_date", columnList = "endDate")
     ]
 )
-@SQLDelete(sql = "UPDATE challenges SET deleted = true, deleted_at = NOW() WHERE id = ?")
-@Where(clause = "deleted = false")
-data class Challenge(
+class Challenge(
+    title: String,
+    description: String,
+    category: String,
+    startDate: LocalDateTime,
+    endDate: LocalDateTime,
+    difficulty: String,
+    createdId: String,
+    viewCnt: Long? = 0,
+    participantCnt: Long? = 0,
+    certificationCnt: Long? = 0
+) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long? = null
 
-    @Column(nullable = false, length = 200)
-    var title: String,
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    var description: String,
-
-    @Column(nullable = false, length = 50)
-    @Enumerated(EnumType.STRING)
-    var category: ChallengeCategory,
+    @Column(nullable = false, unique = true)
+    var challengeId: String = generateChallengeId()
+        private set
 
     @Column(nullable = false)
-    var startDate: LocalDateTime,
+    var title = title
+
+    @Column(nullable = false, length = 1000)
+    var description = description
 
     @Column(nullable = false)
-    var endDate: LocalDateTime,
-
-    @Column(nullable = false, length = 20)
-    @Enumerated(EnumType.STRING)
-    var difficulty: ChallengeDifficulty,
+    var category = category
 
     @Column(nullable = false)
-    val createdBy: Long, // 사용자 ID
+    var startDate = startDate
 
     @Column(nullable = false)
-    var viewCount: Long = 0,
+    var endDate = endDate
 
     @Column(nullable = false)
-    var participantCount: Int = 0,
+    var difficulty = difficulty
 
     @Column(nullable = false)
-    var certificationCount: Long = 0,
+    var createdId = createdId
 
     @Column(nullable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    var viewCnt = viewCnt ?: 0L
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now(),
+    var participantCnt = participantCnt ?: 0L
 
     @Column(nullable = false)
-    var deleted: Boolean = false,
+    var certificationCnt = certificationCnt ?: 0L
 
-    @Column
-    var deletedAt: LocalDateTime? = null,
+    @Column(nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now()
 
-//    @OneToMany(mappedBy = "challenge", cascade = [CascadeType.ALL], orphanRemoval = true)
-//    val participants: MutableList<ChallengeParticipant> = mutableListOf()
-) {
-    @PreUpdate
-    fun preUpdate() {
-        updatedAt = LocalDateTime.now()
-    }
+    @Column(nullable = false)
+    var updatedAt: LocalDateTime = LocalDateTime.now()
 
     fun isActive(): Boolean {
         val now = LocalDateTime.now()
-        return now.isAfter(startDate) && now.isBefore(endDate) && !deleted
-    }
-
-    fun isUpcoming(): Boolean {
-        return LocalDateTime.now().isBefore(startDate) && !deleted
+        return startDate.isBefore(now) && endDate.isAfter(now)
     }
 
     fun isEnded(): Boolean {
-        return LocalDateTime.now().isAfter(endDate)
+        return endDate.isBefore(LocalDateTime.now())
     }
-}
 
-enum class ChallengeCategory {
-    HEALTH,      // 건강
-    EXERCISE,    // 운동
-    STUDY,       // 학습
-    HOBBY,       // 취미
-    LIFESTYLE,   // 생활습관
-    FINANCE,     // 재테크
-    CAREER,      // 커리어
-    RELATIONSHIP,// 관계
-    CREATIVITY,  // 창작
-    OTHER        // 기타
-}
+    fun isUpcoming(): Boolean {
+        return startDate.isAfter(LocalDateTime.now())
+    }
 
-enum class ChallengeDifficulty {
-    EASY,        // 쉬움
-    NORMAL,      // 보통
-    HARD,        // 어려움
-    EXPERT       // 전문가
+    companion object {
+        private fun generateChallengeId(): String {
+            return "CHL-${UUID.randomUUID().toString().substring(0, 8).uppercase()}"
+        }
+    }
 }

@@ -1,23 +1,15 @@
 package com.planit.service
 
 import com.planit.dto.*
-import com.planit.dto.response.*
 import com.planit.entity.Challenge
 import com.planit.entity.ChallengeParticipant
-import com.planit.entity.ParticipantStatus
-import com.planit.exception.ChallengeNotFoundException
-import com.planit.exception.DuplicateParticipationException
-import com.planit.exception.UnauthorizedException
+import com.planit.enum.ParticipantStatusEnum
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
-import com.planit.repository.ChallengeSpecifications
-import com.planit.entity.*
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Sort
-import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.NoSuchElementException
 import java.util.concurrent.TimeUnit
 
 @Service
@@ -37,7 +29,7 @@ class ChallengeService(
      * 챌린지 생성
      */
     @Transactional
-    fun createChallenge(request: ChallengeCreateRequest, userId: Long): ChallengeResponse {
+    fun createChallenge(request: ChallengeRequest, loginId: Long): ChallengeResponse {
         val challenge = Challenge(
             title = request.title,
             description = request.description,
@@ -45,8 +37,10 @@ class ChallengeService(
             startDate = request.startDate,
             endDate = request.endDate,
             difficulty = request.difficulty,
-            tags = request.tags.toMutableSet(),
-            createdBy = userId
+            createdId = request.loginId,
+            viewCnt = 0,
+            participantCnt = 0,
+            certificationCnt = 0
         )
 
         val savedChallenge = challengeRepository.save(challenge)
@@ -62,98 +56,59 @@ class ChallengeService(
     }
 
     /**
-     * 챌린지 목록 조회 (페이징, 필터링, 정렬)
+     * 챌린지 목록 조회 (필터링)
      */
-    fun getChallenges(request: ChallengeSearchRequest): PageResponse<ChallengeListResponse> {
-        val pageable = PageRequest.of(
-            request.page,
-            request.size,
-            Sort.by(
-                if (request.direction == "ASC") Sort.Direction.ASC else Sort.Direction.DESC,
-                request.sort
-            )
-        )
-
-        val page = when {
+    fun getChallenges(request: ChallengeSearchRequest): List<ChallengeListResponse> {
+        val challenges = when {
             // 키워드 검색 (최우선)
             !request.keyword.isNullOrBlank() -> {
                 challengeRepository.findByTitleContainingOrDescriptionContaining(
                     request.keyword,
-                    request.keyword,
-                    pageable
+                    request.keyword
                 )
             }
-            // 태그 검색
-            !request.tags.isNullOrEmpty() -> {
-                challengeRepository.findByTagsIn(request.tags, pageable)
+            // 카테고리 + 난이도
+            !request.category.isNullOrBlank() && !request.difficulty.isNullOrBlank() -> {
+                challengeRepository.findByCategoryAndDifficulty(request.category, request.difficulty)
             }
-            // 카테고리 필터
-            request.category != null -> {
-                challengeRepository.findByCategory(request.category, pageable)
+            // 카테고리만
+            !request.category.isNullOrBlank() -> {
+                challengeRepository.findByCategory(request.category)
             }
-            // 난이도 필터
-            request.difficulty != null -> {
-                challengeRepository.findByDifficulty(request.difficulty, pageable)
-            }
-            // 상태 필터 (Specification 사용)
-            request.status != null -> {
-                val spec = when (request.status) {
-                    ChallengeStatusFilter.ACTIVE -> ChallengeSpecifications.isActive()
-                    ChallengeStatusFilter.UPCOMING -> ChallengeSpecifications.isUpcoming()
-                    ChallengeStatusFilter.ENDED -> ChallengeSpecifications.isEnded()
-                    else -> Specification.where(null)
-                }
-                challengeRepository.findAll(spec, pageable)
+            // 난이도만
+            !request.difficulty.isNullOrBlank() -> {
+                challengeRepository.findByDifficulty(request.difficulty)
             }
             // 기본: 전체 조회
             else -> {
-                challengeRepository.findAll(pageable)
+                challengeRepository.findAll()
             }
         }
 
-        return PageResponse(
-            content = page.content.map { ChallengeListResponse.from(it) },
-            page = page.number,
-            size = page.size,
-            totalElements = page.totalElements,
-            totalPages = page.totalPages,
-            isFirst = page.isFirst,
-            isLast = page.isLast
-        )
+        return challenges.map { ChallengeListResponse.from(it) }
     }
 
     /**
-     * 챌린지 검색 (Full-Text Search)
+     * 챌린지 검색 (키워드)
      */
-    fun searchChallenges(keyword: String, page: Int, size: Int): PageResponse<ChallengeListResponse> {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
-        val challengePage = challengeRepository.findByTitleContainingOrDescriptionContaining(
+    fun searchChallenges(keyword: String): List<ChallengeListResponse> {
+        val challenges = challengeRepository.findByTitleContainingOrDescriptionContaining(
             keyword,
-            keyword,
-            pageable
+            keyword
         )
-
-        return PageResponse(
-            content = challengePage.content.map { ChallengeListResponse.from(it) },
-            page = challengePage.number,
-            size = challengePage.size,
-            totalElements = challengePage.totalElements,
-            totalPages = challengePage.totalPages,
-            isFirst = challengePage.isFirst,
-            isLast = challengePage.isLast
-        )
+        return challenges.map { ChallengeListResponse.from(it) }
     }
 
     /**
      * 챌린지 수정
      */
     @Transactional
-    fun updateChallenge(id: Long, request: ChallengeUpdateRequest, userId: Long): ChallengeResponse {
+    fun updateChallenge(id: Long, request: ChallengeRequest, loginId: Long): ChallengeResponse {
         val challenge = findChallengeById(id)
 
         // 권한 검증
-        if (challenge.createdBy != userId) {
-            throw UnauthorizedException("챌린지를 수정할 권한이 없습니다")
+        if (challenge.createdId != loginId.toString()) {
+            throw IllegalArgumentException("챌린지를 수정할 권한이 없습니다")
         }
 
         // 진행중인 챌린지는 수정 제한
@@ -168,7 +123,6 @@ class ChallengeService(
             startDate = request.startDate
             endDate = request.endDate
             difficulty = request.difficulty
-            tags = request.tags.toMutableSet()
         }
 
         val updatedChallenge = challengeRepository.save(challenge)
@@ -176,18 +130,17 @@ class ChallengeService(
     }
 
     /**
-     * 챌린지 삭제 (소프트 삭제)
+     * 챌린지 삭제
      */
     @Transactional
-    fun deleteChallenge(id: Long, userId: Long) {
+    fun deleteChallenge(id: Long, loginId: Long) {
         val challenge = findChallengeById(id)
 
         // 권한 검증
-        if (challenge.createdBy != userId) {
-            throw UnauthorizedException("챌린지를 삭제할 권한이 없습니다")
+        if (challenge.createdId != loginId.toString()) {
+            throw IllegalArgumentException("챌린지를 삭제할 권한이 없습니다")
         }
 
-        // 소프트 삭제는 JPA의 @SQLDelete 어노테이션으로 자동 처리됨
         challengeRepository.delete(challenge)
     }
 
@@ -195,12 +148,12 @@ class ChallengeService(
      * 챌린지 참여
      */
     @Transactional
-    fun joinChallenge(challengeId: Long, userId: Long): ParticipantResponse {
+    fun joinChallenge(challengeId: Long, loginId: Long): ParticipateResponse {
         val challenge = findChallengeById(challengeId)
 
         // 이미 참여중인지 확인
-        if (participantRepository.existsByChallengeIdAndUserId(challengeId, userId)) {
-            throw DuplicateParticipationException("이미 참여중인 챌린지입니다")
+        if (participantRepository.existsByChallengeIdAndLoginId(challenge.challengeId, loginId)) {
+            throw IllegalStateException("이미 참여중인 챌린지입니다")
         }
 
         // 종료된 챌린지는 참여 불가
@@ -209,8 +162,8 @@ class ChallengeService(
         }
 
         val participant = ChallengeParticipant(
-            challenge = challenge,
-            userId = userId
+            challengeId = challenge.challengeId,
+            loginId = loginId
         )
 
         val savedParticipant = participantRepository.save(participant)
@@ -218,18 +171,20 @@ class ChallengeService(
         // 참여자 수 증가
         challengeRepository.incrementParticipantCount(challengeId)
 
-        return ParticipantResponse.from(savedParticipant)
+        return ParticipateResponse.from(savedParticipant)
     }
 
     /**
      * 챌린지 탈퇴
      */
     @Transactional
-    fun withdrawChallenge(challengeId: Long, userId: Long) {
-        val participant = participantRepository.findByChallengeIdAndUserId(challengeId, userId)
-            .orElseThrow { IllegalStateException("참여 정보를 찾을 수 없습니다") }
+    fun withdrawChallenge(challengeId: Long, loginId: Long) {
+        val challenge = findChallengeById(challengeId)
 
-        if (participant.status != ParticipantStatus.ACTIVE) {
+        val participant = participantRepository.findByChallengeIdAndLoginId(challenge.challengeId, loginId)
+            .orElseThrow { NoSuchElementException("참여 정보를 찾을 수 없습니다") }
+
+        if (participant.status != ParticipantStatusEnum.ACTIVE) {
             throw IllegalStateException("이미 탈퇴했거나 완료된 챌린지입니다")
         }
 
@@ -263,45 +218,36 @@ class ChallengeService(
     @Transactional
     fun syncViewCountToDatabase(id: Long, viewCount: Long) {
         val challenge = findChallengeById(id)
-        challenge.viewCount = viewCount
+        challenge.viewCnt = viewCount
         challengeRepository.save(challenge)
     }
 
     /**
      * 참여자 목록 조회
      */
-    fun getParticipants(challengeId: Long, page: Int, size: Int): PageResponse<ParticipantResponse> {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "joinedAt"))
-        val participantPage = participantRepository.findByChallengeId(challengeId, pageable)
-
-        return PageResponse(
-            content = participantPage.content.map { ParticipantResponse.from(it) },
-            page = participantPage.number,
-            size = participantPage.size,
-            totalElements = participantPage.totalElements,
-            totalPages = participantPage.totalPages,
-            isFirst = participantPage.isFirst,
-            isLast = participantPage.isLast
-        )
+    fun getParticipants(challengeId: Long): List<ParticipateResponse> {
+        val challenge = findChallengeById(challengeId)
+        val participants = participantRepository.findByChallengeId(challenge.challengeId)
+        return participants.map { ParticipateResponse.from(it) }
     }
 
     /**
      * 챌린지 통계 조회
      */
     fun getChallengeStatistics(challengeId: Long): ChallengeStatisticsResponse {
-        findChallengeById(challengeId) // 챌린지 존재 여부 확인
+        val challenge = findChallengeById(challengeId)
 
-        val totalParticipants = participantRepository.countByChallengeId(challengeId).toInt()
+        val totalParticipants = participantRepository.countByChallengeId(challenge.challengeId).toInt()
         val activeParticipants = participantRepository.countByChallengeIdAndStatus(
-            challengeId, ParticipantStatus.ACTIVE
+            challenge.challengeId, ParticipantStatusEnum.ACTIVE
         ).toInt()
         val completedParticipants = participantRepository.countByChallengeIdAndStatus(
-            challengeId, ParticipantStatus.COMPLETED
+            challenge.challengeId, ParticipantStatusEnum.COMPLETED
         ).toInt()
         val withdrawnParticipants = participantRepository.countByChallengeIdAndStatus(
-            challengeId, ParticipantStatus.WITHDRAWN
+            challenge.challengeId, ParticipantStatusEnum.WITHDRAWN
         ).toInt()
-        val totalCertifications = participantRepository.sumCertificationCountByChallengeId(challengeId)
+        val totalCertifications = participantRepository.sumCertificationCountByChallengeId(challenge.challengeId)
 
         val completionRate = if (totalParticipants > 0) {
             (completedParticipants.toDouble() / totalParticipants) * 100
@@ -318,7 +264,7 @@ class ChallengeService(
         // Redis에서 조회수 가져오기
         val key = "$VIEW_COUNT_KEY_PREFIX$challengeId"
         val viewCount = redisTemplate.opsForValue().get(key)?.toLongOrNull()
-            ?: challengeRepository.findById(challengeId).map { it.viewCount }.orElse(0L)
+            ?: challenge.viewCnt ?: 0L
 
         return ChallengeStatisticsResponse(
             challengeId = challengeId,
@@ -338,6 +284,6 @@ class ChallengeService(
      */
     private fun findChallengeById(id: Long): Challenge {
         return challengeRepository.findById(id)
-            .orElseThrow { ChallengeNotFoundException("챌린지를 찾을 수 없습니다: $id") }
+            .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $id") }
     }
 }
