@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UserProfile } from "@/types/user";
 
 // --- Main Profile Page Component ---
 export default function ProfilePage() {
@@ -34,7 +35,7 @@ export default function ProfilePage() {
     }
   }, [isAuthenticated, router]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || !user) {
     return <ProfilePageSkeleton />;
   }
 
@@ -67,7 +68,7 @@ export default function ProfilePage() {
 
 // --- Child Components for Tabs ---
 
-function ProfileInfoTab({ user }) {
+function ProfileInfoTab({ user }: { user: UserProfile }) {
   const logout = useLogout();
   return (
     <Card>
@@ -100,7 +101,7 @@ function ProfileInfoTab({ user }) {
   );
 }
 
-function UpdateInfoTab({ user }) {
+function UpdateInfoTab({ user }: { user: UserProfile }) {
   const [nickname, setNickname] = useState(user?.nickname || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");

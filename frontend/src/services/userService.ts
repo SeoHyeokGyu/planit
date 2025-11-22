@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
-import { ApiResponse, UserProfile, UserPasswordUpdateRequest, UserUpdateRequest } from "@/types/auth";
+import { ApiResponse } from "@/types/auth";
+import { UserProfile, UserPasswordUpdateRequest, UserUpdateRequest } from "@/types/user";
 
 export const userService = {
   async getProfile(): Promise<ApiResponse<UserProfile>> {
