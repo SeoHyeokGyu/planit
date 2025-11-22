@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import QueryProvider from "@/providers/QueryProvider";
+import Providers from "@/providers/Providers";
 
 export const metadata: Metadata = {
   title: "Planit - 여행 플래너",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <QueryProvider>{children}</QueryProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
