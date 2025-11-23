@@ -1,11 +1,11 @@
 spring:
   main:
     lazy-initialization: true
-  # Render에서 제공하는 DATABASE_URL 환경 변수 사용
+  # 환경 변수로 데이터베이스 설정
   datasource:
-    url: jdbc:postgresql://ep-gentle-rain-a17vm76u-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-    username: neondb_owner
-    password: npg_E8grzvON4UwY
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/planit}
+    username: ${SPRING_DATASOURCE_USERNAME:planit}
+    password: ${SPRING_DATASOURCE_PASSWORD:planit123}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -15,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate  # 프로덕션에서는 validate만 사용 (자동 스키마 변경 금지)
+      ddl-auto: update  # 첫 배포 시 테이블 자동 생성
     show-sql: false
     properties:
       hibernate:
@@ -26,9 +26,9 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
       timeout: 3000ms
 
 server:
