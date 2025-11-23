@@ -81,6 +81,7 @@ jobs:
         username: ${{ secrets.ORACLE_CLOUD_USER }}
         key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
         port: 22
+        debug: true
         script: |
           cd ~/planit
           git pull origin main
