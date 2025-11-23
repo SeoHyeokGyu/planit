@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  # L�  L��
+  # L�  L��
   build:
     runs-on: ubuntu-latest
 
@@ -39,7 +39,7 @@ jobs:
         path: build/libs/*.jar
         retention-days: 7
 
-  # Docker t�� L� ( ݬm)
+  # Docker t�� L� ( ݬm)
   docker:
     runs-on: ubuntu-latest
     needs: build
@@ -65,13 +65,45 @@ jobs:
         docker stop planit-test
         docker rm planit-test
 
-  # Render 0� ��p ( ݬm - Render� ��<\ 0�()
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: [build, docker]
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #
-  #   steps:
-  #   - name: Trigger Render deploy
-  #     run: |
-  #       curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+  # Oracle Cloud 배포 (main 브랜치 푸시 시)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Deploy to Oracle Cloud
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.ORACLE_CLOUD_HOST }}
+        username: ${{ secrets.ORACLE_CLOUD_USER }}
+        key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
+        port: 22
+        script: |
+          cd ~/planit
+          git pull origin main
+
+          # 환경 변수 로드
+          export $(cat .env.prod | xargs)
+
+          # Docker Compose로 재배포
+          docker-compose -f docker-compose.prod.yml down
+          docker-compose -f docker-compose.prod.yml up -d --build
+
+          # 컨테이너 상태 확인
+          docker-compose -f docker-compose.prod.yml ps
+
+          # 헬스 체크 (최대 60초 대기)
+          echo "Waiting for application to start..."
+          for i in {1..12}; do
+            if curl -f http://localhost:8080/api/health > /dev/null 2>&1; then
+              echo "✅ Application is healthy!"
+              exit 0
+            fi
+            echo "Waiting... ($i/12)"
+            sleep 5
+          done
+
+          echo "❌ Health check failed"
+          docker-compose -f docker-compose.prod.yml logs backend
+          exit 1

@@ -75,8 +75,8 @@ class SecurityConfig {
   fun corsConfigurationSource(): CorsConfigurationSource {
     val configuration = CorsConfiguration()
     configuration.allowedOrigins = listOf(
-      "https://planit-frontend-dn9b.onrender.com",
-      "http://localhost:3000"
+      "http://localhost:3000",
+      "http://168.107.9.243:3000"
     )
     configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
     configuration.allowedHeaders = listOf("*")
