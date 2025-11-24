@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 
-// 통합 배포: 같은 도메인에서 서빙되므로 상대 경로 사용
-const API_BASE_URL = typeof window !== 'undefined' ? window.location.origin : '';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 interface ApiResponse {
   status: number;
