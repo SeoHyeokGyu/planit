@@ -8,10 +8,10 @@ import java.time.LocalDateTime
 @Table(
     name = "challenge_participants",
     uniqueConstraints = [
-        UniqueConstraint(columnNames = ["challenge_id", "user_id"])
+        UniqueConstraint(columnNames = ["challenge_id", "login_id"])
     ],
     indexes = [
-        Index(name = "idx_user_id", columnList = "user_id"),
+        Index(name = "idx_login_id", columnList = "login_id"),
         Index(name = "idx_challenge_id", columnList = "challenge_id"),
         Index(name = "idx_status", columnList = "status")
     ]
