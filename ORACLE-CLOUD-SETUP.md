@@ -1,11 +1,11 @@
 # Oracle Cloud 서버 초기 설정 가이드
 
-Oracle Cloud 서버(168.107.9.243)에 필요한 모든 도구를 설치하는 단계별 가이드입니다.
+Oracle Cloud 서버(144.24.90.88)에 필요한 모든 도구를 설치하는 단계별 가이드입니다.
 
 ## 1. 서버 접속
 
 ```bash
-ssh opc@168.107.9.243
+ssh -i /Users/seohyeokgyu/Downloads/keys/ssh-key-2025-11-24.key opc@144.24.90.88
 ```
 
 ## 2. 시스템 업데이트
@@ -231,7 +231,7 @@ cat ~/.ssh/planit_deploy_key.pub
 # → 이 내용을 서버의 ~/.ssh/authorized_keys에 붙여넣기
 
 # 연결 테스트
-ssh -i ~/.ssh/planit_deploy_key opc@168.107.9.243
+ssh -i ~/.ssh/planit_deploy_key opc@144.24.90.88
 ```
 
 ## 10. 프로젝트 클론
@@ -318,13 +318,13 @@ docker-compose -f docker-compose.prod.yml ps
 curl http://localhost:8080/api/health
 
 # 외부에서 접속 확인
-curl http://168.107.9.243:8080/api/health
+curl http://144.24.90.88:8080/api/health
 ```
 
 웹 브라우저에서 접속:
-- **백엔드 Swagger**: http://168.107.9.243:8080/swagger-ui/index.html
-- **프론트엔드**: http://168.107.9.243:3000
-- **로그 뷰어**: http://168.107.9.243:9999
+- **백엔드 Swagger**: http://144.24.90.88:8080/swagger-ui/index.html
+- **프론트엔드**: http://144.24.90.88:3000
+- **로그 뷰어**: http://144.24.90.88:9999
 
 ## 14. 자동 시작 설정 (선택사항)
 

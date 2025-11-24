@@ -3,19 +3,19 @@
 이 문서는 Planit 애플리케이션을 Oracle Cloud Infrastructure(OCI)에 Docker를 사용하여 배포하는 방법을 설명합니다.
 
 ## 서버 정보
-- **IP 주소**: 168.107.9.243
+- **IP 주소**: 144.24.90.88
 - **사용자**: opc
-- **백엔드 URL**: http://168.107.9.243:8080
-- **프론트엔드 URL**: http://168.107.9.243:3000
-- **Swagger UI**: http://168.107.9.243:8080/swagger-ui/index.html
-- **로그 뷰어**: http://168.107.9.243:9999
+- **백엔드 URL**: http://144.24.90.88:8080
+- **프론트엔드 URL**: http://144.24.90.88:3000
+- **Swagger UI**: http://144.24.90.88:8080/swagger-ui/index.html
+- **로그 뷰어**: http://144.24.90.88:9999
 
 ## 사전 요구사항
 
 ### 1. Oracle Cloud 인스턴스 설정
 ```bash
 # SSH로 서버 접속
-ssh opc@168.107.9.243
+ssh -i /Users/seohyeokgyu/Downloads/keys/ssh-key-2025-11-24.key opc@144.24.90.88
 
 # 시스템 업데이트
 sudo dnf update -y
@@ -35,7 +35,7 @@ sudo usermod -aG docker opc
 
 # 재로그인 필요 (또는 newgrp docker)
 exit
-ssh opc@168.107.9.243
+ssh -i /Users/seohyeokgyu/Downloads/keys/ssh-key-2025-11-24.key opc@144.24.90.88
 ```
 
 ### 3. Docker Compose 설치
@@ -80,7 +80,7 @@ sudo netfilter-persistent save
 
 ```bash
 # 로컬 머신에서 실행
-scp -r /path/to/planit opc@168.107.9.243:~/
+scp -i /Users/seohyeokgyu/Downloads/keys/ssh-key-2025-11-24.key -r /path/to/planit opc@144.24.90.88:~/
 ```
 
 또는 Git을 사용:
@@ -151,9 +151,9 @@ docker-compose -f docker-compose.prod.yml ps
 curl http://localhost:8080/api/health
 
 # 웹 브라우저에서 확인
-# 백엔드 Swagger: http://168.107.9.243:8080/swagger-ui/index.html
-# 프론트엔드: http://168.107.9.243:3000
-# 로그 뷰어: http://168.107.9.243:9999
+# 백엔드 Swagger: http://144.24.90.88:8080/swagger-ui/index.html
+# 프론트엔드: http://144.24.90.88:3000
+# 로그 뷰어: http://144.24.90.88:9999
 ```
 
 ## 운영 관리
@@ -186,7 +186,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 docker-compose -f docker-compose.prod.yml logs backend
 
 # 또는 Dozzle 웹 UI 사용
-# http://168.107.9.243:9999
+# http://144.24.90.88:9999
 ```
 
 ### 데이터베이스 백업
@@ -281,7 +281,7 @@ sudo lsof -i :3000
    ssh-keygen -t rsa -b 4096
 
    # 공개 키를 서버에 복사
-   ssh-copy-id opc@168.107.9.243
+   ssh-copy-id -i ~/.ssh/id_rsa.pub opc@144.24.90.88
    ```
 
 2. **비밀번호 관리**
