@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -44,6 +45,14 @@ class GlobalExceptionHandler {
     log.warn("리소스를 찾을 수 없음: {}", message)
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(ApiResponse.error("RESOURCE_NOT_FOUND", message))
+  }
+
+  /** 404 Not Found - 정적 리소스를 찾을 수 없음 (Swagger UI 등) */
+  @ExceptionHandler(NoResourceFoundException::class)
+  fun handleNoResourceFoundException(ex: NoResourceFoundException): ResponseEntity<Unit>? {
+    // Swagger UI 및 기타 정적 리소스는 Spring이 처리하도록 null 반환
+    log.debug("정적 리소스를 찾을 수 없음: {}", ex.message)
+    return null
   }
 
   /** 500 Internal Server Error - 처리되지 않은 모든 예외 서버 내부 로직에서 발생하는 예외를 처리합니다. */
