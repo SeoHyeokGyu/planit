@@ -39,6 +39,13 @@ server:
       max: 50
       min-spare: 10
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    enabled: true
+
 logging:
   level:
     com.planit: DEBUG
