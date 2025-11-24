@@ -74,6 +74,39 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+    - name: Verify SSH Secrets
+      run: |
+        if [ -z "${{ secrets.ORACLE_CLOUD_HOST }}" ]; then
+          echo "❌ ORACLE_CLOUD_HOST secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ secrets.ORACLE_CLOUD_USER }}" ]; then
+          echo "❌ ORACLE_CLOUD_USER secret is not set"
+          exit 1
+        fi
+        if [ -z "${{ secrets.ORACLE_CLOUD_SSH_KEY }}" ]; then
+          echo "❌ ORACLE_CLOUD_SSH_KEY secret is not set"
+          exit 1
+        fi
+        echo "✅ All SSH secrets are configured"
+        echo "Host: ${{ secrets.ORACLE_CLOUD_HOST }}"
+        echo "User: ${{ secrets.ORACLE_CLOUD_USER }}"
+
+    - name: Test SSH Connection
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.ORACLE_CLOUD_HOST }}
+        username: ${{ secrets.ORACLE_CLOUD_USER }}
+        key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
+        port: 22
+        debug: true
+        command_timeout: 30s
+        script: |
+          echo "✅ SSH connection successful!"
+          echo "Server: $(hostname)"
+          echo "User: $(whoami)"
+          echo "Working directory: $(pwd)"
+
     - name: Deploy to Oracle Cloud
       uses: appleboy/ssh-action@v1.0.0
       with:
@@ -82,6 +115,7 @@ jobs:
         key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
         port: 22
         debug: true
+        command_timeout: 10m
         script: |
           cd ~/planit
           git pull origin main
