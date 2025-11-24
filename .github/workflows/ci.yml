@@ -120,12 +120,9 @@ jobs:
           cd ~/planit
           git pull origin main
 
-          # Load environment variables
-          export $(grep -E "^[A-Z_]+=" .env.prod | xargs)
-
-          # Redeploy with Docker Compose
-          docker compose -f docker-compose.prod.yml down
-          docker compose -f docker-compose.prod.yml up -d --build
+          # Redeploy with Docker Compose (using --env-file)
+          docker compose --env-file .env.prod -f docker-compose.prod.yml down
+          docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 
           # Check container status
           docker compose -f docker-compose.prod.yml ps

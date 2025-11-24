@@ -1,5 +1,8 @@
 version: '3.8'
 
+# Load environment variables from .env.prod
+# Usage: docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
+
 services:
   # PostgreSQL Database
   postgres:
@@ -80,10 +83,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://168.107.9.243:8080
+        NEXT_PUBLIC_API_URL: http://144.24.90.88:8080
     container_name: planit-frontend
     environment:
-      NEXT_PUBLIC_API_URL: http://168.107.9.243:8080
+      NEXT_PUBLIC_API_URL: http://144.24.90.88:8080
       NODE_ENV: production
     ports:
       - "3000:3000"
