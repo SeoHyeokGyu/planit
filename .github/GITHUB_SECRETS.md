@@ -84,7 +84,7 @@ chmod 700 ~/.ssh
 
 # 3. authorized_keys 파일에 공개 키 추가
 # (로컬에서 복사한 공개 키를 붙여넣기)
-nano ~/.ssh/authorized_keys
+vim ~/.ssh/authorized_keys
 # 또는
 echo "공개_키_내용" >> ~/.ssh/authorized_keys
 
@@ -98,7 +98,7 @@ cd planit
 
 # 6. 환경 변수 파일 생성
 cp .env.prod.example .env.prod
-nano .env.prod
+vim .env.prod
 # 실제 값 입력 (PostgreSQL 비밀번호, JWT Secret, API Keys 등)
 ```
 

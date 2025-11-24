@@ -36,6 +36,7 @@ class SecurityConfig {
                   "/swagger-ui.html",
                   "/v3/api-docs/**",
                   "/swagger-resources/**",
+                  "/webjars/**",
                   "/api/health",
                   "/api/beans",
               )

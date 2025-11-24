@@ -146,8 +146,8 @@ docker-compose version
 ## 6. 유용한 도구 설치
 
 ```bash
-# curl, wget, nano 등 기본 도구 설치
-sudo dnf install -y curl wget nano vim htop net-tools
+# curl, wget, vim 등 기본 도구 설치
+sudo dnf install -y curl wget vim vim htop net-tools
 
 # 설치 확인
 curl --version
@@ -220,7 +220,7 @@ mkdir -p ~/.ssh
 chmod 700 ~/.ssh
 
 # authorized_keys 파일 생성 또는 편집
-nano ~/.ssh/authorized_keys
+vim ~/.ssh/authorized_keys
 
 # 로컬에서 생성한 공개 키를 붙여넣기
 # (로컬 머신에서: cat ~/.ssh/planit_deploy_key.pub)
@@ -343,7 +343,7 @@ curl http://144.24.90.88:8080/api/health
 
 ```bash
 # systemd 서비스 파일 생성
-sudo nano /etc/systemd/system/planit.service
+sudo vim /etc/systemd/system/planit.service
 ```
 
 다음 내용 입력:
