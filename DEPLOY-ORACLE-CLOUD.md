@@ -38,16 +38,23 @@ exit
 ssh -i /Users/seohyeokgyu/Downloads/keys/ssh-key-2025-11-24.key opc@144.24.90.88
 ```
 
-### 3. Docker Compose 설치
-```bash
-# Docker Compose 설치
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+### 3. Docker Compose 설정
 
-# 실행 권한 부여
-sudo chmod +x /usr/local/bin/docker-compose
+Docker CE를 설치하면 Docker Compose 플러그인이 자동으로 포함됩니다:
+
+```bash
+# Docker Compose 확인
+docker compose version
+```
+
+기존 `docker-compose` 명령어 호환성을 위한 심볼릭 링크 생성:
+
+```bash
+# docker-compose 심볼릭 링크 생성
+sudo ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
 
 # 설치 확인
-docker-compose --version
+docker-compose version
 ```
 
 ### 4. 방화벽 설정 (OCI Security List)

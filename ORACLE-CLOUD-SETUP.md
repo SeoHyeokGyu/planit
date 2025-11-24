@@ -118,19 +118,30 @@ docker --version
 docker ps
 ```
 
-## 5. Docker Compose 확인
+## 5. Docker Compose 설정
 
 Docker CE를 설치하면 Docker Compose 플러그인이 자동으로 포함됩니다:
 
 ```bash
 # Docker Compose 플러그인 버전 확인
 docker compose version
-
-# 기존 docker-compose 명령어도 호환됨
-docker-compose --version
 ```
 
-**참고**: 최신 Docker는 `docker compose` (플러그인)을 사용하지만, 기존 `docker-compose` 명령어도 작동합니다.
+### docker-compose 호환성 설정 (권장)
+
+기존 `docker-compose` 명령어(하이픈 사용)를 사용하려면 심볼릭 링크를 생성:
+
+```bash
+# docker-compose 심볼릭 링크 생성
+sudo ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+
+# 확인
+docker-compose version
+```
+
+이제 다음 두 가지 방법 모두 사용 가능합니다:
+- `docker compose` (최신 방식, 공백)
+- `docker-compose` (기존 방식, 하이픈)
 
 ## 6. 유용한 도구 설치
 
