@@ -6,12 +6,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useLogout } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
-  MapPin,
-  Calendar,
   Users,
   TrendingUp,
   Sparkles,
-  Cloud,
   Award,
   Search,
   Heart,
@@ -33,34 +30,34 @@ export default function Home() {
 
   const features = [
     {
-      icon: MapPin,
-      title: '스마트 여행지 추천',
-      description: '당신의 취향과 계절, 날씨를 고려한 맞춤형 여행지 추천',
-    },
-    {
-      icon: Calendar,
-      title: '간편한 일정 관리',
-      description: '직관적인 인터페이스로 여행 일정을 쉽게 계획하고 관리',
-    },
-    {
-      icon: Cloud,
-      title: '실시간 날씨 정보',
-      description: '여행지의 실시간 날씨와 최적의 방문 시기 추천',
+      icon: Sparkles,
+      title: 'AI 챌린지 추천',
+      description: '5가지 알고리즘으로 당신에게 딱 맞는 챌린지를 추천',
     },
     {
       icon: TrendingUp,
-      title: '인기 여행지 트렌드',
-      description: '인구통계 기반 트렌드 분석으로 인기 여행지 발견',
+      title: '실시간 피드',
+      description: 'SSE 기반으로 다른 사람들의 인증을 실시간으로 확인',
     },
     {
-      icon: Users,
-      title: '소셜 기능',
-      description: '리뷰 공유, 여행 예산 관리, 커뮤니티 참여',
+      icon: Heart,
+      title: 'AI 동기부여 코치',
+      description: '개인화된 격려 메시지로 지속적인 동기 부여',
     },
     {
       icon: Award,
-      title: '뱃지 & 챌린지',
-      description: '여행 목표 달성으로 뱃지를 획득하고 랭킹 경쟁',
+      title: '게임화 시스템',
+      description: '포인트, 레벨, 배지, 스트릭으로 성취감 극대화',
+    },
+    {
+      icon: Users,
+      title: '소셜 커뮤니티',
+      description: '같은 목표를 가진 사람들과 함께 성장',
+    },
+    {
+      icon: Search,
+      title: 'AI 인증 분석',
+      description: 'Google Cloud Vision으로 인증 사진 자동 검증',
     },
   ];
 
@@ -80,12 +77,12 @@ export default function Home() {
               </div>
             </div>
             <p className="text-xl sm:text-2xl md:text-3xl text-gray-700 font-semibold mb-4">
-              AI 기반 스마트 여행 플래너
+              AI 기반 소셜 챌린지 트래커
             </p>
             <p className="text-base sm:text-lg text-gray-600 mb-12 max-w-2xl mx-auto">
-              당신만을 위한 완벽한 여행을 계획하세요.
+              작은 성취를 실시간으로 공유하고, 함께 성장하세요.
               <br />
-              날씨, 트렌드, 취향을 모두 고려한 맞춤형 추천 시스템
+              AI가 추천하는 맞춤 챌린지로 매일 새로운 도전을
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -152,10 +149,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              완벽한 여행을 위한 모든 기능
+              성장을 위한 완벽한 도구
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              최신 기술과 데이터 분석으로 당신의 여행을 더욱 특별하게 만들어드립니다
+              AI 기술과 게임화 요소로 지속 가능한 습관 형성을 도와드립니다
             </p>
           </div>
 
@@ -187,24 +184,24 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
             <div>
               <div className="flex justify-center mb-2">
-                <Search className="h-8 w-8" />
+                <TrendingUp className="h-8 w-8" />
               </div>
-              <div className="text-4xl font-bold mb-2">1000+</div>
-              <div className="text-blue-100">여행지 정보</div>
-            </div>
-            <div>
-              <div className="flex justify-center mb-2">
-                <Heart className="h-8 w-8" />
-              </div>
-              <div className="text-4xl font-bold mb-2">AI 분석</div>
-              <div className="text-blue-100">맞춤형 추천 시스템</div>
+              <div className="text-4xl font-bold mb-2">실시간</div>
+              <div className="text-blue-100">인증 피드 & 알림</div>
             </div>
             <div>
               <div className="flex justify-center mb-2">
                 <Sparkles className="h-8 w-8" />
               </div>
-              <div className="text-4xl font-bold mb-2">실시간</div>
-              <div className="text-blue-100">날씨 & 트렌드</div>
+              <div className="text-4xl font-bold mb-2">AI 기반</div>
+              <div className="text-blue-100">챌린지 추천 & 생성</div>
+            </div>
+            <div>
+              <div className="flex justify-center mb-2">
+                <Award className="h-8 w-8" />
+              </div>
+              <div className="text-4xl font-bold mb-2">게임화</div>
+              <div className="text-blue-100">포인트 & 배지 시스템</div>
             </div>
           </div>
         </div>
@@ -214,12 +211,12 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-            지금 바로 시작하세요
+            오늘부터 작은 성취를 시작하세요
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            회원가입하고 AI가 추천하는 완벽한 여행 계획을 만나보세요.
+            회원가입하고 AI가 추천하는 맞춤 챌린지로 새로운 습관을 만들어보세요.
             <br />
-            모든 기능을 무료로 이용할 수 있습니다.
+            실시간 피드에서 다른 사람들의 성취를 확인하며 함께 성장하세요.
           </p>
           {!isAuthenticated && (
             <Link href="/signup">
