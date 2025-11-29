@@ -3,8 +3,6 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
 
 jobs:
   # Build and Test
@@ -120,9 +118,10 @@ jobs:
           cd ~/planit
           git pull origin main
 
-          # Redeploy with Docker Compose (using --env-file)
-          docker compose --env-file .env.prod -f docker-compose.prod.yml down
-          docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+          # Stop and rebuild only backend and frontend (keep postgres, redis, dozzle running)
+          docker compose --env-file .env.prod -f docker-compose.prod.yml stop backend frontend
+          docker compose --env-file .env.prod -f docker-compose.prod.yml rm -f backend frontend
+          docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build backend frontend
 
           # Check container status
           docker compose -f docker-compose.prod.yml ps
