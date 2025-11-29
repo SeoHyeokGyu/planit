@@ -29,7 +29,7 @@ class ChallengeService(
      * 챌린지 생성
      */
     @Transactional
-    fun createChallenge(request: ChallengeRequest, loginId: Long): ChallengeResponse {
+    fun createChallenge(request: ChallengeRequest, loginId: String): ChallengeResponse {
         val challenge = Challenge(
             title = request.title,
             description = request.description,
@@ -50,8 +50,8 @@ class ChallengeService(
     /**
      * 챌린지 상세 조회
      */
-    fun getChallengeById(id: Long): ChallengeResponse {
-        val challenge = findChallengeById(id)
+    fun getChallengeById(challengeId: String): ChallengeResponse {
+        val challenge = findChallengeById(challengeId)
         return ChallengeResponse.from(challenge)
     }
 
@@ -103,11 +103,11 @@ class ChallengeService(
      * 챌린지 수정
      */
     @Transactional
-    fun updateChallenge(id: Long, request: ChallengeRequest, loginId: Long): ChallengeResponse {
-        val challenge = findChallengeById(id)
+    fun updateChallenge(challengeId: String, request: ChallengeRequest, loginId: String): ChallengeResponse {
+        val challenge = findChallengeById(challengeId)
 
         // 권한 검증
-        if (challenge.createdId != loginId.toString()) {
+        if (challenge.createdId != loginId) {
             throw IllegalArgumentException("챌린지를 수정할 권한이 없습니다")
         }
 
@@ -133,11 +133,11 @@ class ChallengeService(
      * 챌린지 삭제
      */
     @Transactional
-    fun deleteChallenge(id: Long, loginId: Long) {
-        val challenge = findChallengeById(id)
+    fun deleteChallenge(challengeId: String, loginId: String) {
+        val challenge = findChallengeById(challengeId)
 
         // 권한 검증
-        if (challenge.createdId != loginId.toString()) {
+        if (challenge.createdId != loginId) {
             throw IllegalArgumentException("챌린지를 삭제할 권한이 없습니다")
         }
 
@@ -148,11 +148,11 @@ class ChallengeService(
      * 챌린지 참여
      */
     @Transactional
-    fun joinChallenge(challengeId: Long, loginId: Long): ParticipateResponse {
+    fun joinChallenge(challengeId: String, loginId: String): ParticipateResponse {
         val challenge = findChallengeById(challengeId)
 
         // 이미 참여중인지 확인
-        if (participantRepository.existsByChallengeIdAndLoginId(challenge.challengeId, loginId)) {
+        if (participantRepository.existsByChallengeIdAndLoginId(challengeId, loginId)) {
             throw IllegalStateException("이미 참여중인 챌린지입니다")
         }
 
@@ -162,14 +162,15 @@ class ChallengeService(
         }
 
         val participant = ChallengeParticipant(
-            challengeId = challenge.challengeId,
+            challengeId = challengeId,
             loginId = loginId
         )
 
         val savedParticipant = participantRepository.save(participant)
 
         // 참여자 수 증가
-        challengeRepository.incrementParticipantCount(challengeId)
+        challenge.participantCnt++
+        challengeRepository.save(challenge)
 
         return ParticipateResponse.from(savedParticipant)
     }
@@ -178,10 +179,10 @@ class ChallengeService(
      * 챌린지 탈퇴
      */
     @Transactional
-    fun withdrawChallenge(challengeId: Long, loginId: Long) {
+    fun withdrawChallenge(challengeId: String, loginId: String) {
         val challenge = findChallengeById(challengeId)
 
-        val participant = participantRepository.findByChallengeIdAndLoginId(challenge.challengeId, loginId)
+        val participant = participantRepository.findByChallengeIdAndLoginId(challengeId, loginId)
             .orElseThrow { NoSuchElementException("참여 정보를 찾을 수 없습니다") }
 
         if (participant.status != ParticipantStatusEnum.ACTIVE) {
@@ -192,15 +193,16 @@ class ChallengeService(
         participantRepository.save(participant)
 
         // 참여자 수 감소
-        challengeRepository.decrementParticipantCount(challengeId)
+        challenge.participantCnt--
+        challengeRepository.save(challenge)
     }
 
     /**
      * 조회수 증가 (Redis 카운터 사용)
      */
     @Transactional
-    fun incrementViewCount(id: Long) {
-        val key = "$VIEW_COUNT_KEY_PREFIX$id"
+    fun incrementViewCount(challengeId: String) {
+        val key = "$VIEW_COUNT_KEY_PREFIX$challengeId"
         val viewCount = redisTemplate.opsForValue().increment(key) ?: 1L
 
         // TTL 설정 (24시간)
@@ -208,7 +210,7 @@ class ChallengeService(
 
         // 일정 조회수마다 DB 동기화
         if (viewCount % VIEW_COUNT_SYNC_THRESHOLD == 0L) {
-            syncViewCountToDatabase(id, viewCount)
+            syncViewCountToDatabase(challengeId, viewCount)
         }
     }
 
@@ -216,8 +218,8 @@ class ChallengeService(
      * Redis의 조회수를 DB에 동기화
      */
     @Transactional
-    fun syncViewCountToDatabase(id: Long, viewCount: Long) {
-        val challenge = findChallengeById(id)
+    fun syncViewCountToDatabase(challengeId: String, viewCount: Long) {
+        val challenge = findChallengeById(challengeId)
         challenge.viewCnt = viewCount
         challengeRepository.save(challenge)
     }
@@ -225,29 +227,29 @@ class ChallengeService(
     /**
      * 참여자 목록 조회
      */
-    fun getParticipants(challengeId: Long): List<ParticipateResponse> {
+    fun getParticipants(challengeId: String): List<ParticipateResponse> {
         val challenge = findChallengeById(challengeId)
-        val participants = participantRepository.findByChallengeId(challenge.challengeId)
+        val participants = participantRepository.findByChallengeId(challengeId)
         return participants.map { ParticipateResponse.from(it) }
     }
 
     /**
      * 챌린지 통계 조회
      */
-    fun getChallengeStatistics(challengeId: Long): ChallengeStatisticsResponse {
+    fun getChallengeStatistics(challengeId: String): ChallengeStatisticsResponse {
         val challenge = findChallengeById(challengeId)
 
-        val totalParticipants = participantRepository.countByChallengeId(challenge.challengeId).toInt()
+        val totalParticipants = participantRepository.countByChallengeId(challengeId).toInt()
         val activeParticipants = participantRepository.countByChallengeIdAndStatus(
-            challenge.challengeId, ParticipantStatusEnum.ACTIVE
+            challengeId, ParticipantStatusEnum.ACTIVE
         ).toInt()
         val completedParticipants = participantRepository.countByChallengeIdAndStatus(
-            challenge.challengeId, ParticipantStatusEnum.COMPLETED
+            challengeId, ParticipantStatusEnum.COMPLETED
         ).toInt()
         val withdrawnParticipants = participantRepository.countByChallengeIdAndStatus(
-            challenge.challengeId, ParticipantStatusEnum.WITHDRAWN
+            challengeId, ParticipantStatusEnum.WITHDRAWN
         ).toInt()
-        val totalCertifications = participantRepository.sumCertificationCountByChallengeId(challenge.challengeId)
+        val totalCertifications = participantRepository.sumCertificationCountByChallengeId(challengeId)
 
         val completionRate = if (totalParticipants > 0) {
             (completedParticipants.toDouble() / totalParticipants) * 100
@@ -264,7 +266,7 @@ class ChallengeService(
         // Redis에서 조회수 가져오기
         val key = "$VIEW_COUNT_KEY_PREFIX$challengeId"
         val viewCount = redisTemplate.opsForValue().get(key)?.toLongOrNull()
-            ?: challenge.viewCnt ?: 0L
+            ?: challenge.viewCnt
 
         return ChallengeStatisticsResponse(
             challengeId = challengeId,
@@ -282,8 +284,8 @@ class ChallengeService(
     /**
      * 챌린지 조회 헬퍼 메서드
      */
-    private fun findChallengeById(id: Long): Challenge {
-        return challengeRepository.findById(id)
-            .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $id") }
+    private fun findChallengeById(challengeId: String): Challenge {
+        return challengeRepository.findById(challengeId)
+            .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $challengeId") }
     }
 }

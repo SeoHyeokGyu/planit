@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ChallengeRepository : JpaRepository<Challenge, Long> {
+interface ChallengeRepository : JpaRepository<Challenge, String> {
 
     // 작성자로 조회
     fun findByCreatedId(createdId: String): List<Challenge>
@@ -28,21 +28,18 @@ interface ChallengeRepository : JpaRepository<Challenge, Long> {
     // 카테고리와 난이도로 조회
     fun findByCategoryAndDifficulty(category: String, difficulty: String): List<Challenge>
 
-    // challengeId로 조회
-    fun findByChallengeId(challengeId: String): Challenge?
-
     // 조회수 증가
     @Modifying
-    @Query("UPDATE Challenge c SET c.viewCnt = c.viewCnt + 1 WHERE c.id = :id")
-    fun incrementViewCount(@Param("id") id: Long)
+    @Query("UPDATE Challenge c SET c.viewCnt = c.viewCnt + 1 WHERE c.challengeId = :challengeId")
+    fun incrementViewCount(@Param("challengeId") challengeId: String)
 
     // 참여자 수 증가
     @Modifying
-    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt + 1 WHERE c.id = :id")
-    fun incrementParticipantCount(@Param("id") id: Long)
+    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt + 1 WHERE c.challengeId = :challengeId")
+    fun incrementParticipantCount(@Param("challengeId") challengeId: String)
 
     // 참여자 수 감소
     @Modifying
-    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt - 1 WHERE c.id = :id AND c.participantCnt > 0")
-    fun decrementParticipantCount(@Param("id") id: Long)
+    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt - 1 WHERE c.challengeId = :challengeId AND c.participantCnt > 0")
+    fun decrementParticipantCount(@Param("challengeId") challengeId: String)
 }

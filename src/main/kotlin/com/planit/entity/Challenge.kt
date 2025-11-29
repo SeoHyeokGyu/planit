@@ -27,9 +27,6 @@ class Challenge(
     certificationCnt: Long? = 0
 ) {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null
-
     @Column(nullable = false, unique = true)
     var challengeId: String = generateChallengeId()
         private set

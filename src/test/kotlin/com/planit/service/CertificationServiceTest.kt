@@ -37,6 +37,7 @@ class CertificationServiceTest {
 
   private lateinit var user: User
   private lateinit var challenge: Challenge
+  private val challengeId = "CHL-12345678"
 
   @BeforeEach
   fun setUp() {
@@ -65,7 +66,7 @@ class CertificationServiceTest {
       // Given
       val request =
           CertificationCreateRequest(
-              challengeId = 1L,
+              challengeId = challengeId,
               title = "Test Title",
               content = "Test Content",
           )

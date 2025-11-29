@@ -10,7 +10,7 @@ import java.time.LocalDateTime
  * @property content 인증 내용
  */
 data class CertificationCreateRequest(
-    val challengeId: Long,
+    val challengeId: String,
     val title: String,
     val content: String
 )

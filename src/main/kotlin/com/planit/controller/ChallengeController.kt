@@ -22,7 +22,7 @@ class ChallengeController(
     @PostMapping
     fun createChallenge(
         @Valid @RequestBody request: ChallengeRequest,
-        @RequestHeader("X-User-Id") userId: Long
+        @RequestHeader("X-User-Id") userId: String
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
         val challenge = challengeService.createChallenge(request, userId)
         return ResponseEntity
@@ -32,11 +32,11 @@ class ChallengeController(
 
     /**
      * 챌린지 상세 조회
-     * GET /api/v1/challenges/{id}
+     * GET /api/v1/challenges/{challengeId}
      */
-    @GetMapping("/{id}")
-    fun getChallengeById(@PathVariable id: Long): ResponseEntity<ApiResponse<ChallengeResponse>> {
-        val challenge = challengeService.getChallengeById(id)
+    @GetMapping("/{challengeId}")
+    fun getChallengeById(@PathVariable challengeId: String): ResponseEntity<ApiResponse<ChallengeResponse>> {
+        val challenge = challengeService.getChallengeById(challengeId)
         return ResponseEntity.ok(ApiResponse.success(challenge))
     }
 
@@ -66,41 +66,41 @@ class ChallengeController(
 
     /**
      * 챌린지 수정
-     * PUT /api/v1/challenges/{id}
+     * PUT /api/v1/challenges/{challengeId}
      */
-    @PutMapping("/{id}")
+    @PutMapping("/{challengeId}")
     fun updateChallenge(
-        @PathVariable id: Long,
+        @PathVariable challengeId: String,
         @Valid @RequestBody request: ChallengeRequest,
-        @RequestHeader("X-User-Id") userId: Long
+        @RequestHeader("X-User-Id") userId: String
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
-        val challenge = challengeService.updateChallenge(id, request, userId)
+        val challenge = challengeService.updateChallenge(challengeId, request, userId)
         return ResponseEntity.ok(ApiResponse.success(challenge))
     }
 
     /**
      * 챌린지 삭제
-     * DELETE /api/v1/challenges/{id}
+     * DELETE /api/v1/challenges/{challengeId}
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{challengeId}")
     fun deleteChallenge(
-        @PathVariable id: Long,
-        @RequestHeader("X-User-Id") userId: Long
+        @PathVariable challengeId: String,
+        @RequestHeader("X-User-Id") userId: String
     ): ResponseEntity<ApiResponse<Unit>> {
-        challengeService.deleteChallenge(id, userId)
+        challengeService.deleteChallenge(challengeId, userId)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
     /**
      * 챌린지 참여
-     * POST /api/v1/challenges/{id}/join
+     * POST /api/v1/challenges/{challengeId}/join
      */
-    @PostMapping("/{id}/join")
+    @PostMapping("/{challengeId}/join")
     fun joinChallenge(
-        @PathVariable id: Long,
-        @RequestHeader("X-User-Id") userId: Long
+        @PathVariable challengeId: String,
+        @RequestHeader("X-User-Id") userId: String
     ): ResponseEntity<ApiResponse<ParticipateResponse>> {
-        val participant = challengeService.joinChallenge(id, userId)
+        val participant = challengeService.joinChallenge(challengeId, userId)
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponse.success(participant))
@@ -108,48 +108,48 @@ class ChallengeController(
 
     /**
      * 챌린지 탈퇴
-     * POST /api/v1/challenges/{id}/withdraw
+     * POST /api/v1/challenges/{challengeId}/withdraw
      */
-    @PostMapping("/{id}/withdraw")
+    @PostMapping("/{challengeId}/withdraw")
     fun withdrawChallenge(
-        @PathVariable id: Long,
-        @RequestHeader("X-User-Id") userId: Long
+        @PathVariable challengeId: String,
+        @RequestHeader("X-User-Id") userId: String
     ): ResponseEntity<ApiResponse<Unit>> {
-        challengeService.withdrawChallenge(id, userId)
+        challengeService.withdrawChallenge(challengeId, userId)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
     /**
      * 조회수 증가
-     * POST /api/v1/challenges/{id}/view
+     * POST /api/v1/challenges/{challengeId}/view
      */
-    @PostMapping("/{id}/view")
-    fun incrementViewCount(@PathVariable id: Long): ResponseEntity<ApiResponse<Unit>> {
-        challengeService.incrementViewCount(id)
+    @PostMapping("/{challengeId}/view")
+    fun incrementViewCount(@PathVariable challengeId: String): ResponseEntity<ApiResponse<Unit>> {
+        challengeService.incrementViewCount(challengeId)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
     /**
      * 참여자 목록 조회
-     * GET /api/v1/challenges/{id}/participants
+     * GET /api/v1/challenges/{challengeId}/participants
      */
-    @GetMapping("/{id}/participants")
+    @GetMapping("/{challengeId}/participants")
     fun getParticipants(
-        @PathVariable id: Long
+        @PathVariable challengeId: String
     ): ResponseEntity<ApiResponse<List<ParticipateResponse>>> {
-        val participants = challengeService.getParticipants(id)
+        val participants = challengeService.getParticipants(challengeId)
         return ResponseEntity.ok(ApiResponse.success(participants))
     }
 
     /**
      * 챌린지 통계 조회
-     * GET /api/v1/challenges/{id}/statistics
+     * GET /api/v1/challenges/{challengeId}/statistics
      */
-    @GetMapping("/{id}/statistics")
+    @GetMapping("/{challengeId}/statistics")
     fun getChallengeStatistics(
-        @PathVariable id: Long
+        @PathVariable challengeId: String
     ): ResponseEntity<ApiResponse<ChallengeStatisticsResponse>> {
-        val statistics = challengeService.getChallengeStatistics(id)
+        val statistics = challengeService.getChallengeStatistics(challengeId)
         return ResponseEntity.ok(ApiResponse.success(statistics))
     }
 }

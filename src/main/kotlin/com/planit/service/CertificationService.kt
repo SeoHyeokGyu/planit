@@ -79,7 +79,7 @@ class CertificationService(
    * @return 페이징된 인증 엔티티 목록 (`Page<Certification>`)
    */
   @Transactional(readOnly = true)
-  fun getCertificationsByChallenge(challengeId: Long, pageable: Pageable): Page<Certification> {
+  fun getCertificationsByChallenge(challengeId: String, pageable: Pageable): Page<Certification> {
     return certificationRepository.findByChallenge_Id(challengeId, pageable)
   }
 
