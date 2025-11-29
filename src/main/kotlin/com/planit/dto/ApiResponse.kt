@@ -1,6 +1,7 @@
 package com.planit.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import org.springframework.data.domain.Page
 
 /**
  * 공용 API 응답 포맷을 위한 데이터 클래스입니다.
@@ -42,4 +43,26 @@ data class ApiResponse<T>(val success: Boolean, val data: T? = null, val error: 
       return ApiResponse(success = false, error = ApiError(code, message))
     }
   }
+}
+
+data class PagedResponse<T>(
+    val content: List<T>,
+    val pageNumber: Int,
+    val pageSize: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val isLast: Boolean
+) {
+    companion object {
+        fun <T, U> from(page: Page<T>, content: List<U>): PagedResponse<U> {
+            return PagedResponse(
+                content = content,
+                pageNumber = page.number,
+                pageSize = page.size,
+                totalElements = page.totalElements,
+                totalPages = page.totalPages,
+                isLast = page.isLast
+            )
+        }
+    }
 }

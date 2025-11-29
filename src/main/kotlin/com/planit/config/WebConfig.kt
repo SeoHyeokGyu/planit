@@ -1,6 +1,7 @@
 package com.planit.config
 
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
@@ -16,5 +17,10 @@ class WebConfig : WebMvcConfigurer {
     registry.addViewController("/").setViewName("forward:/index.html")
     // API가 아닌 모든 경로를 index.html로 포워딩 (SPA 라우팅)
     registry.addViewController("/{x:[\\w\\-]+}/**").setViewName("forward:/index.html")
+  }
+
+  override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+    registry.addResourceHandler("/uploads/**")
+        .addResourceLocations("file:uploads/")
   }
 }
