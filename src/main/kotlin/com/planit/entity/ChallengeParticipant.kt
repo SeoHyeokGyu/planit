@@ -1,6 +1,6 @@
 package com.planit.entity
 
-import com.planit.enum.ParticipantStatusEnum
+import com.planit.enums.ParticipantStatusEnum
 import jakarta.persistence.*
 import java.time.LocalDateTime
 

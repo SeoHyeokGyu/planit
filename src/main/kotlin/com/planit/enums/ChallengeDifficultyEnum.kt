@@ -1,4 +1,4 @@
-package com.planit.enum
+package com.planit.enums
 
 enum class ChallengeDifficultyEnum {
     EASY,        // 쉬움

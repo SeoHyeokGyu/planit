@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.planit.config.JwtTokenProvider
 import com.planit.dto.*
+import com.planit.enums.ParticipantStatusEnum
 import com.planit.service.ChallengeService
 import io.mockk.every
 import io.mockk.just
@@ -281,7 +282,7 @@ class ChallengeControllerTest {
         val response = ParticipateResponse(
             id = 1L,
             userId = 1L,
-            status = com.planit.enum.ParticipantStatusEnum.ACTIVE,
+            status = ParticipantStatusEnum.ACTIVE,
             certificationCnt = 0,
             joinedAt = LocalDateTime.now(),
             completedAt = null,
@@ -358,7 +359,7 @@ class ChallengeControllerTest {
             ParticipateResponse(
                 id = 1L,
                 userId = 1L,
-                status = com.planit.enum.ParticipantStatusEnum.ACTIVE,
+                status = ParticipantStatusEnum.ACTIVE,
                 certificationCnt = 5,
                 joinedAt = LocalDateTime.now(),
                 completedAt = null,
