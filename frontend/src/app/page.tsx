@@ -109,7 +109,7 @@ export default function Home() {
               ) : (
                 <>
                   <Link href="/signup">
-                    <Button size="lg" className="w-full sm:w-auto group">
+                    <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group">
                       무료로 시작하기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -118,7 +118,7 @@ export default function Home() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full sm:w-auto"
+                      className="w-full sm:w-auto border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
                     >
                       로그인
                     </Button>
@@ -223,7 +223,7 @@ export default function Home() {
           </p>
           {!isAuthenticated && (
             <Link href="/signup">
-              <Button size="lg" className="group">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group">
                 무료로 시작하기
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
