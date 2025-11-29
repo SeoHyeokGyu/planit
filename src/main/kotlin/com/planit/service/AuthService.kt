@@ -1,12 +1,15 @@
 package com.planit.service
 
 import com.planit.config.JwtTokenProvider
+import com.planit.dto.CustomUserDetails
 import com.planit.dto.LoginRequest
 import com.planit.dto.LoginResponse
 import com.planit.dto.SignUpRequest
-import com.planit.dto.CustomUserDetails
 import com.planit.entity.User
 import com.planit.repository.UserRepository
+import jakarta.servlet.http.HttpServletRequest
+import java.time.Duration
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -21,7 +24,11 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val authenticationManager: AuthenticationManager,
     private val jwtTokenProvider: JwtTokenProvider,
+    private val redisTemplate: RedisTemplate<String, Any>,
 ) {
+  companion object {
+    const val BLACKLIST_PREFIX = "logout:"
+  }
 
   /** 회원가입 */
   @Transactional
@@ -62,5 +69,21 @@ class AuthService(
             userDetails.username, // user.loginId
         )
     return LoginResponse(accessToken = accessToken)
+  }
+
+  /** 로그아웃 */
+  @Transactional
+  fun logout(request: HttpServletRequest): Unit {
+    val token =
+        jwtTokenProvider.resolveToken(request)
+            ?: throw IllegalArgumentException("Invalid or missing token")
+    val expiration = jwtTokenProvider.getRemainingTime(token)
+
+    // 2. 유효 시간이 남아있다면 Redis에 블랙리스트로 등록
+    if (expiration > 0) {
+      redisTemplate
+          .opsForValue()
+          .set(BLACKLIST_PREFIX + token, "logout", Duration.ofMillis(expiration))
+    }
   }
 }
