@@ -1,6 +1,8 @@
 package com.planit.service
 
-import com.planit.dto.*
+import com.planit.dto.CertificationCreateRequest
+import com.planit.dto.CertificationResponse
+import com.planit.dto.CertificationUpdateRequest
 import com.planit.entity.Certification
 import com.planit.exception.*
 import com.planit.repository.CertificationRepository
@@ -12,89 +14,155 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
+/**
+ * 챌린지 인증(Certification)과 관련된 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ */
 @Service
 class CertificationService(
-    private val certificationRepository: CertificationRepository,
-    private val userRepository: UserRepository,
-    private val challengeRepository: ChallengeRepository
+  private val certificationRepository: CertificationRepository,
+  private val userRepository: UserRepository,
+  private val challengeRepository: ChallengeRepository
 ) {
 
-    @Transactional
-    fun createCertification(request: CertificationCreateRequest, userLoginId: String): CertificationResponse {
-        val user = userRepository.findByLoginId(userLoginId) ?: throw UserNotFoundException()
-        val challenge = challengeRepository.findById(request.challengeId).orElseThrow { ChallengeNotFoundException() }
+  /**
+   * 새로운 인증을 생성합니다.
+   * @param request 인증 생성에 필요한 데이터 (챌린지 ID, 제목, 내용)
+   * @param userLoginId 현재 로그인한 사용자의 ID
+   * @return 생성된 인증의 응답 객체
+   * @throws UserNotFoundException 사용자를 찾을 수 없을 때
+   * @throws ChallengeNotFoundException 챌린지를 찾을 수 없을 때
+   */
+  @Transactional
+  fun createCertification(request: CertificationCreateRequest, userLoginId: String): CertificationResponse {
+    val user = userRepository.findByLoginId(userLoginId) ?: throw UserNotFoundException()
+    val challenge = challengeRepository.findById(request.challengeId).orElseThrow { ChallengeNotFoundException() }
 
-        val certification = Certification(
-            user = user,
-            challenge = challenge,
-            title = request.title,
-            content = request.content
-        )
+    val certification = Certification(
+      user = user,
+      challenge = challenge,
+      title = request.title,
+      content = request.content
+    )
 
-        val savedCertification = certificationRepository.save(certification)
-        return CertificationResponse.from(savedCertification)
+    val savedCertification = certificationRepository.save(certification)
+    return CertificationResponse.from(savedCertification)
+  }
+
+  /**
+   * 특정 인증 ID로 인증 정보를 조회합니다.
+   * @param certificationId 조회할 인증의 ID
+   * @return 조회된 인증의 응답 객체
+   * @throws CertificationNotFoundException 인증을 찾을 수 없을 때
+   */
+  @Transactional(readOnly = true)
+  fun getCertification(certificationId: Long): CertificationResponse {
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
+    return CertificationResponse.from(certification)
+  }
+
+  /**
+   * 특정 사용자가 작성한 인증 목록을 페이징하여 조회합니다.
+   * @param userLoginId 인증 목록을 조회할 사용자의 로그인 ID
+   * @param pageable 페이징 정보
+   * @return 페이징된 인증 엔티티 목록 (`Page<Certification>`)
+   */
+  @Transactional(readOnly = true)
+  fun getCertificationsByUser(userLoginId: String, pageable: Pageable): Page<Certification> {
+    return certificationRepository.findByUser_LoginId(userLoginId, pageable)
+  }
+
+  /**
+   * 특정 챌린지에 속한 인증 목록을 페이징하여 조회합니다.
+   * @param challengeId 인증 목록을 조회할 챌린지의 ID
+   * @param pageable 페이징 정보
+   * @return 페이징된 인증 엔티티 목록 (`Page<Certification>`)
+   */
+  @Transactional(readOnly = true)
+  fun getCertificationsByChallenge(challengeId: Long, pageable: Pageable): Page<Certification> {
+    return certificationRepository.findByChallenge_Id(challengeId, pageable)
+  }
+
+  /**
+   * 인증 정보를 수정합니다. (제목, 내용)
+   * 작성자만 수정 가능하며, 생성 후 24시간 이내에만 수정 가능합니다.
+   * @param certificationId 수정할 인증의 ID
+   * @param request 수정할 인증 데이터
+   * @param userLoginId 현재 로그인한 사용자의 ID
+   * @return 수정된 인증의 응답 객체
+   * @throws CertificationNotFoundException 인증을 찾을 수 없을 때
+   * @throws CertificationUpdateForbiddenException 수정 권한이 없을 때
+   * @throws CertificationUpdatePeriodExpiredException 24시간 수정 기한이 지났을 때
+   */
+  @Transactional
+  fun updateCertification(
+    certificationId: Long,
+    request: CertificationUpdateRequest,
+    userLoginId: String
+  ): CertificationResponse {
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
+
+    // 인증 작성자와 현재 로그인한 사용자가 일치하는지 확인
+    if (certification.user.loginId != userLoginId) {
+      throw CertificationUpdateForbiddenException()
     }
 
-    @Transactional(readOnly = true)
-    fun getCertification(certificationId: Long): CertificationResponse {
-        val certification = certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
-        return CertificationResponse.from(certification)
+    // 인증 생성 후 24시간이 지났는지 확인
+    if (certification.createdAt.isBefore(LocalDateTime.now().minusHours(24))) {
+      throw CertificationUpdatePeriodExpiredException()
     }
 
-    @Transactional(readOnly = true)
-    fun getCertificationsByUser(userLoginId: String, pageable: Pageable): PagedResponse<CertificationResponse> {
-        val certificationPage = certificationRepository.findByUser_LoginId(userLoginId, pageable)
-        val content = certificationPage.content.map { CertificationResponse.from(it) }
-        return PagedResponse.from(certificationPage, content)
+    certification.title = request.title
+    certification.content = request.content
+
+    val updatedCertification = certificationRepository.save(certification)
+    return CertificationResponse.from(updatedCertification)
+  }
+
+  /**
+   * 인증을 삭제합니다. (Soft Delete)
+   * 작성자만 삭제 가능합니다.
+   * @param certificationId 삭제할 인증의 ID
+   * @param userLoginId 현재 로그인한 사용자의 ID
+   * @throws CertificationNotFoundException 인증을 찾을 수 없을 때
+   * @throws CertificationUpdateForbiddenException 삭제 권한이 없을 때
+   */
+  @Transactional
+  fun deleteCertification(certificationId: Long, userLoginId: String) {
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
+
+    // 인증 작성자와 현재 로그인한 사용자가 일치하는지 확인
+    if (certification.user.loginId != userLoginId) {
+      throw CertificationUpdateForbiddenException("이 인증을 삭제할 권한이 없습니다")
     }
 
-    @Transactional(readOnly = true)
-    fun getCertificationsByChallenge(challengeId: Long, pageable: Pageable): PagedResponse<CertificationResponse> {
-        val certificationPage = certificationRepository.findByChallenge_Id(challengeId, pageable)
-        val content = certificationPage.content.map { CertificationResponse.from(it) }
-        return PagedResponse.from(certificationPage, content)
+    // 실제 삭제 대신 isDeleted 플래그를 true로 변경 (Soft Delete)
+    certificationRepository.delete(certification)
+  }
+
+  /**
+   * 특정 인증에 사진 URL을 업로드(등록)합니다.
+   * 작성자만 사진 URL 등록이 가능합니다.
+   * @param certificationId 사진 URL을 등록할 인증의 ID
+   * @param photoUrl 업로드된 사진의 URL
+   * @param userLoginId 현재 로그인한 사용자의 ID
+   * @return 사진 정보가 업데이트된 인증의 응답 객체
+   * @throws CertificationNotFoundException 인증을 찾을 수 없을 때
+   * @throws CertificationUpdateForbiddenException 사진 업로드 권한이 없을 때
+   */
+  @Transactional
+  fun uploadCertificationPhoto(certificationId: Long, photoUrl: String, userLoginId: String): CertificationResponse {
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
+    // 인증 작성자와 현재 로그인한 사용자가 일치하는지 확인
+    if (certification.user.loginId != userLoginId) {
+      throw CertificationUpdateForbiddenException("이 인증에 사진을 업로드할 권한이 없습니다")
     }
 
-    @Transactional
-    fun updateCertification(certificationId: Long, request: CertificationUpdateRequest, userLoginId: String): CertificationResponse {
-        val certification = certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
-
-        if (certification.user.loginId != userLoginId) {
-            throw CertificationUpdateForbiddenException()
-        }
-
-        if (certification.createdAt.isBefore(LocalDateTime.now().minusHours(24))) {
-            throw CertificationUpdatePeriodExpiredException()
-        }
-
-        certification.title = request.title
-        certification.content = request.content
-        certification.updatedAt = LocalDateTime.now()
-
-        val updatedCertification = certificationRepository.save(certification)
-        return CertificationResponse.from(updatedCertification)
-    }
-
-    @Transactional
-    fun deleteCertification(certificationId: Long, userLoginId: String) {
-        val certification = certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
-
-        if (certification.user.loginId != userLoginId) {
-            throw CertificationUpdateForbiddenException("You are not allowed to delete this certification")
-        }
-
-        certificationRepository.delete(certification)
-    }
-    
-    @Transactional
-    fun uploadCertificationPhoto(certificationId: Long, photoUrl: String, userLoginId: String): CertificationResponse {
-        val certification = certificationRepository.findById(certificationId).orElseThrow { CertificationNotFoundException() }
-        if (certification.user.loginId != userLoginId) {
-            throw CertificationUpdateForbiddenException("You are not allowed to upload photo to this certification")
-        }
-        
-        certification.photoUrl = photoUrl
-        val updatedCertification = certificationRepository.save(certification)
-        return CertificationResponse.from(updatedCertification)
-    }
+    certification.photoUrl = photoUrl
+    val updatedCertification = certificationRepository.save(certification)
+    return CertificationResponse.from(updatedCertification)
+  }
 }

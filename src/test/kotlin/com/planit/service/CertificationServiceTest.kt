@@ -2,8 +2,8 @@ package com.planit.service
 
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationUpdateRequest
-import com.planit.entity.Challenge
 import com.planit.entity.Certification
+import com.planit.entity.Challenge
 import com.planit.entity.User
 import com.planit.exception.CertificationUpdateForbiddenException
 import com.planit.exception.CertificationUpdatePeriodExpiredException
@@ -11,16 +11,14 @@ import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
 import com.planit.util.setPrivateProperty
-import io.mockk.*
+import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.justRun
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
 import java.util.*

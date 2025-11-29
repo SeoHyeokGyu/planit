@@ -23,8 +23,8 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
       <div className="text-center">
         <h1 className="text-6xl font-bold text-blue-600 mb-4">Planit</h1>
-        <p className="text-xl text-gray-600 mb-2">여행 플래너 애플리케이션</p>
-        <p className="text-gray-500 mb-8">Spring Boot + Next.js 통합 배포</p>
+        <p className="text-xl text-gray-600 mb-2">매일매일 성장하는 챌린지</p>
+        <p className="text-gray-500 mb-8">새로운 습관을 만들고, 목표를 달성하세요</p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           {isAuthenticated ? (
