@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.*
 import java.time.LocalDateTime
@@ -35,6 +36,9 @@ class ChallengeControllerTest {
     @MockkBean
     private lateinit var jwtTokenProvider: JwtTokenProvider
 
+    @MockkBean
+    private lateinit var redisTemplate: RedisTemplate<String, Any>
+
     @Test
     @DisplayName("챌린지 생성 성공")
     fun `createChallenge should return 201 Created on success`() {
@@ -50,7 +54,7 @@ class ChallengeControllerTest {
         )
 
         val response = ChallengeResponse(
-            id = 1L,
+            challengeId = "CHL-12345678",
             title = "30일 운동 챌린지",
             description = "매일 30분씩 운동하기",
             category = "EXERCISE",
@@ -67,7 +71,7 @@ class ChallengeControllerTest {
 
         // When & Then
         mockMvc.post("/api/v1/challenges") {
-            header("X-User-Id", "1")
+            header("X-User-Id", "user123")
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
@@ -82,7 +86,7 @@ class ChallengeControllerTest {
     fun `getChallengeById should return 200 OK on success`() {
         // Given
         val response = ChallengeResponse(
-            id = 1L,
+            challengeId = "CHL-12345678",
             title = "30일 운동 챌린지",
             description = "매일 30분씩 운동하기",
             category = "EXERCISE",
@@ -95,14 +99,14 @@ class ChallengeControllerTest {
             certificationCnt = 20
         )
 
-        every { challengeService.getChallengeById(1L) } returns response
+        every { challengeService.getChallengeById("CHL-12345678") } returns response
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/1")
+        mockMvc.get("/api/v1/challenges/CHL-12345678")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
-                jsonPath("$.data.id") { value(1) }
+                jsonPath("$.data.challengeId") { value("CHL-12345678") }
                 jsonPath("$.data.title") { value("30일 운동 챌린지") }
             }
     }
@@ -111,11 +115,11 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 상세 조회 실패 - 존재하지 않는 챌린지")
     fun `getChallengeById should return 404 Not Found for non-existent challenge`() {
         // Given
-        every { challengeService.getChallengeById(999L) } throws
-                NoSuchElementException("챌린지를 찾을 수 없습니다: 999")
+        every { challengeService.getChallengeById("CHL-99999999") } throws
+                NoSuchElementException("챌린지를 찾을 수 없습니다: CHL-99999999")
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/999")
+        mockMvc.get("/api/v1/challenges/CHL-99999999")
             .andExpect {
                 status { isNotFound() }
                 jsonPath("$.success") { value(false) }
@@ -129,7 +133,7 @@ class ChallengeControllerTest {
         // Given
         val challenges = listOf(
             ChallengeListResponse(
-                id = 1L,
+                challengeId = "CHL-12345678",
                 title = "30일 운동 챌린지",
                 description = "매일 30분씩 운동하기",
                 category = "EXERCISE",
@@ -161,7 +165,7 @@ class ChallengeControllerTest {
         // Given
         val challenges = listOf(
             ChallengeListResponse(
-                id = 1L,
+                challengeId = "CHL-12345678",
                 title = "30일 운동 챌린지",
                 description = "매일 30분씩 운동하기",
                 category = "EXERCISE",
@@ -202,7 +206,7 @@ class ChallengeControllerTest {
         )
 
         val response = ChallengeResponse(
-            id = 1L,
+            challengeId = "CHL-12345678",
             title = "수정된 챌린지",
             description = "수정된 설명",
             category = "HEALTH",
@@ -215,11 +219,11 @@ class ChallengeControllerTest {
             certificationCnt = 20
         )
 
-        every { challengeService.updateChallenge(1L, any(), 1L) } returns response
+        every { challengeService.updateChallenge("CHL-12345678", any(), "user123") } returns response
 
         // When & Then
-        mockMvc.put("/api/v1/challenges/1") {
-            header("X-User-Id", "1")
+        mockMvc.put("/api/v1/challenges/CHL-12345678") {
+            header("X-User-Id", "user123")
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
@@ -243,12 +247,12 @@ class ChallengeControllerTest {
             endDate = LocalDateTime.of(2024, 1, 31, 23, 59)
         )
 
-        every { challengeService.updateChallenge(1L, any(), 999L) } throws
+        every { challengeService.updateChallenge("CHL-12345678", any(), "user999") } throws
                 IllegalArgumentException("챌린지를 수정할 권한이 없습니다")
 
         // When & Then
-        mockMvc.put("/api/v1/challenges/1") {
-            header("X-User-Id", "999")
+        mockMvc.put("/api/v1/challenges/CHL-12345678") {
+            header("X-User-Id", "user999")
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
@@ -262,17 +266,17 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 삭제 성공")
     fun `deleteChallenge should return 200 OK on success`() {
         // Given
-        every { challengeService.deleteChallenge(1L, 1L) } just runs
+        every { challengeService.deleteChallenge("CHL-12345678", "user123") } just runs
 
         // When & Then
-        mockMvc.delete("/api/v1/challenges/1") {
-            header("X-User-Id", "1")
+        mockMvc.delete("/api/v1/challenges/CHL-12345678") {
+            header("X-User-Id", "user123")
         }.andExpect {
             status { isOk() }
             jsonPath("$.success") { value(true) }
         }
 
-        verify(exactly = 1) { challengeService.deleteChallenge(1L, 1L) }
+        verify(exactly = 1) { challengeService.deleteChallenge("CHL-12345678", "user123") }
     }
 
     @Test
@@ -280,8 +284,8 @@ class ChallengeControllerTest {
     fun `joinChallenge should return 201 Created on success`() {
         // Given
         val response = ParticipateResponse(
-            id = 1L,
-            userId = 1L,
+            challengeId = "CHL-12345678",
+            loginId = "user123",
             status = ParticipantStatusEnum.ACTIVE,
             certificationCnt = 0,
             joinedAt = LocalDateTime.now(),
@@ -289,15 +293,15 @@ class ChallengeControllerTest {
             withdrawnAt = null
         )
 
-        every { challengeService.joinChallenge(1L, 1L) } returns response
+        every { challengeService.joinChallenge("CHL-12345678", "user123") } returns response
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/1/join") {
-            header("X-User-Id", "1")
+        mockMvc.post("/api/v1/challenges/CHL-12345678/join") {
+            header("X-User-Id", "user123")
         }.andExpect {
             status { isCreated() }
             jsonPath("$.success") { value(true) }
-            jsonPath("$.data.userId") { value(1) }
+            jsonPath("$.data.loginId") { value("user123") }
             jsonPath("$.data.status") { value("ACTIVE") }
         }
     }
@@ -306,12 +310,12 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 참여 실패 - 이미 참여중")
     fun `joinChallenge should return 409 Conflict for duplicate participation`() {
         // Given
-        every { challengeService.joinChallenge(1L, 1L) } throws
+        every { challengeService.joinChallenge("CHL-12345678", "user123") } throws
                 IllegalStateException("이미 참여중인 챌린지입니다")
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/1/join") {
-            header("X-User-Id", "1")
+        mockMvc.post("/api/v1/challenges/CHL-12345678/join") {
+            header("X-User-Id", "user123")
         }.andExpect {
             status { isInternalServerError() } // IllegalStateException이 500으로 처리됨
             jsonPath("$.success") { value(false) }
@@ -322,33 +326,33 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 탈퇴 성공")
     fun `withdrawChallenge should return 200 OK on success`() {
         // Given
-        every { challengeService.withdrawChallenge(1L, 1L) } just runs
+        every { challengeService.withdrawChallenge("CHL-12345678", "user123") } just runs
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/1/withdraw") {
-            header("X-User-Id", "1")
+        mockMvc.post("/api/v1/challenges/CHL-12345678/withdraw") {
+            header("X-User-Id", "user123")
         }.andExpect {
             status { isOk() }
             jsonPath("$.success") { value(true) }
         }
 
-        verify(exactly = 1) { challengeService.withdrawChallenge(1L, 1L) }
+        verify(exactly = 1) { challengeService.withdrawChallenge("CHL-12345678", "user123") }
     }
 
     @Test
     @DisplayName("조회수 증가 성공")
     fun `incrementViewCount should return 200 OK on success`() {
         // Given
-        every { challengeService.incrementViewCount(1L) } just runs
+        every { challengeService.incrementViewCount("CHL-12345678") } just runs
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/1/view")
+        mockMvc.post("/api/v1/challenges/CHL-12345678/view")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
             }
 
-        verify(exactly = 1) { challengeService.incrementViewCount(1L) }
+        verify(exactly = 1) { challengeService.incrementViewCount("CHL-12345678") }
     }
 
     @Test
@@ -357,8 +361,8 @@ class ChallengeControllerTest {
         // Given
         val participants = listOf(
             ParticipateResponse(
-                id = 1L,
-                userId = 1L,
+                challengeId = "CHL-12345678",
+                loginId = "user123",
                 status = ParticipantStatusEnum.ACTIVE,
                 certificationCnt = 5,
                 joinedAt = LocalDateTime.now(),
@@ -367,14 +371,14 @@ class ChallengeControllerTest {
             )
         )
 
-        every { challengeService.getParticipants(1L) } returns participants
+        every { challengeService.getParticipants("CHL-12345678") } returns participants
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/1/participants")
+        mockMvc.get("/api/v1/challenges/CHL-12345678/participants")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
-                jsonPath("$.data[0].userId") { value(1) }
+                jsonPath("$.data[0].loginId") { value("user123") }
                 jsonPath("$.data[0].certificationCnt") { value(5) }
             }
     }
@@ -384,7 +388,7 @@ class ChallengeControllerTest {
     fun `getChallengeStatistics should return 200 OK with statistics`() {
         // Given
         val statistics = ChallengeStatisticsResponse(
-            challengeId = 1L,
+            challengeId = "CHL-12345678",
             totalParticipants = 100,
             activeParticipants = 80,
             completedParticipants = 15,
@@ -395,10 +399,10 @@ class ChallengeControllerTest {
             viewCount = 1500
         )
 
-        every { challengeService.getChallengeStatistics(1L) } returns statistics
+        every { challengeService.getChallengeStatistics("CHL-12345678") } returns statistics
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/1/statistics")
+        mockMvc.get("/api/v1/challenges/CHL-12345678/statistics")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }

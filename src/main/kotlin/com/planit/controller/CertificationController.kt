@@ -90,7 +90,7 @@ class CertificationController(
    */
   @GetMapping("/challenge/{challengeId}")
   fun getCertificationsByChallenge(
-    @PathVariable challengeId: Long,
+    @PathVariable challengeId: String,
     @PageableDefault(size = 10) pageable: Pageable
   ): ResponseEntity<ApiResponse<List<CertificationResponse>>> {
     val certificationPage = certificationService.getCertificationsByChallenge(challengeId, pageable)

@@ -9,23 +9,23 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, Long> {
+interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, String> {
 
     // 챌린지 ID로 참여자 조회
     fun findByChallengeId(challengeId: String): List<ChallengeParticipant>
 
     // 중복 참여 체크
-    fun existsByChallengeIdAndLoginId(challengeId: String, loginId: Long): Boolean
+    fun existsByChallengeIdAndLoginId(challengeId: String, loginId: String): Boolean
 
     // 특정 사용자의 챌린지 참여 정보 조회
-    fun findByChallengeIdAndLoginId(challengeId: String, loginId: Long): Optional<ChallengeParticipant>
+    fun findByChallengeIdAndLoginId(challengeId: String, loginId: String): Optional<ChallengeParticipant>
 
     // 사용자의 참여 목록
-    fun findByLoginId(loginId: Long): List<ChallengeParticipant>
+    fun findByLoginId(loginId: String): List<ChallengeParticipant>
 
     // 사용자의 상태별 참여 목록
     fun findByLoginIdAndStatus(
-        loginId: Long,
+        loginId: String,
         status: ParticipantStatusEnum
     ): List<ChallengeParticipant>
 

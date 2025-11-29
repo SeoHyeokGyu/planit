@@ -46,16 +46,20 @@ class ChallengeServiceTest {
     private lateinit var challengeRequest: ChallengeRequest
     private lateinit var participant: ChallengeParticipant
 
+    val now = LocalDateTime.now()
+    val challengeId = "CHL-12345678"
+
     @BeforeEach
     fun setUp() {
+
         challengeRequest = ChallengeRequest(
             title = "30일 운동 챌린지",
             description = "매일 30분씩 운동하기",
             category = "EXERCISE",
             difficulty = "NORMAL",
             loginId = "user123",
-            startDate = LocalDateTime.of(2024, 1, 1, 0, 0),
-            endDate = LocalDateTime.of(2024, 1, 31, 23, 59)
+            startDate = now.minusDays(5),  // 5일 전 시작
+            endDate = now.plusDays(25)     // 25일 후 종료
         )
 
         challenge = Challenge(
@@ -63,8 +67,8 @@ class ChallengeServiceTest {
             description = "매일 30분씩 운동하기",
             category = "EXERCISE",
             difficulty = "NORMAL",
-            startDate = LocalDateTime.of(2024, 1, 1, 0, 0),
-            endDate = LocalDateTime.of(2024, 1, 31, 23, 59),
+            startDate = now.minusDays(5),  // 5일 전 시작
+            endDate = now.plusDays(25),    // 25일 후 종료
             createdId = "user123",
             viewCnt = 0,
             participantCnt = 0,
@@ -72,8 +76,8 @@ class ChallengeServiceTest {
         )
 
         participant = ChallengeParticipant(
-            challengeId = "CHL-12345678",
-            loginId = 1L
+            challengeId = challengeId,
+            loginId = "user123"
         )
 
         every { redisTemplate.opsForValue() } returns valueOperations
@@ -86,7 +90,7 @@ class ChallengeServiceTest {
         every { challengeRepository.save(any()) } returns challenge
 
         // When
-        val result = challengeService.createChallenge(challengeRequest, 1L)
+        val result = challengeService.createChallenge(challengeRequest, "user123")
 
         // Then
         assertNotNull(result)
@@ -99,29 +103,30 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 상세 조회 성공")
     fun `getChallengeById should succeed when challenge exists`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
 
         // When
-        val result = challengeService.getChallengeById(1L)
+        val result = challengeService.getChallengeById(challengeId)
 
         // Then
         assertNotNull(result)
         assertEquals("30일 운동 챌린지", result.title)
-        verify(exactly = 1) { challengeRepository.findById(1L) }
+        verify(exactly = 1) { challengeRepository.findById(challengeId) }
     }
 
     @Test
     @DisplayName("챌린지 상세 조회 실패 - 존재하지 않는 챌린지")
     fun `getChallengeById should throw NoSuchElementException when challenge not found`() {
         // Given
-        every { challengeRepository.findById(999L) } returns Optional.empty()
+        val nonExistentId = "CHL-99999999"
+        every { challengeRepository.findById(nonExistentId) } returns Optional.empty()
 
         // When & Then
         val exception = assertThrows<NoSuchElementException> {
-            challengeService.getChallengeById(999L)
+            challengeService.getChallengeById(nonExistentId)
         }
-        assertEquals("챌린지를 찾을 수 없습니다: 999", exception.message)
-        verify(exactly = 1) { challengeRepository.findById(999L) }
+        assertEquals("챌린지를 찾을 수 없습니다: $nonExistentId", exception.message)
+        verify(exactly = 1) { challengeRepository.findById(nonExistentId) }
     }
 
     @Test
@@ -187,8 +192,21 @@ class ChallengeServiceTest {
             category = "HEALTH",
             difficulty = "HARD",
             loginId = "user123",
-            startDate = LocalDateTime.of(2024, 2, 1, 0, 0),
-            endDate = LocalDateTime.of(2024, 2, 28, 23, 59)
+            startDate = now.plusDays(1),  // 미래 시작일
+            endDate = now.plusDays(31)     // 미래 종료일
+        )
+
+        val futureChallenge = Challenge(
+            title = "30일 운동 챌린지",
+            description = "매일 30분씩 운동하기",
+            category = "EXERCISE",
+            difficulty = "NORMAL",
+            startDate = now.plusDays(1),  // 미래 시작일 (진행 중이 아님)
+            endDate = now.plusDays(31),
+            createdId = "user123",
+            viewCnt = 0,
+            participantCnt = 0,
+            certificationCnt = 0
         )
 
         val updatedChallenge = Challenge(
@@ -196,24 +214,24 @@ class ChallengeServiceTest {
             description = "수정된 설명",
             category = "HEALTH",
             difficulty = "HARD",
-            startDate = LocalDateTime.of(2024, 2, 1, 0, 0),
-            endDate = LocalDateTime.of(2024, 2, 28, 23, 59),
-            createdId = "123",
+            startDate = now.plusDays(1),
+            endDate = now.plusDays(31),
+            createdId = "user123",
             viewCnt = 0,
             participantCnt = 0,
             certificationCnt = 0
         )
 
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
+        every { challengeRepository.findById(challengeId) } returns Optional.of(futureChallenge)
         every { challengeRepository.save(any()) } returns updatedChallenge
 
         // When
-        val result = challengeService.updateChallenge(1L, updateRequest, 123L)
+        val result = challengeService.updateChallenge(challengeId, updateRequest, "user123")
 
         // Then
         assertNotNull(result)
         assertEquals("수정된 챌린지", result.title)
-        verify(exactly = 1) { challengeRepository.findById(1L) }
+        verify(exactly = 1) { challengeRepository.findById(challengeId) }
         verify(exactly = 1) { challengeRepository.save(any()) }
     }
 
@@ -221,14 +239,27 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 수정 실패 - 권한 없음")
     fun `updateChallenge should throw IllegalArgumentException without permission`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
+        val futureChallenge = Challenge(
+            title = "30일 운동 챌린지",
+            description = "매일 30분씩 운동하기",
+            category = "EXERCISE",
+            difficulty = "NORMAL",
+            startDate = now.plusDays(1),
+            endDate = now.plusDays(31),
+            createdId = "user123",
+            viewCnt = 0,
+            participantCnt = 0,
+            certificationCnt = 0
+        )
+
+        every { challengeRepository.findById(challengeId) } returns Optional.of(futureChallenge)
 
         // When & Then
         val exception = assertThrows<IllegalArgumentException> {
-            challengeService.updateChallenge(1L, challengeRequest, 999L)
+            challengeService.updateChallenge(challengeId, challengeRequest, "user999")
         }
         assertEquals("챌린지를 수정할 권한이 없습니다", exception.message)
-        verify(exactly = 1) { challengeRepository.findById(1L) }
+        verify(exactly = 1) { challengeRepository.findById(challengeId) }
         verify(exactly = 0) { challengeRepository.save(any()) }
     }
 
@@ -236,14 +267,14 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 삭제 성공")
     fun `deleteChallenge should succeed with valid permission`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
         every { challengeRepository.delete(any()) } just runs
 
         // When
-        challengeService.deleteChallenge(1L, 123L)
+        challengeService.deleteChallenge(challengeId, "user123")
 
         // Then
-        verify(exactly = 1) { challengeRepository.findById(1L) }
+        verify(exactly = 1) { challengeRepository.findById(challengeId) }
         verify(exactly = 1) { challengeRepository.delete(any()) }
     }
 
@@ -251,14 +282,14 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 삭제 실패 - 권한 없음")
     fun `deleteChallenge should throw IllegalArgumentException without permission`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
 
         // When & Then
         val exception = assertThrows<IllegalArgumentException> {
-            challengeService.deleteChallenge(1L, 999L)
+            challengeService.deleteChallenge(challengeId, "user999")
         }
         assertEquals("챌린지를 삭제할 권한이 없습니다", exception.message)
-        verify(exactly = 1) { challengeRepository.findById(1L) }
+        verify(exactly = 1) { challengeRepository.findById(challengeId) }
         verify(exactly = 0) { challengeRepository.delete(any()) }
     }
 
@@ -266,36 +297,36 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 참여 성공")
     fun `joinChallenge should succeed when not already participating`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
-        every { participantRepository.existsByChallengeIdAndLoginId(any(), any()) } returns false
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") } returns false
         every { participantRepository.save(any()) } returns participant
-        every { challengeRepository.incrementParticipantCount(1L) } just runs
+        every { challengeRepository.save(any()) } returns challenge
 
         // When
-        val result = challengeService.joinChallenge(1L, 1L)
+        val result = challengeService.joinChallenge(challengeId, "user123")
 
         // Then
         assertNotNull(result)
-        assertEquals(1L, result.userId)
+        assertEquals("user123", result.loginId)
         assertEquals(ParticipantStatusEnum.ACTIVE, result.status)
-        verify(exactly = 1) { participantRepository.existsByChallengeIdAndLoginId(any(), any()) }
+        verify(exactly = 1) { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") }
         verify(exactly = 1) { participantRepository.save(any()) }
-        verify(exactly = 1) { challengeRepository.incrementParticipantCount(1L) }
+        verify(exactly = 1) { challengeRepository.save(any()) }
     }
 
     @Test
     @DisplayName("챌린지 참여 실패 - 이미 참여중")
     fun `joinChallenge should throw IllegalStateException when already participating`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
-        every { participantRepository.existsByChallengeIdAndLoginId(any(), any()) } returns true
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") } returns true
 
         // When & Then
         val exception = assertThrows<IllegalStateException> {
-            challengeService.joinChallenge(1L, 1L)
+            challengeService.joinChallenge(challengeId, "user123")
         }
         assertEquals("이미 참여중인 챌린지입니다", exception.message)
-        verify(exactly = 1) { participantRepository.existsByChallengeIdAndLoginId(any(), any()) }
+        verify(exactly = 1) { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") }
         verify(exactly = 0) { participantRepository.save(any()) }
     }
 
@@ -303,35 +334,35 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 탈퇴 성공")
     fun `withdrawChallenge should succeed when actively participating`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
-        every { participantRepository.findByChallengeIdAndLoginId(any(), any()) } returns Optional.of(participant)
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") } returns Optional.of(participant)
         every { participantRepository.save(any()) } returns participant
-        every { challengeRepository.decrementParticipantCount(1L) } just runs
+        every { challengeRepository.save(any()) } returns challenge
 
         // When
-        challengeService.withdrawChallenge(1L, 1L)
+        challengeService.withdrawChallenge(challengeId, "user123")
 
         // Then
         assertEquals(ParticipantStatusEnum.WITHDRAWN, participant.status)
         assertNotNull(participant.withdrawnAt)
-        verify(exactly = 1) { participantRepository.findByChallengeIdAndLoginId(any(), any()) }
+        verify(exactly = 1) { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") }
         verify(exactly = 1) { participantRepository.save(any()) }
-        verify(exactly = 1) { challengeRepository.decrementParticipantCount(1L) }
+        verify(exactly = 1) { challengeRepository.save(any()) }
     }
 
     @Test
     @DisplayName("챌린지 탈퇴 실패 - 참여 정보 없음")
     fun `withdrawChallenge should throw NoSuchElementException when not participating`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
-        every { participantRepository.findByChallengeIdAndLoginId(any(), any()) } returns Optional.empty()
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") } returns Optional.empty()
 
         // When & Then
         val exception = assertThrows<NoSuchElementException> {
-            challengeService.withdrawChallenge(1L, 1L)
+            challengeService.withdrawChallenge(challengeId, "user123")
         }
         assertEquals("참여 정보를 찾을 수 없습니다", exception.message)
-        verify(exactly = 1) { participantRepository.findByChallengeIdAndLoginId(any(), any()) }
+        verify(exactly = 1) { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") }
         verify(exactly = 0) { participantRepository.save(any()) }
     }
 
@@ -343,7 +374,7 @@ class ChallengeServiceTest {
         every { redisTemplate.expire(any(), any(), any()) } returns true
 
         // When
-        challengeService.incrementViewCount(1L)
+        challengeService.incrementViewCount(challengeId)
 
         // Then
         verify(exactly = 1) { valueOperations.increment(any()) }
@@ -354,15 +385,15 @@ class ChallengeServiceTest {
     @DisplayName("조회수 DB 동기화 성공")
     fun `syncViewCountToDatabase should update challenge view count`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
         every { challengeRepository.save(any()) } returns challenge
 
         // When
-        challengeService.syncViewCountToDatabase(1L, 100L)
+        challengeService.syncViewCountToDatabase(challengeId, 100L)
 
         // Then
         assertEquals(100L, challenge.viewCnt)
-        verify(exactly = 1) { challengeRepository.findById(1L) }
+        verify(exactly = 1) { challengeRepository.findById(challengeId) }
         verify(exactly = 1) { challengeRepository.save(any()) }
     }
 
@@ -371,37 +402,37 @@ class ChallengeServiceTest {
     fun `getParticipants should return list of participants`() {
         // Given
         val participants = listOf(participant)
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
-        every { participantRepository.findByChallengeId(any()) } returns participants
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { participantRepository.findByChallengeId(challengeId) } returns participants
 
         // When
-        val result = challengeService.getParticipants(1L)
+        val result = challengeService.getParticipants(challengeId)
 
         // Then
         assertNotNull(result)
         assertEquals(1, result.size)
-        assertEquals(1L, result[0].userId)
-        verify(exactly = 1) { participantRepository.findByChallengeId(any()) }
+        assertEquals("user123", result[0].loginId)
+        verify(exactly = 1) { participantRepository.findByChallengeId(challengeId) }
     }
 
     @Test
     @DisplayName("챌린지 통계 조회 성공")
     fun `getChallengeStatistics should return statistics`() {
         // Given
-        every { challengeRepository.findById(1L) } returns Optional.of(challenge)
-        every { participantRepository.countByChallengeId(any()) } returns 100L
-        every { participantRepository.countByChallengeIdAndStatus(any(), ParticipantStatusEnum.ACTIVE) } returns 80L
-        every { participantRepository.countByChallengeIdAndStatus(any(), ParticipantStatusEnum.COMPLETED) } returns 15L
-        every { participantRepository.countByChallengeIdAndStatus(any(), ParticipantStatusEnum.WITHDRAWN) } returns 5L
-        every { participantRepository.sumCertificationCountByChallengeId(any()) } returns 500L
+        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { participantRepository.countByChallengeId(challengeId) } returns 100L
+        every { participantRepository.countByChallengeIdAndStatus(challengeId, ParticipantStatusEnum.ACTIVE) } returns 80L
+        every { participantRepository.countByChallengeIdAndStatus(challengeId, ParticipantStatusEnum.COMPLETED) } returns 15L
+        every { participantRepository.countByChallengeIdAndStatus(challengeId, ParticipantStatusEnum.WITHDRAWN) } returns 5L
+        every { participantRepository.sumCertificationCountByChallengeId(challengeId) } returns 500L
         every { valueOperations.get(any()) } returns "1500"
 
         // When
-        val result = challengeService.getChallengeStatistics(1L)
+        val result = challengeService.getChallengeStatistics(challengeId)
 
         // Then
         assertNotNull(result)
-        assertEquals(1L, result.challengeId)
+        assertEquals(challengeId, result.challengeId)
         assertEquals(100, result.totalParticipants)
         assertEquals(80, result.activeParticipants)
         assertEquals(15, result.completedParticipants)

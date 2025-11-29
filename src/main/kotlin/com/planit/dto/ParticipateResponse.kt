@@ -5,8 +5,8 @@ import com.planit.enums.ParticipantStatusEnum
 import java.time.LocalDateTime
 
 data class ParticipateResponse(
-    val id: Long,
-    val userId: Long,
+    val challengeId: String,
+    val loginId: String,
     val status: ParticipantStatusEnum,
     val certificationCnt: Int,
     val joinedAt: LocalDateTime,
@@ -16,8 +16,8 @@ data class ParticipateResponse(
     companion object {
         fun from(participant: ChallengeParticipant): ParticipateResponse {
             return ParticipateResponse(
-                id = participant.id!!,
-                userId = participant.loginId,
+                challengeId = participant.challengeId,
+                loginId = participant.loginId,
                 status = participant.status,
                 certificationCnt = participant.certificationCnt,
                 joinedAt = participant.joinedAt,

@@ -1,7 +1,7 @@
 package com.planit.dto
 
 data class ChallengeStatisticsResponse(
-    val challengeId: Long,
+    val challengeId: String,
     val totalParticipants: Int,
     val activeParticipants: Int,
     val completedParticipants: Int,
