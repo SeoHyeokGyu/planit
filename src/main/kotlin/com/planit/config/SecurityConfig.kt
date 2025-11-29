@@ -33,8 +33,10 @@ class SecurityConfig {
           // Swagger UI 접근 허용
           it.requestMatchers(
                   "/swagger-ui/**",
+                  "/swagger-ui.html",
                   "/v3/api-docs/**",
                   "/swagger-resources/**",
+                  "/webjars/**",
                   "/api/health",
                   "/api/beans",
               )
@@ -75,8 +77,8 @@ class SecurityConfig {
   fun corsConfigurationSource(): CorsConfigurationSource {
     val configuration = CorsConfiguration()
     configuration.allowedOrigins = listOf(
-      "https://planit-frontend-dn9b.onrender.com",
-      "http://localhost:3000"
+      "http://localhost:3000",
+      "http://144.24.90.88:3000"
     )
     configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
     configuration.allowedHeaders = listOf("*")

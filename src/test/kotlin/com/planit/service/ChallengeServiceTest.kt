@@ -4,7 +4,7 @@ import com.planit.dto.ChallengeRequest
 import com.planit.dto.ChallengeSearchRequest
 import com.planit.entity.Challenge
 import com.planit.entity.ChallengeParticipant
-import com.planit.enum.ParticipantStatusEnum
+import com.planit.enums.ParticipantStatusEnum
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import io.mockk.every

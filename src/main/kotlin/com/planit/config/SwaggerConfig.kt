@@ -29,7 +29,7 @@ class SwaggerConfig {
                             .email("team@planit.com")
                     )
             )
-            .addServersItem(Server().url("https://planit-api-y2ie.onrender.com").description("Production Server"))
+            .addServersItem(Server().url("http://144.24.90.88:8080").description("Oracle Cloud Production Server"))
             .addServersItem(Server().url("http://localhost:8080").description("Local Server"))
             .addSecurityItem(SecurityRequirement().addList(securitySchemeName))
             .components(

@@ -17,14 +17,6 @@ export interface LoginResponse {
   message: string;
 }
 
-export interface UserProfile {
-  id: number;
-  loginId: string;
-  nickname: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

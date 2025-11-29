@@ -1,0 +1,132 @@
+package com.planit.controller
+
+import com.planit.dto.*
+import com.planit.service.CertificationService
+import com.planit.service.storage.FileStorageService
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+
+/**
+ * 챌린지 인증(Certification) 관련 API를 제공하는 컨트롤러
+ */
+@RestController
+@RequestMapping("/api/certifications")
+class CertificationController(
+  private val certificationService: CertificationService,
+  private val fileStorageService: FileStorageService
+) {
+
+  /**
+   * 새로운 인증을 생성합니다. (텍스트 정보만)
+   * @param request 인증 생성에 필요한 데이터 (challengeId, title, content)
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 생성된 인증 정보
+   */
+  @PostMapping
+  fun createCertification(
+    @RequestBody request: CertificationCreateRequest,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.createCertification(request, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
+   * 특정 인증에 사진을 업로드합니다.
+   * @param id 사진을 추가할 인증의 ID
+   * @param file 업로드할 사진 파일
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 사진 정보가 업데이트된 인증 정보
+   */
+  @PostMapping("/{id}/photo")
+  fun uploadPhoto(
+    @PathVariable id: Long,
+    @RequestParam("file") file: MultipartFile,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    // 파일을 서버에 저장하고 접근 URL을 받음
+    val photoUrl = fileStorageService.storeFile(file)
+    // 인증 정보에 사진 URL을 업데이트
+    val response = certificationService.uploadCertificationPhoto(id, photoUrl, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
+   * 특정 ID의 인증 정보를 조회합니다.
+   * @param id 조회할 인증의 ID
+   * @return 조회된 인증 정보
+   */
+  @GetMapping("/{id}")
+  fun getCertification(@PathVariable id: Long): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.getCertification(id)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
+   * 특정 사용자가 작성한 인증 목록을 페이징하여 조회합니다.
+   * @param userLoginId 인증 목록을 조회할 사용자의 로그인 ID
+   * @param pageable 페이징 정보 (기본 10개)
+   * @return 페이징된 인증 목록
+   */
+  @GetMapping("/user/{userLoginId}")
+  fun getCertificationsByUser(
+    @PathVariable userLoginId: String,
+    @PageableDefault(size = 10) pageable: Pageable
+  ): ResponseEntity<ApiResponse<List<CertificationResponse>>> {
+    val certificationPage = certificationService.getCertificationsByUser(userLoginId, pageable)
+    val certificationResponses = certificationPage.content.map { CertificationResponse.from(it) }
+    return ResponseEntity.ok(ApiResponse.pagedSuccess(certificationResponses, certificationPage))
+  }
+
+  /**
+   * 특정 챌린지에 속한 인증 목록을 페이징하여 조회합니다.
+   * @param challengeId 인증 목록을 조회할 챌린지의 ID
+   * @param pageable 페이징 정보 (기본 10개)
+   * @return 페이징된 인증 목록
+   */
+  @GetMapping("/challenge/{challengeId}")
+  fun getCertificationsByChallenge(
+    @PathVariable challengeId: Long,
+    @PageableDefault(size = 10) pageable: Pageable
+  ): ResponseEntity<ApiResponse<List<CertificationResponse>>> {
+    val certificationPage = certificationService.getCertificationsByChallenge(challengeId, pageable)
+    val certificationResponses = certificationPage.content.map { CertificationResponse.from(it) }
+    return ResponseEntity.ok(ApiResponse.pagedSuccess(certificationResponses, certificationPage))
+  }
+
+  /**
+   * 특정 인증의 정보를 수정합니다. (제목, 내용)
+   * @param id 수정할 인증의 ID
+   * @param request 수정할 인증 데이터
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 수정된 인증 정보
+   */
+  @PutMapping("/{id}")
+  fun updateCertification(
+    @PathVariable id: Long,
+    @RequestBody request: CertificationUpdateRequest,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.updateCertification(id, request, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
+   * 특정 인증을 삭제합니다. (Soft Delete)
+   * @param id 삭제할 인증의 ID
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 성공 응답
+   */
+  @DeleteMapping("/{id}")
+  fun deleteCertification(
+    @PathVariable id: Long,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<Unit>> {
+    certificationService.deleteCertification(id, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success())
+  }
+}

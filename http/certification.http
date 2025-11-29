@@ -1,0 +1,61 @@
+###
+# 새 인증 생성
+# 인증 필요
+POST http://localhost:8080/api/certifications
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "challengeId": 1,
+  "title": "My Certification",
+  "content": "This is my certification content."
+}
+
+###
+# 인증에 사진 업로드
+# 인증 필요
+POST http://localhost:8080/api/certifications/1/photo
+Content-Type: multipart/form-data; boundary=boundary
+Authorization: Bearer {{auth_token}}
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="image.jpg"
+Content-Type: image/jpeg
+
+< /path/to/your/image.jpg
+
+--boundary--
+
+###
+# ID로 인증 조회
+GET http://localhost:8080/api/certifications/1
+Content-Type: application/json
+
+###
+# 사용자별 인증 조회
+GET http://localhost:8080/api/certifications/user/testuser
+Content-Type: application/json
+
+###
+# 챌린지별 인증 조회
+GET http://localhost:8080/api/certifications/challenge/1
+Content-Type: application/json
+
+###
+# 인증 수정
+# 인증 필요
+PUT http://localhost:8080/api/certifications/1
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "title": "Updated Title",
+  "content": "Updated content."
+}
+
+###
+# 인증 삭제
+# 인증 필요
+DELETE http://localhost:8080/api/certifications/1
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}

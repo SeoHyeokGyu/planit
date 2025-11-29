@@ -1,7 +1,7 @@
 package com.planit.dto
 
 import com.planit.entity.ChallengeParticipant
-import com.planit.enum.ParticipantStatusEnum
+import com.planit.enums.ParticipantStatusEnum
 import java.time.LocalDateTime
 
 data class ParticipateResponse(

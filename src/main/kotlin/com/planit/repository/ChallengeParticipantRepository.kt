@@ -1,7 +1,7 @@
 package com.planit.repository
 
 import com.planit.entity.ChallengeParticipant
-import com.planit.enum.ParticipantStatusEnum
+import com.planit.enums.ParticipantStatusEnum
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param

@@ -21,6 +21,8 @@ application-secret.yml
 # Environment
 .env
 .env.local
+.env.prod
+.env.*.local
 
 # OS
 .DS_Store

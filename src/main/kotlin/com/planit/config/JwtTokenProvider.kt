@@ -9,13 +9,16 @@ import io.jsonwebtoken.UnsupportedJwtException
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
 import jakarta.annotation.PostConstruct
+import jakarta.servlet.http.HttpServletRequest
 import java.util.*
 import javax.crypto.SecretKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 
 @Component
 class JwtTokenProvider(
@@ -25,6 +28,8 @@ class JwtTokenProvider(
 ) {
   companion object {
     private val logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
+
+    private const val TOKEN_PREFIX = "Bearer " // 접두사
   }
 
   private lateinit var secretKey: SecretKey
@@ -34,7 +39,7 @@ class JwtTokenProvider(
     secretKey = Keys.hmacShaKeyFor(secretString.toByteArray())
   }
 
-  /** 인증 정보(email)를 기반으로 JWT를 생성합니다. */
+  /** 인증 정보(loginId)를 기반으로 JWT를 생성합니다. */
   fun createToken(loginId: String): String {
     val now = Date()
     val validity = Date(now.time + validityInMilliseconds)
@@ -81,6 +86,32 @@ class JwtTokenProvider(
         else -> logger.warn("JWT 토큰 처리 중 알 수 없는 오류 발생: ${e.message}")
       }
       return false
+    }
+  }
+
+  fun resolveToken(request: HttpServletRequest): String? {
+    return request
+        .getHeader(HttpHeaders.AUTHORIZATION)
+        ?.takeIf { it.isNotBlank() && it.startsWith(TOKEN_PREFIX) }
+        ?.removePrefix(TOKEN_PREFIX)
+  }
+
+  /** 토큰의 남은 유효 시간(밀리초)을 계산합니다. */
+  fun getRemainingTime(token: String): Long {
+    try {
+      // 1. 토큰 파싱하여 Claims(내용) 추출
+      val claims = getClaims(token)
+
+      // 2. 토큰의 만료 시간(exp) 가져오기
+      val expiration: Date = claims.expiration
+
+      // 3. 현재 시간과의 차이 계산
+      val now = Date().time
+      return expiration.time - now
+    } catch (_: Exception) {
+      // 토큰이 잘못되었거나 이미 만료된 경우 등 파싱 실패 시 0 반환
+      // (이미 만료된 토큰은 블랙리스트에 넣을 필요가 없으므로 0 리턴이 안전함)
+      return 0
     }
   }
 }

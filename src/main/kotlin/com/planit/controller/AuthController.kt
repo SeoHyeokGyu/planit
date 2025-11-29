@@ -5,6 +5,7 @@ import com.planit.dto.LoginRequest
 import com.planit.dto.LoginResponse
 import com.planit.dto.SignUpRequest
 import com.planit.service.AuthService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -26,5 +27,11 @@ class AuthController(private val authService: AuthService) {
   fun login(@RequestBody request: LoginRequest): ResponseEntity<ApiResponse<LoginResponse>> {
     val loginResponse = authService.login(request)
     return ResponseEntity.ok(ApiResponse.success(loginResponse))
+  }
+
+  @PostMapping("/logout")
+  fun logout(request: HttpServletRequest): ResponseEntity<ApiResponse<Unit>> {
+    authService.logout(request)
+    return ResponseEntity.ok(ApiResponse.success())
   }
 }
