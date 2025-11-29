@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.crypto.password.PasswordEncoder
 
@@ -27,6 +28,7 @@ class AuthServiceTest {
   @MockK private lateinit var passwordEncoder: PasswordEncoder
   @MockK private lateinit var authenticationManager: AuthenticationManager
   @MockK private lateinit var jwtTokenProvider: JwtTokenProvider
+  @MockK private lateinit var redisTemplate: RedisTemplate<String, Any>
   @InjectMockKs private lateinit var authService: AuthService
 
   private lateinit var signUpRequest: SignUpRequest
