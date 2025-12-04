@@ -31,6 +31,9 @@ interface ChallengeRepository : JpaRepository<Challenge, Long> {
     // challengeId로 조회
     fun findByChallengeId(challengeId: String): Challenge?
 
+    // 여러 challengeId로 조회
+    fun findByChallengeIdIn(challengeIds: List<String>): List<Challenge>
+
     // 조회수 증가
     @Modifying
     @Query("UPDATE Challenge c SET c.viewCnt = c.viewCnt + 1 WHERE c.id = :id")

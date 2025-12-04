@@ -1,5 +1,6 @@
 package com.planit.service
 
+import com.planit.config.RedisConfig
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationResponse
 import com.planit.dto.CertificationUpdateRequest
@@ -21,16 +22,12 @@ import java.time.LocalDateTime
 class CertificationService(
   private val certificationRepository: CertificationRepository,
   private val userRepository: UserRepository,
-  private val challengeRepository: ChallengeRepository
+  private val challengeRepository: ChallengeRepository,
+  private val redisPublisher: RedisPublisher
 ) {
 
   /**
    * 새로운 인증을 생성합니다.
-   * @param request 인증 생성에 필요한 데이터 (챌린지 ID, 제목, 내용)
-   * @param userLoginId 현재 로그인한 사용자의 ID
-   * @return 생성된 인증의 응답 객체
-   * @throws UserNotFoundException 사용자를 찾을 수 없을 때
-   * @throws ChallengeNotFoundException 챌린지를 찾을 수 없을 때
    */
   @Transactional
   fun createCertification(request: CertificationCreateRequest, userLoginId: String): CertificationResponse {
@@ -45,6 +42,12 @@ class CertificationService(
     )
 
     val savedCertification = certificationRepository.save(certification)
+
+    // 실시간 피드 알림을 위해 Redis 전역 채널에 인증 ID 발행
+    savedCertification.id?.let {
+      redisPublisher.publish(RedisConfig.GLOBAL_FEED_CHANNEL, it)
+    }
+
     return CertificationResponse.from(savedCertification)
   }
 

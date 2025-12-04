@@ -1,6 +1,23 @@
-###
-# 팔로잉 피드 조회
+@host = http://localhost:8080
+
+### 메인 피드 조회 (참여 중인 챌린지 기반)
 # 인증 필요
-GET http://localhost:8080/api/feed
+# 쿼리 파라미터: page, size, sort (기본값: page=0, size=10, sort=latest)
+GET {{host}}/api/feed?page=0&size=5&sort=latest
 Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+// @no-check-cert
+// @no-log
+
+### 팔로잉 피드 조회 (팔로우하는 사용자 인증만)
+# 인증 필요
+# 쿼리 파라미터: page, size, sort (기본값: page=0, size=10, sort=latest)
+GET {{host}}/api/feed/following?page=0&size=5&sort=latest
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+### 실시간 피드 스트림 구독 (SSE)
+# 인증 필요
+GET {{host}}/api/feed/stream
+Content-Type: text/event-stream
 Authorization: Bearer {{auth_token}}

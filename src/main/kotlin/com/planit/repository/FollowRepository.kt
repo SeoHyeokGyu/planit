@@ -57,11 +57,5 @@ interface FollowRepository : JpaRepository<Follow, Long> {
    */
   fun countByFollowerId(followerId: Long): Long
 
-  /**
-   * 특정 팔로워 ID를 가진 사용자가 팔로우하는 모든 사용자의 ID 목록을 조회합니다.
-   * @param followerId 팔로우하는 사용자의 ID
-   * @return 팔로우 대상 사용자의 ID 목록
-   */
-  @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :followerId")
-  fun findFollowingIdsByFollowerId(@Param("followerId") followerId: Long): List<Long>
+
 }

@@ -2,6 +2,7 @@ package com.planit.repository
 
 import com.planit.entity.Certification
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 
@@ -26,10 +27,25 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
     fun findByChallenge_Id(challengeId: Long, pageable: Pageable): Page<Certification>
 
     /**
-     * 주어진 사용자 ID 목록에 포함된 사용자들이 작성한 인증 목록을 생성일 내림차순으로 페이징하여 조회합니다.
+     * 주어진 챌린지 ID 목록에 포함된 챌린지의 인증 목록을 생성일 내림차순으로 페이징하여 조회합니다.
+     * @param challengeIds 챌린지 ID 목록
+     * @param pageable 페이징 정보
+     * @return 페이징된 인증 목록
+     */
+    fun findByChallenge_IdIn(challengeIds: List<Long>, pageable: Pageable): Page<Certification>
+
+  /**
+   * 주어진 사용자 ID 목록에 포함된 사용자들이 작성한 인증 목록을 페이징하여 조회합니다.
      * @param userIds 사용자 ID 목록
      * @param pageable 페이징 정보
      * @return 페이징된 인증 목록
      */
-    fun findByUser_IdInOrderByCreatedAtDesc(userIds: List<Long>, pageable: Pageable): Page<Certification>
+  fun findByUser_IdIn(userIds: List<Long>, pageable: Pageable): Page<Certification>
+
+  fun findByUser_IdInOrderByCreatedAtDesc(
+    listOf: List<Long>,
+    pageable: Pageable
+  ): Page<Certification>
+
+  fun findByChallenge_IdInOrderByCreatedAtDesc(listOf: List<Long>, pageable: Pageable): Page<Certification>
 }

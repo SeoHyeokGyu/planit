@@ -1,5 +1,6 @@
 package com.planit.config
 
+import jakarta.servlet.DispatcherType
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -55,7 +56,7 @@ class SecurityConfig {
               .permitAll()
               // 인증 관련 엔드포인트 허용
               .requestMatchers("/api/auth/**")
-              .permitAll()
+              .permitAll().dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
               // 나머지는 인증 필요
               .anyRequest()
               .authenticated()
