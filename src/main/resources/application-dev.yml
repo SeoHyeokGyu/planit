@@ -3,11 +3,11 @@ spring:
     ansi:
       enabled: always
 
-  # Neon PostgreSQL (로컬 테스트)
+  # Local PostgreSQL (Docker)
   datasource:
-    url: jdbc:postgresql://ep-gentle-rain-a17vm76u-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-    username: neondb_owner
-    password: npg_E8grzvON4UwY
+    url: jdbc:postgresql://localhost:5432/planit
+    username: planit
+    password: planit123
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -18,9 +18,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  # Redis 비활성화 (Upstash 설정 전까지)
+  # Local Redis (Docker)
   data:
     redis:
+      host: localhost
+      port: 6379
       repositories:
         enabled: false
 
