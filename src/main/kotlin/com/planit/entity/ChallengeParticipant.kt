@@ -14,6 +14,7 @@ import java.time.LocalDateTime
         Index(name = "idx_status", columnList = "status")
     ]
 )
+@IdClass(ChallengeParticipantId::class)  // 이거 추가
 class ChallengeParticipant(
     @Id
     @Column(name = "challenge_id", nullable = false)
@@ -65,3 +66,8 @@ class ChallengeParticipant(
         return result
     }
 }
+
+data class ChallengeParticipantId(
+    val challengeId: String = "",
+    val loginId: String = ""
+) : Serializable
