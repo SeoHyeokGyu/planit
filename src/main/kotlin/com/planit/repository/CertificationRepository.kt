@@ -23,7 +23,7 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
      * @param pageable 페이징 정보
      * @return 페이징된 인증 목록
      */
-    fun findByChallenge_Id(challengeId: String, pageable: Pageable): Page<Certification>
+    fun findByChallengeChallengeId(challengeId: String, pageable: Pageable): Page<Certification>
 
     /**
      * 주어진 사용자 ID 목록에 포함된 사용자들이 작성한 인증 목록을 생성일 내림차순으로 페이징하여 조회합니다.

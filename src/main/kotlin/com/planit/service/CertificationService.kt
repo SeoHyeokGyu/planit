@@ -80,7 +80,7 @@ class CertificationService(
    */
   @Transactional(readOnly = true)
   fun getCertificationsByChallenge(challengeId: String, pageable: Pageable): Page<Certification> {
-    return certificationRepository.findByChallenge_Id(challengeId, pageable)
+    return certificationRepository.findByChallengeChallengeId(challengeId, pageable)
   }
 
   /**
