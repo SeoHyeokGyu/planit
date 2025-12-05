@@ -28,7 +28,7 @@ class Challenge(
 ) {
     @Id
     @Column(nullable = false, unique = true)
-    var challengeId: String = generateChallengeId()
+    var id: String = generateId()
         private set
 
     @Column(nullable = false)
@@ -81,7 +81,7 @@ class Challenge(
     }
 
     companion object {
-        private fun generateChallengeId(): String {
+        private fun generateId(): String {
             return "CHL-${UUID.randomUUID().toString().substring(0, 8).uppercase()}"
         }
     }

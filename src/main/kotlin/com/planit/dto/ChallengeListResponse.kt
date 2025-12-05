@@ -19,7 +19,7 @@ data class ChallengeListResponse(
     companion object {
         fun from(challenge: Challenge): ChallengeListResponse {
             return ChallengeListResponse(
-                challengeId = challenge.challengeId,
+                challengeId = challenge.id,
                 title = challenge.title,
                 description = challenge.description,
                 category = challenge.category,

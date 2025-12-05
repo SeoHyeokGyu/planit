@@ -12,13 +12,13 @@ import java.util.*
 interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, String> {
 
     // 챌린지 ID로 참여자 조회
-    fun findByChallengeId(challengeId: String): List<ChallengeParticipant>
+    fun findByChallenge_Id(id: String): List<ChallengeParticipant>
 
     // 중복 참여 체크
-    fun existsByChallengeIdAndLoginId(challengeId: String, loginId: String): Boolean
+    fun existsByIdAndLoginId(id: String, loginId: String): Boolean
 
     // 특정 사용자의 챌린지 참여 정보 조회
-    fun findByChallengeIdAndLoginId(challengeId: String, loginId: String): Optional<ChallengeParticipant>
+    fun findByIdAndLoginId(id: String, loginId: String): Optional<ChallengeParticipant>
 
     // 사용자의 참여 목록
     fun findByLoginId(loginId: String): List<ChallengeParticipant>
@@ -30,22 +30,22 @@ interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, S
     ): List<ChallengeParticipant>
 
     // 챌린지의 상태별 참여자 조회
-    fun findByChallengeIdAndStatus(
-        challengeId: String,
+    fun findByIdAndStatus(
+        id: String,
         status: ParticipantStatusEnum
     ): List<ChallengeParticipant>
 
     // 챌린지의 전체 참여자 수
-    fun countByChallengeId(challengeId: String): Long
+    fun countById(id: String): Long
 
     // 챌린지의 상태별 참여자 수
-    fun countByChallengeIdAndStatus(challengeId: String, status: ParticipantStatusEnum): Long
+    fun countByIdAndStatus(id: String, status: ParticipantStatusEnum): Long
 
     // 챌린지의 전체 인증 수 합계
     @Query("""
         SELECT COALESCE(SUM(p.certificationCnt), 0) 
         FROM ChallengeParticipant p 
-        WHERE p.challengeId = :challengeId
+        WHERE p.id = :id
     """)
-    fun sumCertificationCountByChallengeId(@Param("challengeId") challengeId: String): Long
+    fun sumCertificationCountById(@Param("id") id: String): Long
 }
