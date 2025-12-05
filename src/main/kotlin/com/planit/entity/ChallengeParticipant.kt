@@ -10,15 +10,15 @@ import java.time.LocalDateTime
     name = "challenge_participants",
     indexes = [
         Index(name = "idx_login_id", columnList = "login_id"),
-        Index(name = "idx_challenge_id", columnList = "challenge_id"),
+        Index(name = "idx_id", columnList = "id"),
         Index(name = "idx_status", columnList = "status")
     ]
 )
 @IdClass(ChallengeParticipantId::class)  // 이거 추가
 class ChallengeParticipant(
     @Id
-    @Column(name = "challenge_id", nullable = false)
-    val challengeId: String,
+    @Column(name = "id", nullable = false)
+    val id: String,
 
     @Id
     @Column(name = "login_id", nullable = false)
@@ -57,17 +57,17 @@ class ChallengeParticipant(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ChallengeParticipant) return false
-        return challengeId == other.challengeId && loginId == other.loginId
+        return id == other.id && loginId == other.loginId
     }
 
     override fun hashCode(): Int {
-        var result = challengeId.hashCode()
+        var result = id.hashCode()
         result = 31 * result + loginId.hashCode()
         return result
     }
 }
 
 data class ChallengeParticipantId(
-    val challengeId: String = "",
+    val id: String = "",
     val loginId: String = ""
 ) : Serializable

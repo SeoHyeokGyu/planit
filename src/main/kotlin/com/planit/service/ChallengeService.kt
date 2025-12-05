@@ -152,7 +152,7 @@ class ChallengeService(
         val challenge = findChallengeById(challengeId)
 
         // 이미 참여중인지 확인
-        if (participantRepository.existsByChallengeIdAndLoginId(challengeId, loginId)) {
+        if (participantRepository.existsByIdAndLoginId(challengeId, loginId)) {
             throw IllegalStateException("이미 참여중인 챌린지입니다")
         }
 
@@ -162,7 +162,7 @@ class ChallengeService(
         }
 
         val participant = ChallengeParticipant(
-            challengeId = challengeId,
+            id = challengeId,
             loginId = loginId
         )
 
@@ -182,7 +182,7 @@ class ChallengeService(
     fun withdrawChallenge(challengeId: String, loginId: String) {
         val challenge = findChallengeById(challengeId)
 
-        val participant = participantRepository.findByChallengeIdAndLoginId(challengeId, loginId)
+        val participant = participantRepository.findByIdAndLoginId(challengeId, loginId)
             .orElseThrow { NoSuchElementException("참여 정보를 찾을 수 없습니다") }
 
         if (participant.status != ParticipantStatusEnum.ACTIVE) {
@@ -229,7 +229,7 @@ class ChallengeService(
      */
     fun getParticipants(challengeId: String): List<ParticipateResponse> {
         val challenge = findChallengeById(challengeId)
-        val participants = participantRepository.findByChallengeId(challengeId)
+        val participants = participantRepository.findByChallenge_Id(challengeId)
         return participants.map { ParticipateResponse.from(it) }
     }
 
@@ -239,17 +239,17 @@ class ChallengeService(
     fun getChallengeStatistics(challengeId: String): ChallengeStatisticsResponse {
         val challenge = findChallengeById(challengeId)
 
-        val totalParticipants = participantRepository.countByChallengeId(challengeId).toInt()
-        val activeParticipants = participantRepository.countByChallengeIdAndStatus(
+        val totalParticipants = participantRepository.countById(challengeId).toInt()
+        val activeParticipants = participantRepository.countByIdAndStatus(
             challengeId, ParticipantStatusEnum.ACTIVE
         ).toInt()
-        val completedParticipants = participantRepository.countByChallengeIdAndStatus(
+        val completedParticipants = participantRepository.countByIdAndStatus(
             challengeId, ParticipantStatusEnum.COMPLETED
         ).toInt()
-        val withdrawnParticipants = participantRepository.countByChallengeIdAndStatus(
+        val withdrawnParticipants = participantRepository.countByIdAndStatus(
             challengeId, ParticipantStatusEnum.WITHDRAWN
         ).toInt()
-        val totalCertifications = participantRepository.sumCertificationCountByChallengeId(challengeId)
+        val totalCertifications = participantRepository.sumCertificationCountById(challengeId)
 
         val completionRate = if (totalParticipants > 0) {
             (completedParticipants.toDouble() / totalParticipants) * 100

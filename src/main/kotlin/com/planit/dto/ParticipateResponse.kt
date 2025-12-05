@@ -16,7 +16,7 @@ data class ParticipateResponse(
     companion object {
         fun from(participant: ChallengeParticipant): ParticipateResponse {
             return ParticipateResponse(
-                challengeId = participant.challengeId,
+                challengeId = participant.id,
                 loginId = participant.loginId,
                 status = participant.status,
                 certificationCnt = participant.certificationCnt,

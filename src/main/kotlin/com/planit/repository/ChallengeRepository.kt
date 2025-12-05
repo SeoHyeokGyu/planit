@@ -30,16 +30,16 @@ interface ChallengeRepository : JpaRepository<Challenge, String> {
 
     // 조회수 증가
     @Modifying
-    @Query("UPDATE Challenge c SET c.viewCnt = c.viewCnt + 1 WHERE c.challengeId = :challengeId")
-    fun incrementViewCount(@Param("challengeId") challengeId: String)
+    @Query("UPDATE Challenge c SET c.viewCnt = c.viewCnt + 1 WHERE c.id = :id")
+    fun incrementViewCount(@Param("id") id: String)
 
     // 참여자 수 증가
     @Modifying
-    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt + 1 WHERE c.challengeId = :challengeId")
-    fun incrementParticipantCount(@Param("challengeId") challengeId: String)
+    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt + 1 WHERE c.id = :id")
+    fun incrementParticipantCount(@Param("id") id: String)
 
     // 참여자 수 감소
     @Modifying
-    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt - 1 WHERE c.challengeId = :challengeId AND c.participantCnt > 0")
-    fun decrementParticipantCount(@Param("challengeId") challengeId: String)
+    @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt - 1 WHERE c.id = :id AND c.participantCnt > 0")
+    fun decrementParticipantCount(@Param("id") id: String)
 }
