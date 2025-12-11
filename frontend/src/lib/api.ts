@@ -13,8 +13,10 @@ export const api = {
       ? useAuthStore.getState().token // Get token from Zustand store
       : null;
 
+    const isFormData = options.body instanceof FormData;
+
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
+      ...(!isFormData && { "Content-Type": "application/json" }),
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     };
@@ -39,26 +41,29 @@ export const api = {
   },
 
   post<T>(endpoint: string, data?: unknown, options?: RequestInit): Promise<T> {
+    const isFormData = data instanceof FormData;
     return this.fetch<T>(endpoint, {
       ...options,
       method: "POST",
-      body: JSON.stringify(data),
+      body: isFormData ? (data as FormData) : JSON.stringify(data),
     });
   },
 
   put<T>(endpoint: string, data?: unknown, options?: RequestInit): Promise<T> {
+    const isFormData = data instanceof FormData;
     return this.fetch<T>(endpoint, {
       ...options,
       method: "PUT",
-      body: JSON.stringify(data),
+      body: isFormData ? (data as FormData) : JSON.stringify(data),
     });
   },
 
   patch<T>(endpoint: string, data?: unknown, options?: RequestInit): Promise<T> {
+    const isFormData = data instanceof FormData;
     return this.fetch<T>(endpoint, {
       ...options,
       method: "PATCH",
-      body: JSON.stringify(data),
+      body: isFormData ? (data as FormData) : JSON.stringify(data),
     });
   },
 

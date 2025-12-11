@@ -5,10 +5,12 @@ import com.planit.service.CertificationService
 import com.planit.service.storage.FileStorageService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalDateTime
 
 /**
  * 챌린지 인증(Certification) 관련 API를 제공하는 컨트롤러
@@ -80,6 +82,23 @@ class CertificationController(
     val certificationPage = certificationService.getCertificationsByUser(userLoginId, pageable)
     val certificationResponses = certificationPage.content.map { CertificationResponse.from(it) }
     return ResponseEntity.ok(ApiResponse.pagedSuccess(certificationResponses, certificationPage))
+  }
+
+  /**
+   * 특정 사용자가 특정 기간 내에 작성한 인증 목록을 조회합니다.
+   * @param userLoginId 인증 목록을 조회할 사용자의 로그인 ID
+   * @param from 시작 일시 (ISO Date Time)
+   * @param to 종료 일시 (ISO Date Time)
+   * @return 인증 목록
+   */
+  @GetMapping("/user/{userLoginId}/date-range")
+  fun getCertificationsByDateRange(
+    @PathVariable userLoginId: String,
+    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) from: LocalDateTime,
+    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) to: LocalDateTime
+  ): ResponseEntity<ApiResponse<List<CertificationResponse>>> {
+    val responses = certificationService.getCertificationsByDateRange(userLoginId, from, to)
+    return ResponseEntity.ok(ApiResponse.success(responses))
   }
 
   /**
