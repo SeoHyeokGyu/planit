@@ -24,46 +24,46 @@ export default function Header() {
                 href="/dashboard"
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
-                Dashboard
+                대시보드
               </Link>
               <Link
                 href="/challenge"
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
-                Challenges
+                챌린지
               </Link>
               <Link
                 href="/feed"
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
-                Feed
+                피드
               </Link>
               <Link
                 href="/profile"
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
-                Profile
+                프로필
               </Link>
               <button
                 onClick={logout}
-                className="text-gray-500 hover:text-gray-700 text-sm"
+                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
               >
-                Logout
+                로그아웃
               </button>
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="text-gray-600 hover:text-gray-900 font-medium"
+                className="bg-white border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 font-semibold transition-all hover:shadow-md"
               >
-                Login
+                로그인
               </Link>
               <Link
                 href="/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 font-semibold shadow-md hover:shadow-lg transition-all"
               >
-                Sign Up
+                가입하기
               </Link>
             </>
           )}
