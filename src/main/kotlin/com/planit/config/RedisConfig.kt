@@ -1,7 +1,5 @@
 package com.planit.config
 
-import com.planit.dto.FeedEvent
-import com.planit.service.FeedMessageListener
 import java.time.Duration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
@@ -11,16 +9,13 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.data.redis.listener.ChannelTopic
-import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 /**
  * Redis 관련 설정을 정의하는 Configuration 클래스입니다.
- * RedisTemplate, Redis CacheManager, 그리고 Redis Pub/Sub을 구성합니다.
+ * RedisTemplate과 Redis CacheManager을 구성합니다.
  */
 @Configuration
 @EnableCaching // Spring의 캐싱 기능을 활성화합니다.
@@ -41,42 +36,6 @@ class RedisConfig {
             hashKeySerializer = StringRedisSerializer() // Hash Key 직렬화
             hashValueSerializer = GenericJackson2JsonRedisSerializer() // Hash Value 직렬화 (JSON)
         }
-    }
-
-    /**
-     * 피드 이벤트 전용 RedisTemplate을 구성합니다.
-     * SSE를 통한 실시간 피드 브로드캐스트에 사용됩니다.
-     * @param connectionFactory Redis 연결 팩토리
-     * @return FeedEvent 타입 전용 RedisTemplate
-     */
-    @Bean
-    fun feedEventTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, FeedEvent> {
-        return RedisTemplate<String, FeedEvent>().apply {
-            setConnectionFactory(connectionFactory)
-            keySerializer = StringRedisSerializer()
-            valueSerializer = Jackson2JsonRedisSerializer(FeedEvent::class.java)
-        }
-    }
-
-    /**
-     * Redis Pub/Sub 메시지 리스너 컨테이너를 구성합니다.
-     * 'feed-events' 채널을 구독하여 피드 이벤트를 수신합니다.
-     * @param connectionFactory Redis 연결 팩토리
-     * @param feedMessageListener 피드 메시지를 처리할 리스너
-     * @return 구성된 RedisMessageListenerContainer
-     */
-    @Bean
-    fun redisMessageListenerContainer(
-        connectionFactory: RedisConnectionFactory,
-        feedMessageListener: FeedMessageListener
-    ): RedisMessageListenerContainer {
-        val container = RedisMessageListenerContainer()
-        container.setConnectionFactory(connectionFactory)
-        container.addMessageListener(
-            feedMessageListener,
-            ChannelTopic("feed-events")
-        )
-        return container
     }
 
     /**
