@@ -89,7 +89,7 @@ export default function Home() {
               {isAuthenticated ? (
                 <>
                   <Link href="/profile">
-                    <Button size="lg" className="w-full sm:w-auto group">
+                    <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group">
                       내 프로필 가기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -98,7 +98,7 @@ export default function Home() {
                     onClick={handleLogout}
                     variant="outline"
                     size="lg"
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto border-2 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold"
                   >
                     로그아웃
                   </Button>
@@ -106,16 +106,15 @@ export default function Home() {
               ) : (
                 <>
                   <Link href="/signup">
-                    <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group">
+                    <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold">
                       무료로 시작하기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
                   <Link href="/login">
                     <Button
-                      variant="outline"
                       size="lg"
-                      className="w-full sm:w-auto border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                      className="w-full sm:w-auto bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-md hover:shadow-lg font-semibold transition-all"
                     >
                       로그인
                     </Button>
@@ -220,7 +219,7 @@ export default function Home() {
           </p>
           {!isAuthenticated && (
             <Link href="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group">
+              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold px-8 py-3">
                 무료로 시작하기
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>

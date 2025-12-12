@@ -1,10 +1,12 @@
 package com.planit.service
 
+import com.planit.dto.FeedEvent
 import com.planit.entity.Certification
 import com.planit.entity.Challenge
 import com.planit.entity.User
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.CertificationRepository
+import com.planit.repository.FeedRepository
 import com.planit.repository.FollowRepository
 import com.planit.repository.UserRepository
 import com.planit.util.setPrivateProperty
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.redis.core.RedisTemplate
 import java.time.LocalDateTime
 
 @ExtendWith(MockKExtension::class)
@@ -28,6 +31,8 @@ class FeedServiceTest {
   @MockK private lateinit var userRepository: UserRepository
   @MockK private lateinit var followRepository: FollowRepository
   @MockK private lateinit var certificationRepository: CertificationRepository
+  @MockK private lateinit var feedRepository: FeedRepository
+  @MockK private lateinit var feedEventTemplate: RedisTemplate<String, FeedEvent>
 
   @InjectMockKs private lateinit var feedService: FeedService
 

@@ -5,6 +5,7 @@ import java.util.NoSuchElementException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -53,6 +54,16 @@ class GlobalExceptionHandler {
     // Swagger UI 및 기타 정적 리소스는 Spring이 처리하도록 null 반환
     log.debug("정적 리소스를 찾을 수 없음: {}", ex.message)
     return null
+  }
+
+  /** 401 Unauthorized - 인증 실패 (잘못된 자격증명) */
+  @ExceptionHandler(BadCredentialsException::class)
+  fun handleBadCredentialsException(
+      ex: BadCredentialsException
+  ): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("인증 실패: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(ApiResponse.error("INVALID_CREDENTIALS", "아이디 또는 비밀번호가 올바르지 않습니다."))
   }
 
   /** 500 Internal Server Error - 처리되지 않은 모든 예외 서버 내부 로직에서 발생하는 예외를 처리합니다. */

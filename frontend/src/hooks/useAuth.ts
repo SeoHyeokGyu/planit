@@ -19,10 +19,19 @@ export const useLogin = () => {
     onSuccess: (response) => {
       if (response.success && response.data.accessToken) {
         const token = response.data.accessToken;
-        setToken(token);
-        
+        // JWT 토큰에서 userId 추출 (payload의 sub 또는 userId 필드)
+        try {
+          const payload = JSON.parse(
+            atob(token.split(".")[1])
+          );
+          const userId = payload.userId || payload.sub;
+          setToken(token, userId ? parseInt(userId) : undefined);
+        } catch {
+          setToken(token);
+        }
+
         queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-        router.push("/");
+        router.push("/dashboard");
       }
     },
     onError: (error) => {
