@@ -1,7 +1,22 @@
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, UseQueryOptions, QueryKey } from "@tanstack/react-query";
 import { certificationService } from "@/services/certificationService";
 import { CertificationCreateRequest, CertificationUpdateRequest, CertificationResponse } from "@/types/certification";
 import { ApiResponse, Page } from "@/types/api";
+
+// Define internal options types for better type inference and control
+type CertificationsByUserInternalOptions = UseQueryOptions<
+  ApiResponse<Page<CertificationResponse>>,
+  Error,
+  Page<CertificationResponse>,
+  QueryKey
+>;
+
+type CertificationsByDateRangeInternalOptions = UseQueryOptions<
+  ApiResponse<CertificationResponse[]>,
+  Error,
+  CertificationResponse[],
+  QueryKey
+>;
 
 // --- Queries ---
 
@@ -15,10 +30,10 @@ export const useCertification = (id: number) => {
 };
 
 export const useCertificationsByUser = (
-  userLoginId: string,
-  page: number = 0,
-  size: number = 10,
-  options?: UseQueryOptions<ApiResponse<Page<CertificationResponse>>>
+    userLoginId: string,
+    page: number = 0,
+    size: number = 10,
+    options?: { enabled: boolean }
 ) => {
   return useQuery({
     queryKey: ["certifications", "user", userLoginId, page, size],
@@ -42,7 +57,7 @@ export const useCertificationsByDateRange = (
   userLoginId: string,
   from: string,
   to: string,
-  options?: UseQueryOptions<ApiResponse<CertificationResponse[]>>
+  options?: { enabled: boolean }
 ) => {
   return useQuery({
     queryKey: ["certifications", "date-range", userLoginId, from, to],

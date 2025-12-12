@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuthStore } from "@/stores/authStore";
 import Image from "next/image";
+import { useUserProfile } from "@/hooks/useUser"; // Import useUserProfile
+// import { useAuthStore } from "@/stores/authStore"; // No longer needed for user object
 
 interface CertificationDetailPageProps {
   params: {
@@ -19,7 +20,7 @@ interface CertificationDetailPageProps {
 export default function CertificationDetailPage({ params }: CertificationDetailPageProps) {
   const router = useRouter();
   const certificationId = parseInt(params.id);
-  const { user } = useAuthStore(); // Get current user from auth store
+  const { data: user } = useUserProfile(); // Get current user profile
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
@@ -77,7 +78,7 @@ export default function CertificationDetailPage({ params }: CertificationDetailP
     return <div className="text-center py-8">인증을 찾을 수 없습니다.</div>;
   }
 
-  const isAuthor = user?.username === data.authorNickname; // Assuming authorNickname is user's loginId or actual nickname matching authenticated user
+  const isAuthor = user?.nickname === data.authorNickname;
 
   return (
     <div className="flex justify-center p-4">
