@@ -84,6 +84,23 @@ class CertificationService(
   }
 
   /**
+   * 특정 사용자가 특정 기간 내에 작성한 인증 목록을 조회합니다.
+   * @param userLoginId 사용자 로그인 ID
+   * @param start 시작 일시
+   * @param end 종료 일시
+   * @return 인증 목록 응답 객체 리스트
+   */
+  @Transactional(readOnly = true)
+  fun getCertificationsByDateRange(
+    userLoginId: String,
+    start: LocalDateTime,
+    end: LocalDateTime
+  ): List<CertificationResponse> {
+    val certifications = certificationRepository.findByUser_LoginIdAndCreatedAtBetween(userLoginId, start, end)
+    return certifications.map { CertificationResponse.from(it) }
+  }
+
+  /**
    * 인증 정보를 수정합니다. (제목, 내용)
    * 작성자만 수정 가능하며, 생성 후 24시간 이내에만 수정 가능합니다.
    * @param certificationId 수정할 인증의 ID
