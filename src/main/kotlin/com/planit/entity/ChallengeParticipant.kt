@@ -40,6 +40,12 @@ class ChallengeParticipant(
     @Column
     var withdrawnAt: LocalDateTime? = null
 ) : Serializable {
+
+    // Challenge 관계 추가
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id", insertable = false, updatable = false)
+    lateinit var challenge: Challenge
+
     fun complete() {
         status = ParticipantStatusEnum.COMPLETED
         completedAt = LocalDateTime.now()
