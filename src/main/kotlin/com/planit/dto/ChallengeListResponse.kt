@@ -4,7 +4,7 @@ import com.planit.entity.Challenge
 import java.time.LocalDateTime
 
 data class ChallengeListResponse(
-    val challengeId: String,
+    val id: String,
     val title: String,
     val description: String,
     val category: String,
@@ -19,7 +19,7 @@ data class ChallengeListResponse(
     companion object {
         fun from(challenge: Challenge): ChallengeListResponse {
             return ChallengeListResponse(
-                challengeId = challenge.id,
+                id = challenge.id,
                 title = challenge.title,
                 description = challenge.description,
                 category = challenge.category,

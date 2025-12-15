@@ -23,7 +23,7 @@ export const useSearchChallenges = (keyword: string) => {
     });
 };
 
-export const useChallenge = (id: number) => {
+export const useChallenge = (id: string) => {
     return useQuery({
         queryKey: ["challenge", id],
         queryFn: () => challengeService.getChallenge(id),
@@ -32,7 +32,7 @@ export const useChallenge = (id: number) => {
     });
 };
 
-export const useParticipants = (id: number) => {
+export const useParticipants = (id: string) => {
     return useQuery({
         queryKey: ["challenge", id, "participants"],
         queryFn: () => challengeService.getParticipants(id),
@@ -41,7 +41,7 @@ export const useParticipants = (id: number) => {
     });
 };
 
-export const useChallengeStatistics = (id: number) => {
+export const useChallengeStatistics = (id: string) => {
     return useQuery({
         queryKey: ["challenge", id, "statistics"],
         queryFn: () => challengeService.getStatistics(id),
@@ -65,7 +65,7 @@ export const useCreateChallenge = () => {
 export const useUpdateChallenge = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: ChallengeRequest }) =>
+        mutationFn: ({ id, data }: { id: string; data: ChallengeRequest }) =>
             challengeService.updateChallenge(id, data),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["challenges"] });
@@ -77,7 +77,7 @@ export const useUpdateChallenge = () => {
 export const useDeleteChallenge = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) => challengeService.deleteChallenge(id),
+        mutationFn: (id: string) => challengeService.deleteChallenge(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["challenges"] });
         },
@@ -87,7 +87,7 @@ export const useDeleteChallenge = () => {
 export const useJoinChallenge = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) => challengeService.joinChallenge(id),
+        mutationFn: (id: string) => challengeService.joinChallenge(id),
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["challenge", id] });
             queryClient.invalidateQueries({ queryKey: ["challenge", id, "participants"] });
@@ -98,7 +98,7 @@ export const useJoinChallenge = () => {
 export const useWithdrawChallenge = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) => challengeService.withdrawChallenge(id),
+        mutationFn: (id: string) => challengeService.withdrawChallenge(id),
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["challenge", id] });
             queryClient.invalidateQueries({ queryKey: ["challenge", id, "participants"] });

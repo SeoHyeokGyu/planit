@@ -269,7 +269,7 @@ class ChallengeService(
             ?: challenge.viewCnt
 
         return ChallengeStatisticsResponse(
-            challengeId = challengeId,
+            id = challengeId,
             totalParticipants = totalParticipants,
             activeParticipants = activeParticipants,
             completedParticipants = completedParticipants,

@@ -48,6 +48,7 @@ class ChallengeServiceTest {
 
     val now = LocalDateTime.now()
     val challengeId = "CHL-12345678"
+    val loginId = "user123"
 
     @BeforeEach
     fun setUp() {
@@ -76,7 +77,7 @@ class ChallengeServiceTest {
         )
 
         participant = ChallengeParticipant(
-            challengeId = challengeId,
+            id = challengeId,
             loginId = "user123"
         )
 
@@ -298,7 +299,7 @@ class ChallengeServiceTest {
     fun `joinChallenge should succeed when not already participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") } returns false
+        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns false
         every { participantRepository.save(any()) } returns participant
         every { challengeRepository.save(any()) } returns challenge
 
@@ -309,7 +310,7 @@ class ChallengeServiceTest {
         assertNotNull(result)
         assertEquals("user123", result.loginId)
         assertEquals(ParticipantStatusEnum.ACTIVE, result.status)
-        verify(exactly = 1) { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") }
+        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, "user123") }
         verify(exactly = 1) { participantRepository.save(any()) }
         verify(exactly = 1) { challengeRepository.save(any()) }
     }
@@ -319,14 +320,14 @@ class ChallengeServiceTest {
     fun `joinChallenge should throw IllegalStateException when already participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") } returns true
+        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns true
 
         // When & Then
         val exception = assertThrows<IllegalStateException> {
             challengeService.joinChallenge(challengeId, "user123")
         }
         assertEquals("이미 참여중인 챌린지입니다", exception.message)
-        verify(exactly = 1) { participantRepository.existsByChallengeIdAndLoginId(challengeId, "user123") }
+        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, "user123") }
         verify(exactly = 0) { participantRepository.save(any()) }
     }
 
@@ -335,7 +336,7 @@ class ChallengeServiceTest {
     fun `withdrawChallenge should succeed when actively participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") } returns Optional.of(participant)
+        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns Optional.of(participant)
         every { participantRepository.save(any()) } returns participant
         every { challengeRepository.save(any()) } returns challenge
 
@@ -345,7 +346,7 @@ class ChallengeServiceTest {
         // Then
         assertEquals(ParticipantStatusEnum.WITHDRAWN, participant.status)
         assertNotNull(participant.withdrawnAt)
-        verify(exactly = 1) { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") }
+        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, "user123") }
         verify(exactly = 1) { participantRepository.save(any()) }
         verify(exactly = 1) { challengeRepository.save(any()) }
     }
@@ -355,14 +356,14 @@ class ChallengeServiceTest {
     fun `withdrawChallenge should throw NoSuchElementException when not participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") } returns Optional.empty()
+        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns Optional.empty()
 
         // When & Then
         val exception = assertThrows<NoSuchElementException> {
             challengeService.withdrawChallenge(challengeId, "user123")
         }
         assertEquals("참여 정보를 찾을 수 없습니다", exception.message)
-        verify(exactly = 1) { participantRepository.findByChallengeIdAndLoginId(challengeId, "user123") }
+        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, "user123") }
         verify(exactly = 0) { participantRepository.save(any()) }
     }
 
@@ -403,7 +404,7 @@ class ChallengeServiceTest {
         // Given
         val participants = listOf(participant)
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.findByChallengeId(challengeId) } returns participants
+        every { participantRepository.existsByIdAndLoginId(challengeId, loginId) } returns participants
 
         // When
         val result = challengeService.getParticipants(challengeId)
@@ -412,7 +413,7 @@ class ChallengeServiceTest {
         assertNotNull(result)
         assertEquals(1, result.size)
         assertEquals("user123", result[0].loginId)
-        verify(exactly = 1) { participantRepository.findByChallengeId(challengeId) }
+        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, loginId) }
     }
 
     @Test
@@ -420,11 +421,11 @@ class ChallengeServiceTest {
     fun `getChallengeStatistics should return statistics`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.countByChallengeId(challengeId) } returns 100L
-        every { participantRepository.countByChallengeIdAndStatus(challengeId, ParticipantStatusEnum.ACTIVE) } returns 80L
-        every { participantRepository.countByChallengeIdAndStatus(challengeId, ParticipantStatusEnum.COMPLETED) } returns 15L
-        every { participantRepository.countByChallengeIdAndStatus(challengeId, ParticipantStatusEnum.WITHDRAWN) } returns 5L
-        every { participantRepository.sumCertificationCountByChallengeId(challengeId) } returns 500L
+        every { participantRepository.countById(challengeId) } returns 100L
+        every { participantRepository.countByIdAndStatus(challengeId, ParticipantStatusEnum.ACTIVE) } returns 80L
+        every { participantRepository.countByIdAndStatus(challengeId, ParticipantStatusEnum.COMPLETED) } returns 15L
+        every { participantRepository.countByIdAndStatus(challengeId, ParticipantStatusEnum.WITHDRAWN) } returns 5L
+        every { participantRepository.sumCertificationCountById(challengeId) } returns 500L
         every { valueOperations.get(any()) } returns "1500"
 
         // When
@@ -432,7 +433,7 @@ class ChallengeServiceTest {
 
         // Then
         assertNotNull(result)
-        assertEquals(challengeId, result.challengeId)
+        assertEquals(challengeId, result.id)
         assertEquals(100, result.totalParticipants)
         assertEquals(80, result.activeParticipants)
         assertEquals(15, result.completedParticipants)

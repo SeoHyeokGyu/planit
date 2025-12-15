@@ -14,55 +14,78 @@ export const challengeService = {
     getChallenges: (params?: ChallengeSearchRequest) => {
         const searchParams = new URLSearchParams();
         if (params?.category) searchParams.append("category", params.category);
-        if (params?.status) searchParams.append("status", params.status);
+        if (params?.difficulty) searchParams.append("difficulty", params.difficulty);
         if (params?.page) searchParams.append("page", String(params.page));
         if (params?.size) searchParams.append("size", String(params.size));
 
         const query = searchParams.toString();
         return api.get<ApiResponse<ChallengeListResponse[]>>(
-            `/api/v1/challenges${query ? `?${query}` : ""}`
+            `/api/challenge${query ? `?${query}` : ""}`
         );
     },
 
     // 검색
     searchChallenges: (keyword: string) =>
         api.get<ApiResponse<ChallengeListResponse[]>>(
-            `/api/v1/challenges/search?keyword=${encodeURIComponent(keyword)}`
+            `/api/challenge/search?keyword=${encodeURIComponent(keyword)}`
         ),
 
     // 상세 조회
-    getChallenge: (id: number) =>
-        api.get<ApiResponse<ChallengeResponse>>(`/api/v1/challenges/${id}`),
+    getChallenge: (id: string) =>
+        api.get<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`),
 
     // 생성
     createChallenge: (data: ChallengeRequest) =>
-        api.post<ApiResponse<ChallengeResponse>>("/api/v1/challenges", data),
+        api.post<ApiResponse<ChallengeResponse>>("/api/challenge", data),
 
     // 수정
-    updateChallenge: (id: number, data: ChallengeRequest) =>
-        api.put<ApiResponse<ChallengeResponse>>(`/api/v1/challenges/${id}`, data),
+    updateChallenge: (id: string, data: ChallengeRequest) =>
+        api.put<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`, data),
 
     // 삭제
-    deleteChallenge: (id: number) =>
-        api.delete<ApiResponse<void>>(`/api/v1/challenges/${id}`),
+    deleteChallenge: (id: string) =>
+        api.delete<ApiResponse<void>>(
+            `/api/challenge/${id}`,
+            {
+                headers: {
+                    'X-User-Id': 'test123' // TODO: 실제 로그인한 사용자 ID로 교체
+                }
+            }
+        ),
 
     // 참여
-    joinChallenge: (id: number) =>
-        api.post<ApiResponse<ParticipateResponse>>(`/api/v1/challenges/${id}/join`),
+    joinChallenge: (id: string) =>
+        api.post<ApiResponse<ParticipateResponse>>(
+            `/api/challenge/${id}/join`,
+            {},
+            {
+                headers: {
+                    'X-User-Id': 'test123' // TODO: 실제 로그인한 사용자 ID로 교체
+                }
+            }
+        ),
 
     // 탈퇴
-    withdrawChallenge: (id: number) =>
-        api.post<ApiResponse<void>>(`/api/v1/challenges/${id}/withdraw`),
+    withdrawChallenge: (id: string) =>
+        api.post<ApiResponse<void>>(
+            `/api/challenge/${id}/withdraw`,
+            {},
+            {
+                headers: {
+                    'X-User-Id': 'test123' // TODO: 실제 로그인한 사용자 ID로 교체
+                }
+            }
+        ),
 
     // 조회수 증가
-    incrementViewCount: (id: number) =>
-        api.post<ApiResponse<void>>(`/api/v1/challenges/${id}/view`),
+    incrementViewCount: (id: string) =>
+        api.post<ApiResponse<void>>(`/api/challenge/${id}/view`),
 
     // 참여자 목록
-    getParticipants: (id: number) =>
-        api.get<ApiResponse<ParticipateResponse[]>>(`/api/v1/challenges/${id}/participants`),
+    getParticipants: (id: string) =>
+        api.get<ApiResponse<ParticipateResponse[]>>(`/api/challenge/${id}/participants`),
 
     // 통계
-    getStatistics: (id: number) =>
-        api.get<ApiResponse<ChallengeStatisticsResponse>>(`/api/v1/challenges/${id}/statistics`),
+    getStatistics: (id: string) =>
+        api.get<ApiResponse<ChallengeStatisticsResponse>>(`/api/challenge/${id}/statistics`),
 };

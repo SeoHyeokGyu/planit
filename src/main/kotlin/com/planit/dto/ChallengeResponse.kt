@@ -4,13 +4,13 @@ import com.planit.entity.*
 import java.time.LocalDateTime
 
 data class ChallengeResponse(
-    val challengeId: String,
+    val id: String,
     val title: String,
     val description: String,
     val category: String,
+    val difficulty: String,
     val startDate: LocalDateTime,
     val endDate: LocalDateTime,
-    val difficulty: String,
     val createdId: String,
     val viewCnt: Long,
     val participantCnt: Long,
@@ -19,13 +19,13 @@ data class ChallengeResponse(
     companion object {
         fun from(challenge: Challenge): ChallengeResponse {
             return ChallengeResponse(
-                challengeId = challenge.id,
+                id = challenge.id,
                 title = challenge.title,
                 description = challenge.description,
                 category = challenge.category,
+                difficulty = challenge.difficulty,
                 startDate = challenge.startDate,
                 endDate = challenge.endDate,
-                difficulty = challenge.difficulty,
                 createdId = challenge.createdId,
                 viewCnt = challenge.viewCnt,
                 participantCnt = challenge.participantCnt,

@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/v1/challenges")
+@RequestMapping("/api/challenge")
 @Validated
 class ChallengeController(
     private val challengeService: ChallengeService
@@ -17,14 +17,14 @@ class ChallengeController(
 
     /**
      * 챌린지 생성
-     * POST /api/v1/challenges
+     * POST /api/challenge
      */
     @PostMapping
     fun createChallenge(
-        @Valid @RequestBody request: ChallengeRequest,
-        @RequestHeader("X-User-Id") userId: String
+        @Valid @RequestBody request: ChallengeRequest
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
-        val challenge = challengeService.createChallenge(request, userId)
+        // request.loginId를 직접 사용
+        val challenge = challengeService.createChallenge(request, request.loginId)
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponse.success(challenge))
@@ -32,7 +32,7 @@ class ChallengeController(
 
     /**
      * 챌린지 상세 조회
-     * GET /api/v1/challenges/{challengeId}
+     * GET /api/challenge/{challengeId}
      */
     @GetMapping("/{challengeId}")
     fun getChallengeById(@PathVariable challengeId: String): ResponseEntity<ApiResponse<ChallengeResponse>> {
@@ -42,19 +42,39 @@ class ChallengeController(
 
     /**
      * 챌린지 목록 조회 (필터링)
-     * GET /api/v1/challenges
+     * GET /api/challenge
      */
     @GetMapping
     fun getChallenges(
-        @ModelAttribute request: ChallengeSearchRequest
+        @RequestParam(required = false) keyword: String?,
+        @RequestParam(required = false) category: String?,
+        @RequestParam(required = false) difficulty: String?,
+        @RequestParam(required = false) status: String?
     ): ResponseEntity<ApiResponse<List<ChallengeListResponse>>> {
+        val request = ChallengeSearchRequest(
+            keyword = keyword,
+            category = category,
+            difficulty = difficulty,
+            status = status
+        )
+
+        // 디버깅 로그
+        println("=== Challenge Search Request ===")
+        println("keyword: $keyword")
+        println("category: $category")
+        println("difficulty: $difficulty")
+        println("status: $status")
+
         val challenges = challengeService.getChallenges(request)
+
+        println("Found ${challenges.size} challenges")
+
         return ResponseEntity.ok(ApiResponse.success(challenges))
     }
 
     /**
      * 챌린지 검색 (키워드)
-     * GET /api/v1/challenges/search
+     * GET /api/challenge/search
      */
     @GetMapping("/search")
     fun searchChallenges(
@@ -66,21 +86,20 @@ class ChallengeController(
 
     /**
      * 챌린지 수정
-     * PUT /api/v1/challenges/{challengeId}
+     * PUT /api/challenge/{challengeId}
      */
     @PutMapping("/{challengeId}")
     fun updateChallenge(
         @PathVariable challengeId: String,
-        @Valid @RequestBody request: ChallengeRequest,
-        @RequestHeader("X-User-Id") userId: String
+        @Valid @RequestBody request: ChallengeRequest
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
-        val challenge = challengeService.updateChallenge(challengeId, request, userId)
+        val challenge = challengeService.updateChallenge(challengeId, request, request.loginId)
         return ResponseEntity.ok(ApiResponse.success(challenge))
     }
 
     /**
      * 챌린지 삭제
-     * DELETE /api/v1/challenges/{challengeId}
+     * DELETE /api/challenge/{challengeId}
      */
     @DeleteMapping("/{challengeId}")
     fun deleteChallenge(
@@ -93,7 +112,7 @@ class ChallengeController(
 
     /**
      * 챌린지 참여
-     * POST /api/v1/challenges/{challengeId}/join
+     * POST /api/challenge/{challengeId}/join
      */
     @PostMapping("/{challengeId}/join")
     fun joinChallenge(
@@ -108,7 +127,7 @@ class ChallengeController(
 
     /**
      * 챌린지 탈퇴
-     * POST /api/v1/challenges/{challengeId}/withdraw
+     * POST /api/challenge/{challengeId}/withdraw
      */
     @PostMapping("/{challengeId}/withdraw")
     fun withdrawChallenge(
@@ -121,7 +140,7 @@ class ChallengeController(
 
     /**
      * 조회수 증가
-     * POST /api/v1/challenges/{challengeId}/view
+     * POST /api/challenge/{challengeId}/view
      */
     @PostMapping("/{challengeId}/view")
     fun incrementViewCount(@PathVariable challengeId: String): ResponseEntity<ApiResponse<Unit>> {
@@ -131,7 +150,7 @@ class ChallengeController(
 
     /**
      * 참여자 목록 조회
-     * GET /api/v1/challenges/{challengeId}/participants
+     * GET /api/challenge/{challengeId}/participants
      */
     @GetMapping("/{challengeId}/participants")
     fun getParticipants(
@@ -143,7 +162,7 @@ class ChallengeController(
 
     /**
      * 챌린지 통계 조회
-     * GET /api/v1/challenges/{challengeId}/statistics
+     * GET /api/challenge/{challengeId}/statistics
      */
     @GetMapping("/{challengeId}/statistics")
     fun getChallengeStatistics(

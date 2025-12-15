@@ -56,6 +56,9 @@ class SecurityConfig {
               // 인증 관련 엔드포인트 허용
               .requestMatchers("/api/auth/**")
               .permitAll()
+              //챌린지 관련 엔드포인트 허용
+              it.requestMatchers("/api/challenge/**")
+                  .permitAll()
               // 나머지는 인증 필요
               .anyRequest()
               .authenticated()
