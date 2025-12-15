@@ -18,11 +18,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  # Local Redis (Docker)
+  # Development Server Redis
   data:
     redis:
-      host: localhost
+      host: 144.24.90.88
       port: 6379
+      password: planit
       repositories:
         enabled: false
 

@@ -3,16 +3,7 @@
 import { useState } from "react";
 import { useSignUp } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
 
 export function SignUpForm() {
   const [loginId, setLoginId] = useState("");
@@ -33,82 +24,102 @@ export function SignUpForm() {
     signUpMutation.mutate({ loginId, password, nickname });
   };
 
-  // 회원가입 성공 시 리디렉션은 useSignUp 훅 내부에서 처리됩니다.
-  
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">회원가입</CardTitle>
-        <CardDescription>
-          새 계정을 만들기 위한 정보를 입력하세요.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="loginId">아이디</Label>
-            <Input
-              id="loginId"
-              type="text"
-              placeholder="사용할 아이디"
-              required
-              value={loginId}
-              onChange={(e) => setLoginId(e.target.value)}
-              disabled={signUpMutation.isPending}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="nickname">닉네임</Label>
-            <Input
-              id="nickname"
-              type="text"
-              placeholder="사용할 닉네임"
-              required
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              disabled={signUpMutation.isPending}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">비밀번호</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="비밀번호"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={signUpMutation.isPending}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">비밀번호 확인</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="비밀번호 확인"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={signUpMutation.isPending}
-            />
-          </div>
-          {(formError || signUpMutation.error) && (
-            <p className="text-sm font-medium text-red-500">
+    <div className="w-full space-y-6">
+      {/* Form Title */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900">회원가입</h2>
+        <p className="text-gray-500 text-sm mt-2">새로운 계정을 만들어보세요.</p>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Login ID Field */}
+        <div className="space-y-2">
+          <label htmlFor="loginId" className="block text-sm font-medium text-gray-700">
+            아이디
+          </label>
+          <Input
+            id="loginId"
+            type="text"
+            placeholder="사용할 아이디"
+            required
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            disabled={signUpMutation.isPending}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+          />
+        </div>
+
+        {/* Nickname Field */}
+        <div className="space-y-2">
+          <label htmlFor="nickname" className="block text-sm font-medium text-gray-700">
+            닉네임
+          </label>
+          <Input
+            id="nickname"
+            type="text"
+            placeholder="표시될 닉네임"
+            required
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            disabled={signUpMutation.isPending}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+          />
+        </div>
+
+        {/* Password Field */}
+        <div className="space-y-2">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            비밀번호
+          </label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="비밀번호를 입력하세요"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={signUpMutation.isPending}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+          />
+        </div>
+
+        {/* Confirm Password Field */}
+        <div className="space-y-2">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            비밀번호 확인
+          </label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="비밀번호를 다시 입력하세요"
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={signUpMutation.isPending}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+          />
+        </div>
+
+        {/* Error Message */}
+        {(formError || signUpMutation.error) && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm font-medium text-red-600">
               {formError || signUpMutation.error?.message || "회원가입 중 오류가 발생했습니다."}
             </p>
-          )}
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={signUpMutation.isPending}>
-            {signUpMutation.isPending ? "가입 처리 중..." : "회원가입"}
-          </Button>
-          <div className="mt-4 text-center text-sm">
-            이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="underline">
-              로그인
-            </Link>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        )}
+
+        {/* Submit Button */}
+        <Button
+          type="submit"
+          disabled={signUpMutation.isPending}
+          className="w-full py-3 mt-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md"
+        >
+          {signUpMutation.isPending ? "가입 처리 중..." : "회원가입"}
+        </Button>
+      </form>
+    </div>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQuery, useQueryClient, UseQueryOptions, QueryKey } from "@tanstack/react-query";
 import { certificationService } from "@/services/certificationService";
 import { CertificationCreateRequest, CertificationUpdateRequest, CertificationResponse } from "@/types/certification";
