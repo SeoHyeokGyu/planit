@@ -5,6 +5,7 @@ import com.planit.service.ChallengeService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -21,13 +22,25 @@ class ChallengeController(
      */
     @PostMapping
     fun createChallenge(
+        @AuthenticationPrincipal userDetails: CustomUserDetails,
         @Valid @RequestBody request: ChallengeRequest
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
-        // request.loginId를 직접 사용
-        val challenge = challengeService.createChallenge(request, request.loginId)
+        val challenge = challengeService.createChallenge(request, userDetails.user.loginId)
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponse.success(challenge))
+    }
+
+    /**
+     * 내가 참여중인 챌린지 목록 조회
+     * GET /api/challenge/my
+     */
+    @GetMapping("/my")
+    fun getMyChallenges(
+        @AuthenticationPrincipal userDetails: CustomUserDetails
+    ): ResponseEntity<ApiResponse<List<ChallengeListResponse>>> {
+        val challenges = challengeService.getParticipatingChallenges(userDetails.user.loginId)
+        return ResponseEntity.ok(ApiResponse.success(challenges))
     }
 
     /**
@@ -91,9 +104,10 @@ class ChallengeController(
     @PutMapping("/{challengeId}")
     fun updateChallenge(
         @PathVariable challengeId: String,
+        @AuthenticationPrincipal userDetails: CustomUserDetails,
         @Valid @RequestBody request: ChallengeRequest
     ): ResponseEntity<ApiResponse<ChallengeResponse>> {
-        val challenge = challengeService.updateChallenge(challengeId, request, request.loginId)
+        val challenge = challengeService.updateChallenge(challengeId, request, userDetails.user.loginId)
         return ResponseEntity.ok(ApiResponse.success(challenge))
     }
 
@@ -104,9 +118,9 @@ class ChallengeController(
     @DeleteMapping("/{challengeId}")
     fun deleteChallenge(
         @PathVariable challengeId: String,
-        @RequestHeader("X-User-Id") userId: String
+        @AuthenticationPrincipal userDetails: CustomUserDetails
     ): ResponseEntity<ApiResponse<Unit>> {
-        challengeService.deleteChallenge(challengeId, userId)
+        challengeService.deleteChallenge(challengeId, userDetails.user.loginId)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
@@ -117,9 +131,9 @@ class ChallengeController(
     @PostMapping("/{challengeId}/join")
     fun joinChallenge(
         @PathVariable challengeId: String,
-        @RequestHeader("X-User-Id") userId: String
+        @AuthenticationPrincipal userDetails: CustomUserDetails
     ): ResponseEntity<ApiResponse<ParticipateResponse>> {
-        val participant = challengeService.joinChallenge(challengeId, userId)
+        val participant = challengeService.joinChallenge(challengeId, userDetails.user.loginId)
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(ApiResponse.success(participant))
@@ -132,9 +146,9 @@ class ChallengeController(
     @PostMapping("/{challengeId}/withdraw")
     fun withdrawChallenge(
         @PathVariable challengeId: String,
-        @RequestHeader("X-User-Id") userId: String
+        @AuthenticationPrincipal userDetails: CustomUserDetails
     ): ResponseEntity<ApiResponse<Unit>> {
-        challengeService.withdrawChallenge(challengeId, userId)
+        challengeService.withdrawChallenge(challengeId, userDetails.user.loginId)
         return ResponseEntity.ok(ApiResponse.success())
     }
 

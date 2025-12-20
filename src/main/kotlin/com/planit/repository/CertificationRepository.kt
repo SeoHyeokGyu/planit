@@ -42,4 +42,11 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
      * @return 인증 목록
      */
     fun findByUser_LoginIdAndCreatedAtBetween(userLoginId: String, start: LocalDateTime, end: LocalDateTime): List<Certification>
+
+    /**
+     * 특정 사용자가 작성한 전체 인증 개수를 조회합니다.
+     * @param userLoginId 사용자 로그인 ID
+     * @return 인증 개수
+     */
+    fun countByUser_LoginId(userLoginId: String): Long
 }

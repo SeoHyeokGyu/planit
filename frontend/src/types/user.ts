@@ -14,3 +14,8 @@ export interface UserPasswordUpdateRequest {
   currentPassword: string;
   newPassword: string;
 }
+
+export interface UserDashboardStats {
+  challengeCount: number;
+  certificationCount: number;
+}

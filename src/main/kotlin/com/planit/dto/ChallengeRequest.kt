@@ -7,7 +7,7 @@ data class ChallengeRequest(
     var description: String,
     var category: String,
     var difficulty: String,
-    var loginId: String,
+    var loginId: String = "",
     var startDate: LocalDateTime,
     var endDate: LocalDateTime
 )

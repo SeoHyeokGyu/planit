@@ -31,3 +31,6 @@ logging:
   level:
     com.planit: DEBUG
     org.springframework: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    web: debug

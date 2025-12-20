@@ -31,7 +31,7 @@ export const certificationService = {
     userLoginId: string,
     page: number = 0,
     size: number = 10
-  ): Promise<ApiResponse<Page<CertificationResponse>>> => {
+  ): Promise<ApiResponse<CertificationResponse[]>> => {
     return api.get(`/api/certifications/user/${userLoginId}?page=${page}&size=${size}`);
   },
 
@@ -39,7 +39,7 @@ export const certificationService = {
     challengeId: number,
     page: number = 0,
     size: number = 10
-  ): Promise<ApiResponse<Page<CertificationResponse>>> => {
+  ): Promise<ApiResponse<CertificationResponse[]>> => {
     return api.get(`/api/certifications/challenge/${challengeId}?page=${page}&size=${size}`);
   },
 

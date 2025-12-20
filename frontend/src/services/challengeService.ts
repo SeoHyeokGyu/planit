@@ -30,6 +30,10 @@ export const challengeService = {
             `/api/challenge/search?keyword=${encodeURIComponent(keyword)}`
         ),
 
+    // 내가 참여중인 챌린지
+    getMyChallenges: () =>
+        api.get<ApiResponse<ChallengeListResponse[]>>("/api/challenge/my"),
+
     // 상세 조회
     getChallenge: (id: string) =>
         api.get<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`),
@@ -44,38 +48,15 @@ export const challengeService = {
 
     // 삭제
     deleteChallenge: (id: string) =>
-        api.delete<ApiResponse<void>>(
-            `/api/challenge/${id}`,
-            {
-                headers: {
-                    'X-User-Id': 'test123' // TODO: 실제 로그인한 사용자 ID로 교체
-                }
-            }
-        ),
+        api.delete<ApiResponse<void>>(`/api/challenge/${id}`),
 
     // 참여
     joinChallenge: (id: string) =>
-        api.post<ApiResponse<ParticipateResponse>>(
-            `/api/challenge/${id}/join`,
-            {},
-            {
-                headers: {
-                    'X-User-Id': 'test123' // TODO: 실제 로그인한 사용자 ID로 교체
-                }
-            }
-        ),
+        api.post<ApiResponse<ParticipateResponse>>(`/api/challenge/${id}/join`),
 
     // 탈퇴
     withdrawChallenge: (id: string) =>
-        api.post<ApiResponse<void>>(
-            `/api/challenge/${id}/withdraw`,
-            {},
-            {
-                headers: {
-                    'X-User-Id': 'test123' // TODO: 실제 로그인한 사용자 ID로 교체
-                }
-            }
-        ),
+        api.post<ApiResponse<void>>(`/api/challenge/${id}/withdraw`),
 
     // 조회수 증가
     incrementViewCount: (id: string) =>

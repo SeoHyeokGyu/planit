@@ -37,7 +37,7 @@ class ChallengeService(
             startDate = request.startDate,
             endDate = request.endDate,
             difficulty = request.difficulty,
-            createdId = request.loginId,
+            createdId = loginId,
             viewCnt = 0,
             participantCnt = 0,
             certificationCnt = 0
@@ -281,11 +281,42 @@ class ChallengeService(
         )
     }
 
-    /**
-     * 챌린지 조회 헬퍼 메서드
-     */
-    private fun findChallengeById(challengeId: String): Challenge {
-        return challengeRepository.findById(challengeId)
-            .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $challengeId") }
+        /**
+
+         * 사용자가 참여중인 챌린지 목록 조회
+
+         */
+
+        fun getParticipatingChallenges(loginId: String): List<ChallengeListResponse> {
+
+            val participants = participantRepository.findByLoginIdAndStatus(
+
+                loginId,
+
+                ParticipantStatusEnum.ACTIVE
+
+            )
+
+            return participants.map { ChallengeListResponse.from(it.challenge) }
+
+        }
+
+    
+
+        /**
+
+         * 챌린지 조회 헬퍼 메서드
+
+         */
+
+        private fun findChallengeById(challengeId: String): Challenge {
+
+            return challengeRepository.findById(challengeId)
+
+                .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $challengeId") }
+
+        }
+
     }
-}
+
+    
