@@ -36,7 +36,7 @@ export const certificationService = {
   },
 
   getCertificationsByChallenge: async (
-    challengeId: number,
+    challengeId: string,
     page: number = 0,
     size: number = 10
   ): Promise<ApiResponse<CertificationResponse[]>> => {
