@@ -105,9 +105,13 @@ class FollowService(
     fun getFollowerCount(userLoginId: String): Long {
         // 캐시에서 먼저 조회
         val cache = cacheManager.getCache("followerCount")
-        val cachedCount = cache?.get(userLoginId, Long::class.java)
-        if (cachedCount != null) {
-            return cachedCount
+        val cachedValue = cache?.get(userLoginId)?.get()
+        if (cachedValue != null) {
+            return when (cachedValue) {
+                is Long -> cachedValue
+                is Number -> cachedValue.toLong()
+                else -> cachedValue.toString().toLong()
+            }
         }
 
         // 캐시에 없으면 DB에서 조회 후 캐시에 저장
@@ -129,9 +133,13 @@ class FollowService(
     fun getFollowingCount(userLoginId: String): Long {
         // 캐시에서 먼저 조회
         val cache = cacheManager.getCache("followingCount")
-        val cachedCount = cache?.get(userLoginId, Long::class.java)
-        if (cachedCount != null) {
-            return cachedCount
+        val cachedValue = cache?.get(userLoginId)?.get()
+        if (cachedValue != null) {
+            return when (cachedValue) {
+                is Long -> cachedValue
+                is Number -> cachedValue.toLong()
+                else -> cachedValue.toString().toLong()
+            }
         }
 
         // 캐시에 없으면 DB에서 조회 후 캐시에 저장
@@ -183,8 +191,13 @@ class FollowService(
     private fun incrementCacheValue(cacheName: String, key: String) {
         val cache = cacheManager.getCache(cacheName)
         // 캐시에 값이 존재할 경우에만 업데이트
-        val currentValue = cache?.get(key, Long::class.java)
-        if (currentValue != null) {
+        val cachedValue = cache?.get(key)?.get()
+        if (cachedValue != null) {
+            val currentValue = when (cachedValue) {
+                is Long -> cachedValue
+                is Number -> cachedValue.toLong()
+                else -> cachedValue.toString().toLong()
+            }
             cache.put(key, currentValue + 1)
         }
     }
@@ -199,8 +212,13 @@ class FollowService(
     private fun decrementCacheValue(cacheName: String, key: String) {
         val cache = cacheManager.getCache(cacheName)
         // 캐시에 값이 존재할 경우에만 업데이트
-        val currentValue = cache?.get(key, Long::class.java)
-        if (currentValue != null) {
+        val cachedValue = cache?.get(key)?.get()
+        if (cachedValue != null) {
+            val currentValue = when (cachedValue) {
+                is Long -> cachedValue
+                is Number -> cachedValue.toLong()
+                else -> cachedValue.toString().toLong()
+            }
             cache.put(key, currentValue - 1)
         }
     }

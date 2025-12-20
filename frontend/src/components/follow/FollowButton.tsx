@@ -73,11 +73,14 @@ export default function FollowButton({
 
   return (
     <Button
-      variant={isFollowing ? "outline" : variant}
       onClick={handleClick}
       disabled={isLoading}
       size={size}
-      className="min-w-[100px]"
+      className={`min-w-[110px] font-semibold transition-all duration-200 ${
+        isFollowing
+          ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300"
+          : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg"
+      } disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       {isLoading ? (
         <>

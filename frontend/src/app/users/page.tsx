@@ -153,27 +153,32 @@ export default function UsersPage() {
               {users.map((user) => (
                 <Card
                   key={user.loginId}
-                  className="cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 group bg-gradient-to-br from-white to-gray-50"
+                  className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-gradient-to-br from-white to-gray-50"
                 >
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                      {user.nickname}
-                    </CardTitle>
-                    <CardDescription className="text-sm text-gray-600">
-                      @{user.loginId}
-                    </CardDescription>
+                  <CardHeader className="pb-3">
+                    <div
+                      onClick={() => handleNavigateToProfile(user.loginId)}
+                      className="hover:opacity-80 transition-opacity"
+                    >
+                      <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                        {user.nickname}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-gray-600">
+                        @{user.loginId}
+                      </CardDescription>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-500 mb-4">
-                      가입일: {new Date(user.createdAt).toLocaleDateString()}
+                  <CardContent className="space-y-4">
+                    <p className="text-xs text-gray-500">
+                      📅 가입: {new Date(user.createdAt).toLocaleDateString()}
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-2">
                       <Button
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 font-semibold hover:bg-gray-100 transition-colors"
                         onClick={() => handleNavigateToProfile(user.loginId)}
                       >
-                        프로필 보기
+                        프로필
                       </Button>
                       <div className="flex-1">
                         <FollowButton
