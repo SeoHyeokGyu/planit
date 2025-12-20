@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useChallenge, useJoinChallenge, useWithdrawChallenge, useMyChallenges } from "@/hooks/useChallenge";
+import { challengeService } from "@/services/challengeService";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -45,22 +46,56 @@ export default function ChallengeDetailPage() {
 
     useEffect(() => {
         const incrementViewCount = async () => {
-            if (!params.id) return;
+            if (!challengeId) return;
+
+            const sessionKey = `viewed_challenge_${challengeId}`;
+            const lockKey = `lock_${sessionKey}`;
+
+            // 이미 처리 중이면 스킵 (Strict Mode 중복 방지)
+            if (sessionStorage.getItem(lockKey)) {
+                console.log('Already processing, skipping:', challengeId);
+                return;
+            }
+
+            const lastViewTime = sessionStorage.getItem(sessionKey);
+
+            // 마지막 방문 시간 확인
+            if (lastViewTime) {
+                const timeDiff = Date.now() - parseInt(lastViewTime);
+                const fiveMinutes = 1 * 60 * 1000; // 5분을 밀리초로
+
+                // 5분 이내 재방문은 카운트 안 함
+                if (timeDiff < fiveMinutes) {
+                    console.log('Viewed within 5 minutes, skipping:', challengeId);
+                    return;
+                }
+
+                // 5분 경과 → 조회수 증가
+                console.log('5 minutes passed, incrementing:', challengeId);
+            }
 
             try {
-                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/challenge/${params.id}/view`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+                // 처리 중 플래그 설정
+                sessionStorage.setItem(lockKey, 'true');
+
+                await challengeService.incrementViewCount(challengeId);
+
+                // 현재 시간 저장
+                sessionStorage.setItem(sessionKey, Date.now().toString());
+                console.log('View count incremented:', challengeId);
+
+                // 100ms 후 lock 해제 (Strict Mode 중복 방지)
+                setTimeout(() => {
+                    sessionStorage.removeItem(lockKey);
+                }, 100);
             } catch (error) {
+                sessionStorage.removeItem(lockKey);
                 console.error('Failed to increment view count:', error);
             }
         };
 
         incrementViewCount();
-    }, [params.id]);
+    }, [challengeId]);
 
     const { data: challenge, isLoading, error } = useChallenge(challengeId);
     const { data: myChallenges } = useMyChallenges();

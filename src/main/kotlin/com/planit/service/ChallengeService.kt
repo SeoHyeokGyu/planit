@@ -52,7 +52,14 @@ class ChallengeService(
      */
     fun getChallengeById(challengeId: String): ChallengeResponse {
         val challenge = findChallengeById(challengeId)
-        return ChallengeResponse.from(challenge)
+
+        // Redis에서 최신 조회수 가져오기
+        val key = "$VIEW_COUNT_KEY_PREFIX$challengeId"
+        val viewCount = redisTemplate.opsForValue().get(key)?.toLongOrNull()
+            ?: challenge.viewCnt
+
+        val response = ChallengeResponse.from(challenge)
+        return response.copy(viewCnt = viewCount)
     }
 
     /**
@@ -281,42 +288,40 @@ class ChallengeService(
         )
     }
 
-        /**
+    /**
 
-         * 사용자가 참여중인 챌린지 목록 조회
+     * 사용자가 참여중인 챌린지 목록 조회
 
-         */
+     */
 
-        fun getParticipatingChallenges(loginId: String): List<ChallengeListResponse> {
+    fun getParticipatingChallenges(loginId: String): List<ChallengeListResponse> {
 
-            val participants = participantRepository.findByLoginIdAndStatus(
+        val participants = participantRepository.findByLoginIdAndStatus(
 
-                loginId,
+            loginId,
 
-                ParticipantStatusEnum.ACTIVE
+            ParticipantStatusEnum.ACTIVE
 
-            )
+        )
 
-            return participants.map { ChallengeListResponse.from(it.challenge) }
-
-        }
-
-    
-
-        /**
-
-         * 챌린지 조회 헬퍼 메서드
-
-         */
-
-        private fun findChallengeById(challengeId: String): Challenge {
-
-            return challengeRepository.findById(challengeId)
-
-                .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $challengeId") }
-
-        }
+        return participants.map { ChallengeListResponse.from(it.challenge) }
 
     }
 
-    
+
+
+    /**
+
+     * 챌린지 조회 헬퍼 메서드
+
+     */
+
+    private fun findChallengeById(challengeId: String): Challenge {
+
+        return challengeRepository.findById(challengeId)
+
+            .orElseThrow { NoSuchElementException("챌린지를 찾을 수 없습니다: $challengeId") }
+
+    }
+
+}

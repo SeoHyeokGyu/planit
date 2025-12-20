@@ -53,6 +53,7 @@ class LoggingAspect {
         val args = joinPoint.args.map { arg ->
             // 파일 업로드 객체 등 로그에 찍기 부적절한 타입 필터링
             when (arg) {
+                null -> "null"
                 is org.springframework.web.multipart.MultipartFile -> "파일(${arg.originalFilename}, ${arg.size} 바이트)"
                 is HttpServletRequest -> "HttpServletRequest"
                 is jakarta.servlet.http.HttpServletResponse -> "HttpServletResponse"
