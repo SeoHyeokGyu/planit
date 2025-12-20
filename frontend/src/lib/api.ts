@@ -26,14 +26,14 @@ export const api = {
       headers,
     });
 
+    const result = await response.json();
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({
-        message: "An error occurred",
-      }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      const errorMessage = result?.error?.message || result?.message || `HTTP error! status: ${response.status}`;
+      throw new Error(errorMessage);
     }
 
-    return response.json();
+    return result;
   },
 
   get<T>(endpoint: string, options?: RequestInit): Promise<T> {
