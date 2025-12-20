@@ -10,6 +10,8 @@ import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.UserRepository
 import java.util.NoSuchElementException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -59,5 +61,18 @@ class UserService(
         challengeCount = challengeCount,
         certificationCount = certificationCount
     )
+  }
+
+  @Transactional(readOnly = true)
+  fun getUserProfileByLoginId(loginId: String): UserProfileResponse {
+    val user = userRepository.findByLoginId(loginId)
+        ?: throw NoSuchElementException("사용자를 찾을 수 없습니다: $loginId")
+    return UserProfileResponse.of(user)
+  }
+
+  @Transactional(readOnly = true)
+  fun searchUsers(keyword: String, pageable: Pageable): Page<UserProfileResponse> {
+    val usersPage = userRepository.findByLoginIdContainingOrNicknameContaining(keyword, keyword, pageable)
+    return usersPage.map { UserProfileResponse.of(it) }
   }
 }
