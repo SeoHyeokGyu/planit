@@ -9,12 +9,19 @@
 **챌린지 트래커**는 사용자들이 개인의 작은 성취를 실시간으로 공유하며 함께 성장하는 소셜 플랫폼입니다.
 
 ### 핵심 기능
-- **실시간 피드**: SSE 기반 실시간 인증 알림 ("OO님이 방금 인증했습니다!")
-- **AI 추천 엔진**: 5가지 알고리즘으로 맞춤 챌린지 추천
-- **AI 챌린지 생성기**: 키워드만 입력하면 GPT가 챌린지 자동 생성
-- **AI 인증 분석**: Google Cloud Vision으로 인증 사진 자동 검증
-- **AI 동기부여 코치**: 개인화된 격려 메시지 생성
-- **게임화**: 포인트, 레벨, 배지, 스트릭 시스템
+- **실시간 피드**: SSE 기반 실시간 인증 알림 ("OO님이 방금 인증했습니다!") ✅
+- **챌린지 시스템**: 챌린지 생성, 참여, 관리 기능 ✅
+- **인증 시스템**: 챌린지별 인증 생성 및 관리 ✅
+- **팔로우 시스템**: 사용자 팔로우/언팔로우 및 팔로잉 피드 ✅
+- **알림 시스템**: DB 기반 알림 및 SSE 실시간 푸시 ✅
+- **프로필 시스템**: 사용자 프로필 조회 및 수정 ✅
+
+### 향후 계획
+- **AI 추천 엔진**: 5가지 알고리즘으로 맞춤 챌린지 추천 (계획 중)
+- **AI 챌린지 생성기**: 키워드만 입력하면 GPT가 챌린지 자동 생성 (계획 중)
+- **AI 인증 분석**: Google Cloud Vision으로 인증 사진 자동 검증 (계획 중)
+- **AI 동기부여 코치**: 개인화된 격려 메시지 생성 (계획 중)
+- **게임화**: 포인트, 레벨, 배지, 스트릭 시스템 (계획 중)
 
 ### 기술 스택
 
@@ -42,328 +49,336 @@
 
 ---
 
-## 개발 일정 (12주)
+## 26개 기능 섹션 상세 목록
 
-### Week 1-2: 프로젝트 기반 구축 및 인프라
+### 1. 홈/랜딩 페이지 (Home/Landing Page)
+- [ ] 메인 랜딩 페이지 (비로그인 사용자용)
+- [ ] 서비스 소개 섹션
+- [ ] 인기 챌린지 미리보기
+- [ ] 사용자 후기/통계
+- [ ] CTA 버튼 (시작하기, 회원가입)
+- [ ] 로그인 상태에서는 대시보드로 리다이렉트
 
-#### 백엔드 설정
-- [ ] Spring Boot 프로젝트 초기 설정
-- [ ] PostgreSQL, Redis Docker 환경 구성
-- [ ] 데이터베이스 스키마 설계 (20+ 엔티티)
-- [ ] JPA 엔티티 구현
-- [ ] Swagger/OpenAPI 문서 설정
+### 2. 네비게이션 (Navigation)
+- [ ] 상단 네비게이션 (챌린지, 피드, 랭킹, 추천, 검색, 알림, 프로필)
+- [ ] 하단 푸터 (서비스 소개, 약관, 문의)
 
-#### 인프라 구축
-- [ ] GitHub Actions CI/CD 파이프라인
-- [ ] Docker 이미지 자동 빌드
-- [ ] Render 자동 배포 설정
-- [ ] 헬스체크 및 롤백 자동화
+### 3. 사용자 관리 (User Management)
+- [x] 회원가입 API (이메일, 비밀번호, 닉네임)
+- [ ] 이메일 중복 검증 API
+- [x] JWT 토큰 발급/갱신 API
+- [x] 로그인/로그아웃 API
+- [x] 프로필 조회/수정 API
+- [ ] 비밀번호 변경 API (기존 비밀번호 검증)
+- [ ] 회원 탈퇴 API (연관 데이터 처리)
+- [ ] 프로필 이미지 업로드 API (S3/CloudFront)
 
-#### 실시간 통신 기반
-- [ ] SSE 엔드포인트 설정
-- [ ] Redis Pub/Sub 구성
-- [ ] 실시간 메시지 브로드캐스트 테스트
+### 4. 챌린지 관리 (Challenge Management)
+- [x] 챌린지 생성 API (제목, 설명, 카테고리, 기간, 난이도)
+- [x] 챌린지 조회 API (목록/상세, 페이징, 필터링)
+- [x] 챌린지 수정 API (작성자 권한 검증)
+- [x] 챌린지 삭제 API (소프트 삭제)
+- [x] 챌린지 참여/탈퇴 API
+- [ ] 챌린지 검색 API (키워드, Full-Text Search)
+- [x] 조회수 증가 API (Redis 카운터)
+- [x] 참여자 목록 API (페이징)
+- [x] 챌린지 통계 API (참여자 수, 인증 수, 완료율)
 
-**완료 목표**: 개발 환경 완성 + CI/CD 파이프라인 + 실시간 인프라
+### 5. 인증 작성/관리 (Certification Management)
+- [x] 인증 생성 API (챌린지 ID, 제목, 내용)
+- [ ] 이미지 업로드 API (S3 멀티파트 업로드)
+- [ ] 이미지 검증 (서버 사이드: 파일 타입, 크기, MIME 타입)
+- [ ] 이미지 리사이징 (서버 사이드: 썸네일 생성)
+- [x] 인증 조회 API (목록/상세, 페이징)
+- [x] 인증 수정 API (작성자 권한)
+- [x] 인증 삭제 API (작성자 권한, 소프트 삭제)
+- [x] 사용자별 인증 목록 API
+- [x] 챌린지별 인증 목록 API
+- [ ] 인증 통계 API (좋아요 수, 댓글 수)
 
----
+### 6. 실시간 피드 ⭐ 핵심 기능 (Real-time Feed)
+- [x] SSE 엔드포인트 (/api/feed/stream)
+- [x] 실시간 알림 브로드캐스트 (SSE 기반)
+- [x] 인증 생성 시 자동 알림 발행
+- [x] SSE 연결 관리 (사용자별 세션 관리)
+- [x] 하트비트 (30초마다 keep-alive)
+- [x] 피드 조회 API (참여 중인 챌린지 기반, 페이징)
+- [ ] 피드 정렬 API (최신순, 좋아요순, 댓글순)
+- [x] 팔로잉 피드 API (팔로우한 사용자 인증)
 
-### Week 3: 사용자 관리 & 인증 시스템
-
-#### API 개발
-- [ ] User 엔티티 구현
-- [ ] 회원가입 API (POST /api/auth/register)
-- [ ] 로그인 API (POST /api/auth/login)
-- [ ] JWT 토큰 발급/갱신 API
-- [ ] 프로필 조회/수정 API
-- [ ] 비밀번호 변경 API
-- [ ] 회원 탈퇴 API
-- [ ] 프로필 이미지 업로드 (S3)
-
-#### 보안
-- [ ] Spring Security + JWT 필터 구현
-- [ ] 비밀번호 암호화 (BCrypt)
-- [ ] Rate Limiting 설정 (Bucket4j)
-
-#### 프론트엔드
-- [ ] 회원가입/로그인 페이지
-- [ ] 프로필 페이지
-- [ ] JWT 토큰 관리 훅
-
-**완료 목표**: 완전한 사용자 인증 시스템
-
----
-
-### Week 4: 챌린지 관리 시스템
-
-#### API 개발
-- [ ] Challenge 엔티티 구현
-- [ ] UserChallenge 엔티티 (참여 관계)
-- [ ] 챌린지 생성 API (POST /api/challenges)
-- [ ] 챌린지 목록/상세 조회 API
-- [ ] 챌린지 수정/삭제 API (소프트 삭제)
-- [ ] 챌린지 참여/탈퇴 API
-- [ ] 챌린지 검색 API (Full-Text Search)
-- [ ] 조회수 API (Redis 카운터)
-- [ ] 챌린지 통계 API
-
-#### 프론트엔드
-- [ ] 챌린지 목록 페이지
-- [ ] 챌린지 상세 페이지
-- [ ] 챌린지 생성/수정 페이지
-
-**완료 목표**: 기본 챌린지 관리 완성
-
----
-
-### Week 5: 인증 작성 & 이미지 관리
-
-#### API 개발
-- [ ] Certification 엔티티 구현
-- [ ] 인증 생성 API (POST /api/certifications)
-- [ ] 이미지 업로드 API (S3 멀티파트)
-- [ ] 이미지 검증 (파일 타입, 크기, MIME)
-- [ ] 이미지 리사이징 (썸네일 생성)
-- [ ] 인증 조회 API (목록/상세, 페이징)
-- [ ] 인증 수정/삭제 API (24시간 제한)
-- [ ] 사용자별/챌린지별 인증 목록 API
-
-#### 프론트엔드
-- [ ] 인증 작성 페이지
-- [ ] 이미지 업로드 UI
-- [ ] 인증 목록/상세 페이지
-
-**완료 목표**: 인증 작성 및 이미지 관리 시스템
-
----
-
-### Week 6: 실시간 피드 ⭐ 핵심 기능
-
-#### API 개발
-- [ ] SSE 엔드포인트 (GET /api/feed/stream)
-- [ ] Redis Pub/Sub 기반 브로드캐스트
-- [ ] 인증 생성 시 자동 알림 발행
-- [ ] SSE 연결 관리 (사용자별 세션)
-- [ ] 하트비트 (30초 keep-alive)
-- [ ] 피드 조회 API (페이징, 정렬)
-- [ ] 팔로잉 피드 API
-
-#### 프론트엔드
-- [ ] EventSource API 연결
-- [ ] 실시간 토스트 알림 ("OO님이 방금 인증했습니다!")
-- [ ] 피드 페이지 (무한 스크롤)
-- [ ] 연결 상태 표시
-
-**완료 목표**: 실시간 인증 공유 시스템
-
----
-
-### Week 7: AI 추천 엔진 ⭐
-
-#### API 개발
-- [ ] UserBehavior 엔티티 (행동 로그)
-- [ ] 추천 API (5가지 알고리즘)
-  - 쿼리 기반 (참가자 수 TOP)
-  - 콘텐츠 기반 (태그 유사도)
-  - 협업 필터링 (User-Based CF)
-  - 개인화 (행동 로그 분석)
-  - 트렌드 (24시간 급상승)
-- [ ] 추천 이유 생성 API
-- [ ] 사용자 행동 로그 수집
+### 7. AI 추천 엔진 ⭐ 핵심 기능 (AI Recommendation Engine)
+- [ ] 추천 API (5가지 추천 알고리즘)
+- [ ] 쿼리 기반 추천 (참가자 수 TOP, Redis 캐싱)
+- [ ] 콘텐츠 기반 추천 (태그 유사도 계산, 코사인 유사도)
+- [ ] 협업 필터링 (공통 참여 챌린지 분석, User-Based CF)
+- [ ] 개인화 추천 (사용자 행동 로그 분석, 난이도/카테고리 선호)
+- [ ] 트렌드 추천 (24시간 급상승 챌린지, Redis Sorted Set)
+- [ ] 추천 이유 생성 API (설명 텍스트)
+- [ ] 사용자 행동 로그 수집 (조회, 참여, 완료)
 - [ ] 추천 결과 캐싱 (Redis, TTL 1시간)
 - [ ] 추천 성능 측정 (CTR, 참여율)
 
-#### 프론트엔드
-- [ ] AI 추천 페이지
-- [ ] 추천 이유 카드
-- [ ] 추천 새로고침 기능
+### 8. 팔로우/팔로워 (Follow System) ✅
+- [x] 팔로우/언팔로우 API
+- [x] 팔로워 목록 API (페이징)
+- [x] 팔로잉 목록 API (페이징)
+- [x] 팔로우 카운트 캐싱 (Redis)
+- [x] 팔로우 관계 저장 (DB 인덱싱)
+- [x] 팔로잉 피드 API (팔로우한 사용자 인증 조회)
+- [x] 중복 팔로우 방지 (Unique 제약조건)
 
-**완료 목표**: 지능형 추천 시스템
-
----
-
-### Week 8: 소셜 기능
-
-#### API 개발
-- [ ] UserFollowing 엔티티
-- [ ] 팔로우/언팔로우 API
-- [ ] 팔로워/팔로잉 목록 API
-- [ ] 팔로우 카운트 캐싱 (Redis)
-- [ ] Comment 엔티티
-- [ ] 댓글 생성/조회/삭제 API
-- [ ] 댓글 수 카운트 (Redis)
+### 9. 댓글 & 좋아요 (Comments & Likes)
+- [ ] 댓글 생성 API
+- [ ] 댓글 조회 API (인증별, 페이징)
+- [ ] 댓글 삭제 API (작성자 권한 검증)
+- [ ] 댓글 수 카운트 (Redis 캐싱)
 - [ ] 좋아요 생성/취소 API (토글)
-- [ ] 좋아요 카운트 API (Redis)
-- [ ] 좋아요 목록 API
+- [ ] 좋아요 카운트 API (Redis 캐싱)
+- [ ] 좋아요 목록 API (사용자 목록)
+- [ ] 중복 좋아요 방지 (Unique 제약조건)
+- [ ] 좋아요 알림 발송 (비동기)
 
-#### 프론트엔드
-- [ ] 팔로우 버튼
-- [ ] 팔로워/팔로잉 목록 모달
-- [ ] 댓글 시스템
-- [ ] 좋아요 버튼
+### 10. 알림 (Notifications) ✅
+- [x] 알림 생성 API (팔로우, 인증 활동)
+- [x] 알림 조회 API (목록, 페이징)
+- [ ] 미읽음 알림 카운트 API (Redis 캐싱)
+- [ ] 알림 읽음 처리 API (개별/일괄)
+- [x] 알림 삭제 API (소프트 삭제)
+- [ ] 알림 설정 API (타입별 수신 여부)
+- [x] SSE 기반 실시간 알림 푸시
+- [ ] 알림 만료 정책 (30일 후 자동 삭제)
 
-**완료 목표**: 소셜 상호작용 시스템
+### 11. 포인트/레벨 시스템 (Points & Level System)
+- [ ] 포인트 적립 API (행동별 포인트 부여)
+- [ ] 포인트 규칙 (인증 +10, 댓글 +2, 좋아요 +1, 배지 +5)
+- [ ] 레벨 계산 로직 (경험치 기반)
+- [ ] 레벨업 감지 및 알림 발송
+- [ ] 포인트 히스토리 API (페이징, 필터링)
+- [ ] 포인트 조회 API (현재 포인트, 레벨, 진행률)
+- [ ] 포인트 차감 API (향후 상점 기능 대비)
+- [ ] 포인트 통계 API (일별/주별/월별)
 
----
+### 12. 배지 시스템 (Badge System)
+- [ ] 배지 정의 API (배지 목록, 조건, 등급)
+- [ ] 배지 획득 감지 로직 (조건 체크)
+- [ ] 배지 자동 부여 API (비동기 처리)
+- [ ] 배지 조회 API (사용자별 획득/미획득)
+- [ ] 배지 종류 (첫 인증, 7일 연속, 100 포인트, 10팔로워, 50인증 등)
+- [ ] 배지 등급 시스템 (브론즈, 실버, 골드, 플래티넘)
+- [ ] 배지 획득 알림 발송
 
-### Week 9: 게임화 시스템
+### 13. 스트릭 (Streak System)
+- [ ] 스트릭 계산 로직 (연속 인증일 수)
+- [ ] 스트릭 조회 API (현재, 최고, 기록)
+- [ ] 스트릭 캘린더 API (최근 30일 데이터)
+- [ ] 스트릭 검증 배치 작업 (매일 자정 실행)
+- [ ] 스트릭 끊김 경고 알림 (오늘 미인증 시)
+- [ ] 스트릭 통계 API (일별/주별/월별)
 
-#### API 개발
-- [ ] UserLevel 엔티티
-- [ ] Badge, UserBadge 엔티티
-- [ ] Streak 엔티티
-- [ ] 포인트 부여 로직 (인증 +10, 댓글 +2, 좋아요 +1)
-- [ ] 레벨 계산 로직
-- [ ] 배지 획득 조건 및 부여 로직
-- [ ] 스트릭 계산 로직
-- [ ] 랭킹 API (Redis Sorted Set)
-- [ ] 통계 API (개인/챌린지)
+### 14. 랭킹 (Ranking/Leaderboard)
+- [ ] 랭킹 계산 API (Redis Sorted Set 활용)
+- [ ] 랭킹 조회 API (주간/월간/전체, 페이징)
+- [ ] 랭킹 갱신 배치 작업 (1시간마다 실행)
+- [ ] 본인 순위 조회 API (특정 사용자 순위)
+- [ ] 순위 변동 추적 (이전 순위 저장)
+- [ ] SSE 기반 실시간 순위 업데이트
 
-#### 프론트엔드
-- [ ] 레벨 표시
-- [ ] 배지 모음 페이지
-- [ ] 스트릭 캘린더
-- [ ] 랭킹 리더보드
+### 15. 통계/분석 (Statistics & Analytics)
+- [ ] 개인 통계 API (총 인증 수, 포인트, 레벨, 배지, 스트릭, 평균 시간)
+- [ ] 챌린지 통계 API (참여자 수, 인증 수, 완료율, 조회수)
+- [ ] 차트 데이터 API (일별 인증 추이, 주별 포인트, 카테고리별 참여도)
+- [ ] 통계 집계 배치 작업 (매일 실행)
+- [ ] 통계 데이터 캐싱 (Redis, TTL 1시간)
+- [ ] CSV 내보내기 API (개인 데이터 다운로드)
 
-**완료 목표**: 게임화를 통한 참여 극대화
+### 16. 고급 검색 (Advanced Search)
+- [ ] 챌린지 검색 API (키워드, Full-Text Search)
+- [ ] 필터링 API (카테고리, 난이도, 기간, 상태)
+- [ ] 정렬 API (인기도, 신규순, 참여자순, 종료 예정)
+- [ ] 검색 인덱싱 (PostgreSQL tsvector, GIN 인덱스)
+- [ ] 검색 결과 캐싱 (Redis, TTL 10분)
+- [ ] 검색어 자동완성 API
+- [ ] 인기 검색어 API (Redis Sorted Set)
 
----
+### 17. 개인 대시보드 (Personal Dashboard)
+- [ ] 대시보드 데이터 API (레벨, 포인트, 배지, 스트릭)
+- [ ] 참여 중인 챌린지 API (진행률, 인증 수, 남은 기간)
+- [ ] 최근 활동 피드 API (최근 5개 인증)
+- [ ] 대시보드 추천 챌린지 API (AI 기반)
+- [ ] 대시보드 데이터 캐싱 (Redis, TTL 5분)
 
-### Week 10: AI 기능 강화 ⭐
+### 18. 관리자 기능 (Admin Features)
+- [ ] 관리자 대시보드 API
+- [ ] 사용자 관리 API (조회, 검색, 비활성화, 삭제)
+- [ ] 챌린지 관리 API (승인, 거부, 삭제, 수정)
+- [ ] 인증 관리 API (신고 처리, 삭제)
+- [ ] 댓글 관리 API (신고 처리, 삭제)
+- [ ] 통계 조회 API (전체 사용자 수, 챌린지 수, 인증 수)
+- [ ] 시스템 설정 API (포인트 규칙, 레벨 기준, 배지 조건)
+- [ ] 공지사항 관리 API (생성, 수정, 삭제)
+- [ ] 관리자 권한 검증 (ADMIN 역할)
+- [ ] 관리자 활동 로그 저장
 
-#### API 개발
-- [ ] AI 챌린지 생성 API (OpenAI GPT)
-- [ ] 키워드 기반 챌린지 자동 생성
-- [ ] GPT 프롬프트 엔지니어링
-- [ ] 생성 미리보기 API
-- [ ] AI 인증 분석 API (Google Cloud Vision)
-- [ ] 라벨/텍스트/안전 탐지
-- [ ] AI 신뢰도 점수 계산
-- [ ] AI 배지 자동 부여
-- [ ] AI 격려 메시지 생성 API
-- [ ] 개인화 메시지 생성
+### 19. 에러 처리 (Error Handling)
+- [ ] 전역 예외 처리 (@RestControllerAdvice)
+- [ ] 커스텀 예외 클래스 정의
+- [ ] HTTP 상태 코드 매핑 (4xx, 5xx)
+- [ ] 에러 응답 표준화 (code, message, timestamp)
+- [ ] 에러 로깅 (Sentry, Logback)
 
-#### 프론트엔드
-- [ ] AI 챌린지 생성 페이지
-- [ ] AI 분석 결과 표시
-- [ ] AI 격려 메시지 팝업
+### 20. Redis 캐싱 전략 (Redis Caching Strategy)
+- [ ] Redis 연결 설정 (Lettuce)
+- [ ] 캐시 키 전략 정의 (네이밍 규칙)
+- [ ] TTL 정책 설정 (데이터별)
+- [ ] 캐시 프리로딩 (서버 시작 시)
+- [ ] 캐시 무효화 전략 (Write-Through, Write-Behind)
+- [ ] 캐시 히트율 모니터링
 
-**완료 목표**: 차별화된 AI 기능 완성
+### 21. 보안 시스템 (Security System)
+- [ ] JWT 토큰 검증 필터
+- [ ] Rate Limiting (Bucket4j)
+  - API별 요청 제한 (분당 100회)
+  - 사용자별 요청 제한 (분당 50회)
+  - IP별 요청 제한 (분당 200회)
+- [ ] IP 차단 시스템 (Redis 블랙리스트)
+- [ ] CORS 설정 (허용 오리진, 메서드, 헤더)
+- [ ] XSS 방지 (HTML 이스케이프)
+- [ ] SQL Injection 방지 (Prepared Statement)
+- [ ] CSRF 토큰 검증
+- [ ] 권한 관리 (Spring Security, Role 기반)
+- [ ] 비밀번호 암호화 (BCrypt)
+- [ ] 민감 정보 암호화 (AES-256)
 
----
-
-### Week 11: 알림 & 소셜 로그인
-
-#### API 개발
-- [ ] Notification 엔티티
-- [ ] 알림 생성 API (팔로우, 댓글, 좋아요, 배지, 레벨업)
-- [ ] 알림 조회 API (목록, 페이징)
-- [ ] 미읽음 알림 카운트 API (Redis)
-- [ ] 알림 읽음 처리 API
-- [ ] 알림 설정 API
-- [ ] SSE 기반 실시간 알림 푸시
-- [ ] OAuth 2.0 연동 (Google, Kakao)
-- [ ] 소셜 로그인 콜백 API
-- [ ] 소셜 계정 연동/해제 API
-
-#### 프론트엔드
-- [ ] 알림 벨 아이콘
-- [ ] 알림 드롭다운
-- [ ] 알림 목록 페이지
-- [ ] 소셜 로그인 버튼
-
-**완료 목표**: 알림 시스템 + 소셜 로그인
-
----
-
-### Week 12: 성능 최적화 & 런칭
-
-#### 백엔드 최적화
-- [ ] 데이터베이스 인덱싱 (복합 인덱스, 부분 인덱스)
+### 22. API 성능 최적화 (API Performance Optimization)
 - [ ] 쿼리 최적화 (N+1 문제 해결, Fetch Join)
-- [ ] Redis 캐싱 전략 최적화
+- [ ] 데이터베이스 인덱싱 (복합 인덱스, 부분 인덱스)
 - [ ] 페이징 최적화 (Cursor 기반)
-- [ ] API 응답 시간 개선 (목표: 500ms 이하)
+- [ ] 응답 압축 (Gzip)
+- [ ] API 응답 시간 모니터링
+- [ ] Slow Query 로그 분석
 - [ ] 커넥션 풀 최적화 (HikariCP)
-- [ ] 배치 작업 설정 (6개)
+- [ ] 트랜잭션 범위 최소화
+
+### 23. 배치 작업/스케줄링 (Batch Jobs & Scheduling)
+- [ ] Spring Batch 설정
+- [ ] 스케줄러 설정 (@Scheduled)
+- [ ] 배치 작업 목록:
   - 스트릭 검증 (매일 자정)
   - 랭킹 갱신 (1시간마다)
   - 통계 집계 (매일 새벽 2시)
   - 만료 알림 삭제 (매주 일요일)
   - 챌린지 종료 처리 (매시간)
-  - 주간 리포트 발송 (매주 월요일)
+  - 주간 리포트 이메일 발송 (매주 월요일)
+- [ ] 배치 실행 이력 저장
+- [ ] 배치 실패 알림 (Slack, Discord)
+- [ ] 배치 작업 모니터링 (실행 시간, 성공/실패)
 
-#### 보안 강화
-- [ ] IP 차단 시스템 (Redis 블랙리스트)
-- [ ] CORS 설정
-- [ ] XSS 방지
-- [ ] SQL Injection 방지
-- [ ] CSRF 토큰 검증
-- [ ] 민감 정보 암호화 (AES-256)
+### 24. AI 인증 분석 (AI Certification Analysis)
+- [ ] Google Cloud Vision API 연동
+- [ ] 이미지 업로드 시 비동기 분석 (백그라운드 작업)
+- [ ] 라벨 탐지 (Label Detection) 분석
+- [ ] 텍스트 탐지 (OCR) 분석
+- [ ] 안전 탐지 (Safe Search) 분석
+- [ ] AI 신뢰도 점수 계산 (0-100)
+- [ ] 분석 결과 저장 (DB)
+- [ ] AI 인증 배지 자동 부여 (신뢰도 80% 이상)
+- [ ] 분석 실패 시 재시도 로직
 
-#### 테스트
-- [ ] 단위 테스트 (Service, Util)
-- [ ] 통합 테스트 (Controller, DB, Redis)
-- [ ] E2E 테스트 (전체 플로우)
+### 25. AI 동기부여 코치 (AI Motivational Coach)
+- [ ] AI 격려 메시지 생성 API (OpenAI GPT 연동)
+- [ ] 사용자 컨텍스트 수집 (레벨, 스트릭, 최근 활동)
+- [ ] 개인화 메시지 생성 (사용자 데이터 기반)
+- [ ] 메시지 템플릿 엔진 (다양한 표현)
+- [ ] 메시지 저장 및 이력 관리
+- [ ] 메시지 조회 API (최근 10개)
+- [ ] 알림 시스템 연동 (자동 발송)
 
-#### 프론트엔드 최적화
-- [ ] 코드 스플리팅
-- [ ] 이미지 lazy loading
-- [ ] API 호출 최적화
-- [ ] 불필요한 리렌더링 방지
-
-#### 런칭 준비
-- [ ] 사용자 온보딩 플로우
-- [ ] 관리자 대시보드
-- [ ] 에러 페이지 (404, 500, 403)
-- [ ] 로깅/모니터링 (Sentry, Prometheus)
-- [ ] 정식 서비스 런칭
-
-**완료 목표**: 완전한 소셜 챌린지 트래커 서비스
+### 26. AI 챌린지 생성기 (AI Challenge Generator)
+- [ ] AI 챌린지 생성 API (OpenAI GPT 연동)
+- [ ] 키워드 기반 챌린지 자동 생성 (제목, 설명, 태그, 카테고리)
+- [ ] GPT 프롬프트 엔지니어링 (구조화된 출력)
+- [ ] 생성 결과 검증 (필수 필드, 길이 제한)
+- [ ] 생성 미리보기 API (저장 전 확인)
+- [ ] 생성된 챌린지 수정 API (제목, 설명, 태그 수정)
+- [ ] 챌린지 즉시 생성 API (검증 후 DB 저장)
+- [ ] 생성 이력 저장 (사용자별, 통계)
+- [ ] API 호출 제한 (Rate Limiting, 일일 10회)
+- [ ] 생성 실패 시 재시도 로직 (최대 3회)
 
 ---
 
-## 주요 API 엔드포인트 (100+)
+## 주요 API 엔드포인트 (35+)
 
-### 사용자 관리
-- `POST /api/auth/register` - 회원가입
+### 인증 관리 (AuthController)
+- `POST /api/auth/signup` - 회원가입
 - `POST /api/auth/login` - 로그인 (JWT 반환)
-- `POST /api/auth/refresh` - 토큰 갱신
-- `GET /api/users/{id}` - 프로필 조회
-- `PUT /api/users/{id}` - 프로필 수정
+- `POST /api/auth/logout` - 로그아웃
 
-### 챌린지 관리
-- `POST /api/challenges` - 챌린지 생성
-- `GET /api/challenges` - 목록 조회
-- `GET /api/challenges/{id}` - 상세 조회
-- `POST /api/challenges/{id}/join` - 참여
-- `GET /api/challenges/search` - 검색
+### 사용자 관리 (UserController)
+- `GET /api/users/{loginId}` - 사용자 프로필 조회
+- `PUT /api/users/{loginId}` - 프로필 수정
+- `GET /api/users` - 사용자 목록 조회 (페이징)
 
-### 인증 관리
+### 챌린지 관리 (ChallengeController)
+- `POST /api/challenge` - 챌린지 생성
+- `GET /api/challenge` - 목록 조회 (필터링, 페이징)
+- `GET /api/challenge/{challengeId}` - 상세 조회
+- `GET /api/challenge/search` - 검색
+- `PUT /api/challenge/{challengeId}` - 수정
+- `DELETE /api/challenge/{challengeId}` - 삭제
+- `POST /api/challenge/{challengeId}/join` - 참여
+- `POST /api/challenge/{challengeId}/withdraw` - 탈퇴
+- `POST /api/challenge/{challengeId}/view` - 조회수 증가
+- `GET /api/challenge/{challengeId}/participants` - 참여자 목록
+- `GET /api/challenge/{challengeId}/statistics` - 통계
+- `GET /api/challenge/my` - 내 챌린지 목록
+
+### 인증 관리 (CertificationController)
 - `POST /api/certifications` - 인증 생성
-- `POST /api/certifications/upload` - 이미지 업로드
 - `GET /api/certifications` - 목록 조회
+- `GET /api/certifications/{certId}` - 상세 조회
+- `PUT /api/certifications/{certId}` - 수정
+- `DELETE /api/certifications/{certId}` - 삭제
 
-### 실시간 피드
+### 팔로우 시스템 (FollowController)
+- `POST /api/follows/{followingLoginId}` - 팔로우
+- `DELETE /api/follows/{followingLoginId}` - 언팔로우
+- `GET /api/follows/{userLoginId}/followers` - 팔로워 목록 (페이징)
+- `GET /api/follows/{userLoginId}/followings` - 팔로잉 목록 (페이징)
+- `GET /api/follows/{userLoginId}/follower-count` - 팔로워 수
+- `GET /api/follows/{userLoginId}/following-count` - 팔로잉 수
+
+### 실시간 피드 (FeedController)
+- `GET /api/feed` - 피드 조회 (페이징)
 - `GET /api/feed/stream` - SSE 스트림
-- `GET /api/feed` - 피드 조회
 
-### AI 기능
-- `POST /api/ai/challenges/generate` - AI 챌린지 생성
-- `POST /api/ai/certifications/analyze` - AI 인증 분석
-- `POST /api/ai/motivate` - AI 격려 메시지
-- `GET /api/ai/recommendations` - AI 추천
+### 알림 (NotificationController)
+- `GET /api/notifications` - 알림 목록 조회 (페이징)
+- `GET /api/notifications/unread-count` - 미읽음 알림 수
+- `PUT /api/notifications/{notificationId}/read` - 알림 읽음 표시
+- `DELETE /api/notifications/{notificationId}` - 알림 삭제
 
-### 소셜 기능
-- `POST /api/users/{id}/follow` - 팔로우
-- `POST /api/certifications/{id}/comments` - 댓글
-- `POST /api/certifications/{id}/like` - 좋아요
+---
 
-### 게임화
-- `GET /api/users/{id}/stats` - 통계
-- `GET /api/rankings` - 랭킹
-- `GET /api/badges` - 배지
-- `GET /api/streaks/{userId}` - 스트릭
+## 구현된 프론트엔드 페이지 (15+)
+
+- 🏠 **홈페이지** `/` - 로그인 상태에 따라 대시보드 또는 랜딩 페이지
+- 🔐 **인증** `/login`, `/signup` - 로그인/회원가입
+- 📊 **대시보드** `/dashboard` - 사용자 통계, 참여 중인 챌린지
+- 🏆 **챌린지**
+  - `/challenge` - 챌린지 목록 (필터링, 페이징)
+  - `/challenge/[id]` - 챌린지 상세보기
+  - `/challenge/create` - 챌린지 생성
+  - `/challenge/my` - 내 챌린지 목록
+- ✅ **인증**
+  - `/certification/[id]` - 인증 상세보기
+  - `/certification/create` - 인증 생성
+  - `/certification/my` - 내 인증 목록
+- 📰 **피드** `/feed` - 참여 중인 챌린지 및 팔로우 사용자의 실시간 인증 피드
+- 👤 **프로필**
+  - `/profile` - 내 프로필
+  - `/profile/[loginId]` - 다른 사용자 프로필 (팔로우 가능)
+- 👥 **사용자** `/users` - 사용자 목록 (검색, 페이징, 팔로우 가능)
 
 ---
 
@@ -482,14 +497,13 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 
 | 항목 | 수치 |
 |------|------|
-| **총 기능 섹션** | 26개 |
-| **총 API 엔드포인트** | 100+ |
-| **백엔드 기능 비중** | 85% |
-| **프론트엔드 페이지** | 25+ |
-| **전체 체크리스트** | 210+ |
-| **개발 기간** | 12주 |
-| **배치 작업** | 6개 |
-| **외부 API 연동** | 4개 (OpenAI GPT, Google Cloud Vision, Google OAuth, Kakao OAuth) |
+| **구현된 API 엔드포인트** | 35+ |
+| **구현된 프론트엔드 페이지** | 15+ |
+| **백엔드 기능 섹션** | 8개 (인증, 사용자, 챌린지, 인증, 피드, 팔로우, 알림, 기타) |
+| **구현된 기능** | 사용자 인증, 챌린지 관리, 인증 시스템, 팔로우, 실시간 피드, 알림 |
+| **완료율** | ~40% (8개 섹션 중 주요 기능 완료) |
+| **현재 기술 스택** | Spring Boot, Next.js, PostgreSQL, Redis, SSE |
+| **외부 API 연동** | 0개 (계획 중: OpenAI GPT, Google Cloud Vision) |
 
 ---
 
@@ -514,4 +528,27 @@ MIT License
 
 ---
 
-**12주로 완성하는 백엔드 중심 AI 기반 소셜 챌린지 트래커** 🚀
+**실시간 SSE 기반 소셜 챌린지 트래커 - 구현 진행 중** 🚀
+
+---
+
+## 주요 기능 요약
+
+### ✅ 완료된 기능
+- 사용자 인증 & 프로필 관리
+- 챌린지 생성/관리/참여 시스템
+- 챌린지 인증 작성 & 관리
+- 실시간 SSE 기반 피드 시스템
+- 팔로우/언팔로우 시스템
+- 팔로잉 피드 (팔로우한 사용자 인증)
+- 알림 시스템 (DB 기반 + SSE 실시간 푸시)
+- Redis 캐싱 (조회수, 팔로우 수)
+
+### 🔄 진행 중 & 계획 중
+- 댓글 & 좋아요 시스템
+- 포인트/레벨/배지 시스템
+- AI 기반 챌린지 추천
+- AI 챌린지 생성기 (GPT)
+- AI 이미지 검증 (Google Vision)
+- 관리자 기능
+- 배치 작업 (스트릭, 랭킹 갱신)
