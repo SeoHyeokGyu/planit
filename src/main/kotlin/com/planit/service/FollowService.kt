@@ -1,6 +1,7 @@
 package com.planit.service
 
 import com.planit.dto.UserProfileResponse
+import com.planit.dto.NotificationDto
 import com.planit.entity.Follow
 import com.planit.repository.FollowRepository
 import com.planit.repository.UserRepository
@@ -9,7 +10,9 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import com.planit.exception.UserNotFoundException // UserNotFoundException import 추가
+import com.planit.exception.UserNotFoundException
+import java.time.LocalDateTime
+import java.util.UUID
 
 /**
  * 팔로우(Follow) 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
@@ -20,7 +23,8 @@ import com.planit.exception.UserNotFoundException // UserNotFoundException impor
 class FollowService(
     private val followRepository: FollowRepository,
     private val userRepository: UserRepository,
-    private val cacheManager: CacheManager // 캐시 관리를 위한 CacheManager 주입
+    private val cacheManager: CacheManager,
+    private val notificationService: NotificationService
 ) {
 
     /**
@@ -52,6 +56,17 @@ class FollowService(
         // 팔로우 카운트 캐시 업데이트: 팔로우한 사람의 팔로잉 수 증가, 팔로우 당한 사람의 팔로워 수 증가
         incrementCacheValue("followingCount", followerLoginId)
         incrementCacheValue("followerCount", followingLoginId)
+
+        // 알림 전송
+        notificationService.sendNotification(
+            followingLoginId,
+            NotificationDto(
+                id = UUID.randomUUID().toString(),
+                type = "INFO",
+                message = "${follower.nickname}님이 회원님을 팔로우하기 시작했습니다.",
+                createdAt = LocalDateTime.now()
+            )
+        )
     }
 
     /**

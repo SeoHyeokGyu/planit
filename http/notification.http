@@ -1,0 +1,21 @@
+
+### SSE 알림 구독
+# 주의: 일부 HTTP 클라이언트는 SSE 연결을 끝까지 유지하지 못할 수 있습니다.
+# 브라우저에서 직접 테스트하거나 별도의 SSE 클라이언트를 사용하세요.
+< {%
+    client.global.set("auth_token", "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzY2MjA2MDYxLCJleHAiOjE3NjYyOTI0NjF9.ckoxgz3DVpcuOeLI6EyEPSIw6oIw60JoyyjG_jb_j1I");
+%}
+GET http://localhost:8080/api/subscribe?token={{auth_token}}
+Accept: text/event-stream
+
+### 테스트 알림 전송
+# 특정 사용자에게 실시간 알림을 보냅니다.
+POST http://localhost:8080/api/subscribe/test
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "userLoginId": "2",
+  "type": "INFO",
+  "message": "안녕하세요! 실시간 알림 테스트입니다."
+}
