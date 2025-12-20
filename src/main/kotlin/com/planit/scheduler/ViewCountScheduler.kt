@@ -51,7 +51,7 @@ class ViewCountScheduler(
                 }
             }
 
-            logger.info("=== 조회수 동기화 완료 === 성공: $successCount, 실패: $failCount")
+            logger.info("=== 조회수 동기화 완료 ===  성공: $successCount, 실패: $failCount")
 
         } catch (e: Exception) {
             logger.error("조회수 동기화 스케줄러 오류", e)
