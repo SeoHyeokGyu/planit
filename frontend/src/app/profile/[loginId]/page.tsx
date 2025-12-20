@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
-import { CertificationsSection } from "@/components/profile/CertificationsSection";
+import CertificationsSection from "@/components/profile/CertificationsSection";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import FollowButton from "@/components/follow/FollowButton";
 import { Button } from "@/components/ui/button";
