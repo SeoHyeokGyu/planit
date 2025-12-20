@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useChallenge, useJoinChallenge, useWithdrawChallenge } from "@/hooks/useChallenge";
+import { useChallenge, useJoinChallenge, useWithdrawChallenge, useMyChallenges } from "@/hooks/useChallenge";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -24,12 +24,24 @@ import {
     TrendingUp
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {useEffect} from "react";
+import { useEffect, useState } from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function ChallengeDetailPage() {
     const params = useParams();
     const router = useRouter();
     const challengeId = params.id as string;
+    const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
 
     useEffect(() => {
         const incrementViewCount = async () => {
@@ -51,32 +63,33 @@ export default function ChallengeDetailPage() {
     }, [params.id]);
 
     const { data: challenge, isLoading, error } = useChallenge(challengeId);
+    const { data: myChallenges } = useMyChallenges();
     const joinMutation = useJoinChallenge();
     const withdrawMutation = useWithdrawChallenge();
+
+    const isParticipating = myChallenges?.some((c) => c.id === challengeId);
 
     const handleJoin = () => {
         joinMutation.mutate(challengeId, {
             onSuccess: () => {
-                alert("챌린지에 참여했습니다!");
+                toast.success("챌린지에 참여했습니다!");
                 window.location.reload();
             },
             onError: (error: any) => {
-                alert(error.message || "참여에 실패했습니다.");
-            },
+                toast.error(error.message || "참여에 실패했습니다.");
+            }
         });
     };
 
     const handleWithdraw = () => {
-        if (!confirm("정말 탈퇴하시겠습니까?")) return;
-
         withdrawMutation.mutate(challengeId, {
             onSuccess: () => {
-                alert("챌린지에서 탈퇴했습니다.");
+                toast.success("챌린지에서 탈퇴했습니다.");
                 window.location.reload();
             },
             onError: (error: any) => {
-                alert(error.message || "탈퇴에 실패했습니다.");
-            },
+                toast.error(error.message || "탈퇴에 실패했습니다.");
+            }
         });
     };
 
@@ -168,7 +181,7 @@ export default function ChallengeDetailPage() {
                 {/* Back Button */}
                 <Button
                     variant="ghost"
-                    onClick={() => router.back()}
+                    onClick={() => router.push("/challenge")}
                     className="mb-6 hover:bg-blue-50 text-gray-900 font-semibold"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -272,23 +285,54 @@ export default function ChallengeDetailPage() {
                     </CardContent>
 
                     <CardFooter className="border-t bg-gray-50 flex gap-3">
-                        <Button
-                            onClick={handleJoin}
-                            disabled={joinMutation.isPending}
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 font-bold"
-                        >
-                            {joinMutation.isPending ? "참여 중..." : "챌린지 참여하기"}
-                        </Button>
-                        <Button
-                            onClick={handleWithdraw}
-                            disabled={withdrawMutation.isPending}
-                            variant="outline"
-                            className="flex-1 border-2 border-red-400 text-red-700 hover:bg-red-50 h-12 font-bold"
-                        >
-                            {withdrawMutation.isPending ? "탈퇴 중..." : "챌린지 탈퇴"}
-                        </Button>
+                        {!isParticipating ? (
+                            <Button
+                                onClick={handleJoin}
+                                disabled={joinMutation.isPending}
+                                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 font-bold"
+                            >
+                                {joinMutation.isPending ? "참여 중..." : "챌린지 참여하기"}
+                            </Button>
+                        ) : (
+                            <>
+                                <Button
+                                    onClick={() => router.push(`/certification/create?challengeId=${challengeId}`)}
+                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12 font-bold"
+                                >
+                                    인증하기
+                                </Button>
+                                <Button
+                                    onClick={() => setIsWithdrawDialogOpen(true)}
+                                    disabled={withdrawMutation.isPending}
+                                    variant="outline"
+                                    className="flex-1 border-2 border-red-400 text-red-700 hover:bg-red-50 h-12 font-bold"
+                                >
+                                    {withdrawMutation.isPending ? "탈퇴 중..." : "챌린지 탈퇴"}
+                                </Button>
+                            </>
+                        )}
                     </CardFooter>
                 </Card>
+
+                <AlertDialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>챌린지 탈퇴</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                정말로 이 챌린지에서 탈퇴하시겠습니까? 탈퇴 후에도 다시 참여할 수 있습니다.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>취소</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleWithdraw}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                탈퇴하기
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
     );

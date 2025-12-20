@@ -1,9 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { userService } from "@/services/userService";
 import { useAuthStore } from "@/stores/authStore";
-import { UserPasswordUpdateRequest, UserUpdateRequest } from "@/types/user";
+import { UserPasswordUpdateRequest, UserUpdateRequest, UserProfile } from "@/types/user";
+import { ApiResponse } from "@/types/api";
 
 // --- Queries ---
 
@@ -34,6 +36,10 @@ export const useUpdateProfile = () => {
     mutationFn: (data: UserUpdateRequest) => userService.updateProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      toast.success("프로필이 업데이트되었습니다.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "프로필 업데이트 실패");
     },
   });
 };
@@ -44,5 +50,11 @@ export const useUpdateProfile = () => {
 export const useUpdatePassword = () => {
   return useMutation({
     mutationFn: (data: UserPasswordUpdateRequest) => userService.updatePassword(data),
+    onSuccess: () => {
+      toast.success("비밀번호가 변경되었습니다.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "비밀번호 변경 실패");
+    },
   });
 };

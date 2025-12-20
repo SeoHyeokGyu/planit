@@ -42,6 +42,7 @@ data class CertificationResponse(
     val content: String,
     val photoUrl: String?,
     val authorNickname: String,
+    val challengeId: String,
     val challengeTitle: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
@@ -60,6 +61,7 @@ data class CertificationResponse(
                 photoUrl = certification.photoUrl,
                 // 작성자 닉네임이 없을 경우 로그인 ID 사용
                 authorNickname = certification.user.nickname ?: certification.user.loginId,
+                challengeId = certification.challenge.id,
                 challengeTitle = certification.challenge.title,
                 createdAt = certification.createdAt,
                 updatedAt = certification.updatedAt

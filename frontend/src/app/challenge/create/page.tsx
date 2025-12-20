@@ -24,6 +24,7 @@ import {
 import { ArrowLeft, Info, Sparkles, Calendar, Target } from "lucide-react";
 import { ChallengeRequest } from "@/types/challenge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 export default function CreateChallengePage() {
     const router = useRouter();
@@ -35,13 +36,14 @@ export default function CreateChallengePage() {
         return today.toISOString().split('T')[0];
     };
 
-    const [formData, setFormData] = useState<Omit<ChallengeRequest, 'loginId'>>({
+    const [formData, setFormData] = useState<ChallengeRequest>({
         title: "",
         description: "",
         category: "",
         difficulty: "",
         startDate: "",
         endDate: "",
+        loginId: "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -49,7 +51,7 @@ export default function CreateChallengePage() {
 
         // 유효성 검증
         if (!formData.category || !formData.difficulty) {
-            alert("카테고리와 난이도를 선택해주세요.");
+            toast.error("카테고리와 난이도를 선택해주세요.");
             return;
         }
 
@@ -58,12 +60,9 @@ export default function CreateChallengePage() {
         const end = new Date(formData.endDate);
 
         if (end <= start) {
-            alert("종료일은 시작일보다 늦어야 합니다.");
+            toast.error("종료일은 시작일보다 늦어야 합니다.");
             return;
         }
-
-        // TODO: 실제 로그인한 사용자 ID로 교체 필요
-        const loginId = "test123"; // 임시 하드코딩, 나중에 인증 컨텍스트에서 가져오기
 
         // 날짜를 LocalDateTime 형식으로 변환 (YYYY-MM-DDTHH:mm:ss)
         const startDateTime = `${formData.startDate}T00:00:00`;
@@ -71,7 +70,6 @@ export default function CreateChallengePage() {
 
         const requestData = {
             ...formData,
-            loginId,
             startDate: startDateTime,
             endDate: endDateTime,
         };

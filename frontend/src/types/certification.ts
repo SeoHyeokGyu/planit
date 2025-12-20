@@ -1,7 +1,7 @@
 // frontend/src/types/certification.ts
 
 export interface CertificationCreateRequest {
-  challengeId: number;
+  challengeId: string;
   title: string;
   content: string;
 }
@@ -17,6 +17,7 @@ export interface CertificationResponse {
   content: string;
   photoUrl: string | null;
   authorNickname: string;
+  challengeId: string;
   challengeTitle: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string

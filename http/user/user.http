@@ -27,3 +27,9 @@ Authorization: Bearer {{auth_token}}
 {
   "nickname": "{{$random.superhero.name}}"
 }
+
+###
+# @name 대시보드 통계 가져오기
+GET http://localhost:8080/api/users/me/stats
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}

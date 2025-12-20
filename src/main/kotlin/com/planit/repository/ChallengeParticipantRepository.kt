@@ -41,6 +41,9 @@ interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, S
     // 챌린지의 상태별 참여자 수
     fun countByIdAndStatus(id: String, status: ParticipantStatusEnum): Long
 
+    // 특정 사용자의 상태별 참여 챌린지 수
+    fun countByLoginIdAndStatus(loginId: String, status: ParticipantStatusEnum): Long
+
     // 챌린지의 전체 인증 수 합계
     @Query("""
         SELECT COALESCE(SUM(p.certificationCnt), 0) 

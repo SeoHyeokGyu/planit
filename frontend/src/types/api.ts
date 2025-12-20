@@ -1,7 +1,28 @@
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
-  message: string;
+  pagination?: PaginationInfo;
+  message?: string;
+  error?: {
+    code: string;
+    message: string;
+  };
+}
+
+export interface PaginationInfo {
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+}
+
+export interface ApiErrorResponse {
+  success: boolean;
+  error: {
+    code: string;
+    message: string;
+  };
 }
 
 export interface Page<T> {

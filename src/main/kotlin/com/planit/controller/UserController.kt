@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+import com.planit.dto.UserDashboardStats
+
 @RestController
 @RequestMapping("/api/users")
 class UserController(val userService: UserService) {
@@ -30,6 +32,14 @@ class UserController(val userService: UserService) {
     val profile = UserProfileResponse.of(userDetails.user)
 
     return ResponseEntity.ok(ApiResponse.success(profile))
+  }
+
+  @GetMapping("/me/stats")
+  fun getMyStats(
+      @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<UserDashboardStats>> {
+    val stats = userService.getDashboardStats(userDetails.user.loginId)
+    return ResponseEntity.ok(ApiResponse.success(stats))
   }
 
   @PatchMapping("/me/password")

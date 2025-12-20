@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { challengeService } from "@/services/challengeService";
 import { ChallengeRequest, ChallengeSearchRequest } from "@/types/challenge";
 
@@ -50,6 +51,14 @@ export const useChallengeStatistics = (id: string) => {
     });
 };
 
+export const useMyChallenges = () => {
+    return useQuery({
+        queryKey: ["myChallenges"],
+        queryFn: () => challengeService.getMyChallenges(),
+        select: (data) => data.data,
+    });
+};
+
 // --- Mutations ---
 
 export const useCreateChallenge = () => {
@@ -58,6 +67,10 @@ export const useCreateChallenge = () => {
         mutationFn: (data: ChallengeRequest) => challengeService.createChallenge(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["challenges"] });
+            toast.success("챌린지가 생성되었습니다.");
+        },
+        onError: (error) => {
+            toast.error(error.message || "챌린지 생성 실패");
         },
     });
 };
@@ -67,9 +80,13 @@ export const useUpdateChallenge = () => {
     return useMutation({
         mutationFn: ({ id, data }: { id: string; data: ChallengeRequest }) =>
             challengeService.updateChallenge(id, data),
-        onSuccess: (_, variables) => {
+        onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ["challenges"] });
             queryClient.invalidateQueries({ queryKey: ["challenge", variables.id] });
+            toast.success("챌린지가 수정되었습니다.");
+        },
+        onError: (error) => {
+            toast.error(error.message || "챌린지 수정 실패");
         },
     });
 };
@@ -80,6 +97,10 @@ export const useDeleteChallenge = () => {
         mutationFn: (id: string) => challengeService.deleteChallenge(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["challenges"] });
+            toast.success("챌린지가 삭제되었습니다.");
+        },
+        onError: (error) => {
+            toast.error(error.message || "챌린지 삭제 실패");
         },
     });
 };
@@ -88,9 +109,13 @@ export const useJoinChallenge = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: string) => challengeService.joinChallenge(id),
-        onSuccess: (_, id) => {
+        onSuccess: (data, id) => {
             queryClient.invalidateQueries({ queryKey: ["challenge", id] });
             queryClient.invalidateQueries({ queryKey: ["challenge", id, "participants"] });
+            toast.success("챌린지에 참여했습니다.");
+        },
+        onError: (error) => {
+            toast.error(error.message || "참여 실패");
         },
     });
 };
@@ -99,9 +124,13 @@ export const useWithdrawChallenge = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: string) => challengeService.withdrawChallenge(id),
-        onSuccess: (_, id) => {
+        onSuccess: (data, id) => {
             queryClient.invalidateQueries({ queryKey: ["challenge", id] });
             queryClient.invalidateQueries({ queryKey: ["challenge", id, "participants"] });
+            toast.success("챌린지를 포기했습니다.");
+        },
+        onError: (error) => {
+            toast.error(error.message || "포기 실패");
         },
     });
 };

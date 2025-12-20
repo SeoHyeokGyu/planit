@@ -1,24 +1,10 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient, UseQueryOptions, QueryKey } from "@tanstack/react-query";
 import { certificationService } from "@/services/certificationService";
-import { CertificationCreateRequest, CertificationUpdateRequest, CertificationResponse } from "@/types/certification";
-import { ApiResponse, Page } from "@/types/api";
-
-// Define internal options types for better type inference and control
-type CertificationsByUserInternalOptions = UseQueryOptions<
-  ApiResponse<Page<CertificationResponse>>,
-  Error,
-  Page<CertificationResponse>,
-  QueryKey
->;
-
-type CertificationsByDateRangeInternalOptions = UseQueryOptions<
-  ApiResponse<CertificationResponse[]>,
-  Error,
-  CertificationResponse[],
-  QueryKey
->;
+import { Page } from "@/types/api";
+import { CertificationCreateRequest, CertificationUpdateRequest } from "@/types/certification";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 // --- Queries ---
 
@@ -41,7 +27,13 @@ export const useCertificationsByUser = (
     queryKey: ["certifications", "user", userLoginId, page, size],
     queryFn: () => certificationService.getCertificationsByUser(userLoginId, page, size),
     enabled: !!userLoginId,
-    select: (data) => data.data,
+    select: (data): Page<any> => ({
+      content: data.data,
+      totalElements: data.pagination?.totalElements || 0,
+      totalPages: data.pagination?.totalPages || 0,
+      number: data.pagination?.pageNumber || 0,
+      size: data.pagination?.pageSize || 10,
+    }),
     ...options
   });
 };
@@ -51,7 +43,13 @@ export const useCertificationsByChallenge = (challengeId: number, page: number =
     queryKey: ["certifications", "challenge", challengeId, page, size],
     queryFn: () => certificationService.getCertificationsByChallenge(challengeId, page, size),
     enabled: !!challengeId && !isNaN(challengeId),
-    select: (data) => data.data,
+    select: (data): Page<any> => ({
+      content: data.data,
+      totalElements: data.pagination?.totalElements || 0,
+      totalPages: data.pagination?.totalPages || 0,
+      number: data.pagination?.pageNumber || 0,
+      size: data.pagination?.pageSize || 10,
+    }),
   });
 };
 
@@ -76,8 +74,12 @@ export const useCreateCertification = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CertificationCreateRequest) => certificationService.createCertification(data),
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      toast.success("인증글이 작성되었습니다.");
+    },
+    onError: (error, variables, context) => {
+      toast.error(error.message || "인증글 작성에 실패했습니다.");
     },
   });
 };
@@ -87,9 +89,13 @@ export const useUploadCertificationPhoto = () => {
   return useMutation({
     mutationFn: ({ id, file }: { id: number; file: File }) =>
       certificationService.uploadPhoto(id, file),
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["certification", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      toast.success("사진이 업로드되었습니다.");
+    },
+    onError: (error, variables, context) => {
+      toast.error(error.message || "사진 업로드에 실패했습니다.");
     },
   });
 };
@@ -99,9 +105,13 @@ export const useUpdateCertification = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: CertificationUpdateRequest }) =>
       certificationService.updateCertification(id, data),
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["certification", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      toast.success("인증글이 수정되었습니다.");
+    },
+    onError: (error, variables, context) => {
+      toast.error(error.message || "인증글 수정에 실패했습니다.");
     },
   });
 };
@@ -110,8 +120,12 @@ export const useDeleteCertification = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => certificationService.deleteCertification(id),
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      toast.success("인증글이 삭제되었습니다.");
+    },
+    onError: (error, variables, context) => {
+      toast.error(error.message || "인증글 삭제에 실패했습니다.");
     },
   });
 };

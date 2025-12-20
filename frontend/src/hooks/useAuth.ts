@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { authService } from "@/services/authService";
 import { useAuthStore } from "@/stores/authStore";
 import { LoginRequest, SignUpRequest } from "@/types/auth";
@@ -31,11 +32,13 @@ export const useLogin = () => {
         }
 
         queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+        toast.success("로그인되었습니다.");
         router.push("/dashboard");
       }
     },
     onError: (error) => {
       console.error("Login failed:", error);
+      toast.error(error.message || "로그인에 실패했습니다.");
     },
   });
 };
@@ -48,10 +51,12 @@ export const useSignUp = () => {
   return useMutation({
     mutationFn: (data: SignUpRequest) => authService.signUp(data),
     onSuccess: () => {
+      toast.success("회원가입이 완료되었습니다.");
       router.push("/login?signup=success");
     },
     onError: (error) => {
       console.error("Sign up failed:", error);
+      toast.error(error.message || "회원가입에 실패했습니다.");
     },
   });
 };
@@ -65,10 +70,16 @@ export const useLogout = () => {
   const queryClient = useQueryClient();
 
   const logout = async () => {
-    await authService.logout();
-    clearToken();
-    queryClient.removeQueries({ queryKey: ["userProfile"] });
-    router.push("/login");
+    try {
+      await authService.logout();
+      clearToken();
+      queryClient.removeQueries({ queryKey: ["userProfile"] });
+      toast.success("로그아웃되었습니다.");
+      router.push("/login");
+    } catch (error: any) {
+      console.error("Logout failed:", error);
+      toast.error(error.message || "로그아웃에 실패했습니다.");
+    }
   };
 
   return logout;

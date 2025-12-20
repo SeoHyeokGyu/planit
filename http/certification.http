@@ -33,8 +33,9 @@ Content-Type: application/json
 
 ###
 # 사용자별 인증 조회
-GET http://localhost:8080/api/certifications/user/testuser
+GET http://localhost:8080/api/certifications/user/2?page=0&size=100
 Content-Type: application/json
+Authorization: Bearer {{auth_token}}
 
 ###
 # 챌린지별 인증 조회
