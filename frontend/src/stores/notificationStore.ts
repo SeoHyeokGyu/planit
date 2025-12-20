@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast } from "sonner";
 
 export interface Notification {
   id?: string; // 서버에서 제공하는 고유 ID
@@ -20,6 +21,22 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   notifications: [],
   unreadCount: 0,
   addNotification: (notification) => {
+    console.info("noti 수신함.", notification);
+    
+    // 토스트 알림 표시
+    switch (notification.type) {
+      case "SUCCESS":
+        toast.success(notification.message);
+        break;
+      case "ERROR":
+        toast.error(notification.message);
+        break;
+      case "INFO":
+      default:
+        toast.info(notification.message);
+        break;
+    }
+
     const newNotification: Notification = {
       ...notification,
       read: false,

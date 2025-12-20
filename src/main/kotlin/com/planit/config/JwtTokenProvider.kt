@@ -90,10 +90,12 @@ class JwtTokenProvider(
   }
 
   fun resolveToken(request: HttpServletRequest): String? {
-    return request
-        .getHeader(HttpHeaders.AUTHORIZATION)
-        ?.takeIf { it.isNotBlank() && it.startsWith(TOKEN_PREFIX) }
-        ?.removePrefix(TOKEN_PREFIX)
+    val bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION)
+    if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
+      return bearerToken.substring(7)
+    }
+    // SSE 연결 등 헤더를 사용할 수 없는 경우 쿼리 파라미터에서 토큰 추출
+    return request.getParameter("token")
   }
 
   /** 토큰의 남은 유효 시간(밀리초)을 계산합니다. */

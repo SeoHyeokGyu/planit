@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 
 // 백엔드의 SSE 구독 엔드포인트
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const SSE_ENDPOINT = "/api/subscribe"; // 실제 엔드포인트에 맞게 수정해야 합니다.
 
 export default function SseProvider({ children }: { children: React.ReactNode }) {
@@ -19,9 +20,12 @@ export default function SseProvider({ children }: { children: React.ReactNode })
 
     console.log("SSE: Authenticated. Attempting to connect...");
 
+    const token = useAuthStore.getState().token;
+    const url = token ? `${API_BASE_URL}${SSE_ENDPOINT}?token=${token}` : SSE_ENDPOINT;
+
     // EventSource는 'Authorization' 헤더를 직접 지원하지 않습니다.
     // 백엔드에서 쿠키 기반 인증 또는 다른 방식을 통해 SSE 연결을 인증해야 합니다.
-    const eventSource = new EventSource(SSE_ENDPOINT, { withCredentials: true });
+    const eventSource = new EventSource(url, { withCredentials: true });
 
     eventSource.onopen = () => {
       console.log("SSE: Connection opened successfully.");
@@ -37,7 +41,7 @@ export default function SseProvider({ children }: { children: React.ReactNode })
         console.error("SSE: Failed to parse event data.", error);
       }
     });
-    
+
     // 기본 'message' 이벤트 리스너 (서버가 이벤트 이름을 지정하지 않을 경우)
     eventSource.onmessage = (event) => {
         console.log("SSE: Received default 'message' event", event.data);

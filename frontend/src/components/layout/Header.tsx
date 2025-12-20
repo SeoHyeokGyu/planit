@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
+import NotificationDropdown from "@/components/layout/NotificationDropdown";
 
 export default function Header() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function Header() {
   const logout = useLogout();
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="bg-white shadow-sm border-b sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold text-blue-600">
           PlanIt
@@ -44,6 +45,9 @@ export default function Header() {
               >
                 Profile
               </Link>
+              
+              <NotificationDropdown />
+              
               <button
                 onClick={logout}
                 className="text-gray-500 hover:text-gray-700 text-sm"
