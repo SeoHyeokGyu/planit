@@ -48,6 +48,21 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
     ): Page<Notification>
 
     /**
+     * 특정 수신자의 읽음 상태와 타입으로 필터링된 알림을 페이징하여 조회합니다.
+     * @param receiverId 수신자 사용자 ID
+     * @param isRead 읽음 여부
+     * @param type 알림 타입
+     * @param pageable 페이징 정보
+     * @return 알림 페이지
+     */
+    fun findAllByReceiverIdAndIsReadAndTypeOrderByCreatedAtDesc(
+        receiverId: Long,
+        isRead: Boolean,
+        type: NotificationType,
+        pageable: Pageable
+    ): Page<Notification>
+
+    /**
      * 특정 수신자의 읽지 않은 알림 개수를 조회합니다.
      * @param receiverId 수신자 사용자 ID
      * @return 읽지 않은 알림 개수

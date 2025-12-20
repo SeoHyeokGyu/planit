@@ -56,7 +56,7 @@ class LoggingAspect {
                 is org.springframework.web.multipart.MultipartFile -> "파일(${arg.originalFilename}, ${arg.size} 바이트)"
                 is HttpServletRequest -> "HttpServletRequest"
                 is jakarta.servlet.http.HttpServletResponse -> "HttpServletResponse"
-                else -> arg.toString()
+                else -> arg?.toString() ?: "null"
             }
         }
 

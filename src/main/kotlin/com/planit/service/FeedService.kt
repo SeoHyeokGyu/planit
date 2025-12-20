@@ -56,8 +56,8 @@ class FeedService(
                 senderLoginId = certification.user.loginId,
                 challengeId = certification.challenge.id!!,
                 challengeTitle = certification.challenge.title,
-                createdAt = certification.createdAt.toString(),
-                updatedAt = certification.updatedAt.toString()
+                createdAt = certification.createdAt,
+                updatedAt = certification.updatedAt
             )
         }
 

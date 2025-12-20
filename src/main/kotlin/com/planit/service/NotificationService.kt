@@ -145,8 +145,9 @@ class NotificationService(
 
         val notificationPage = when {
             isRead != null && type != null -> {
-                notificationRepository.findAllByReceiverIdOrderByCreatedAtDesc(user.id!!, pageable)
-                    .filter { it.isRead == isRead && it.type == type }
+                notificationRepository.findAllByReceiverIdAndIsReadAndTypeOrderByCreatedAtDesc(
+                    user.id!!, isRead, type, pageable
+                )
             }
             isRead != null -> {
                 notificationRepository.findAllByReceiverIdAndIsReadOrderByCreatedAtDesc(

@@ -32,6 +32,8 @@ data class CertificationUpdateRequest(
  * @property content 인증 내용
  * @property photoUrl 인증 사진 URL
  * @property authorNickname 작성자 닉네임 (닉네임이 없을 경우 로그인 ID 사용)
+ * @property senderNickname 작성자 닉네임 (피드용)
+ * @property senderLoginId 작성자 로그인 ID (피드용)
  * @property challengeTitle 챌린지 제목
  * @property createdAt 인증 생성일시
  * @property updatedAt 인증 최종 수정일시
@@ -42,6 +44,8 @@ data class CertificationResponse(
     val content: String,
     val photoUrl: String?,
     val authorNickname: String,
+    val senderNickname: String? = null,
+    val senderLoginId: String? = null,
     val challengeId: String,
     val challengeTitle: String,
     val createdAt: LocalDateTime,
@@ -61,6 +65,8 @@ data class CertificationResponse(
                 photoUrl = certification.photoUrl,
                 // 작성자 닉네임이 없을 경우 로그인 ID 사용
                 authorNickname = certification.user.nickname ?: certification.user.loginId,
+                senderNickname = certification.user.nickname ?: certification.user.loginId,
+                senderLoginId = certification.user.loginId,
                 challengeId = certification.challenge.id,
                 challengeTitle = certification.challenge.title,
                 createdAt = certification.createdAt,
