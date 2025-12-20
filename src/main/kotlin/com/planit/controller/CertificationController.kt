@@ -44,18 +44,18 @@ class CertificationController(
    * @param userDetails 현재 로그인한 사용자 정보
    * @return 사진 정보가 업데이트된 인증 정보
    */
-  @PostMapping("/{id}/photo")
-  fun uploadPhoto(
-    @PathVariable id: Long,
-    @RequestParam("file") file: MultipartFile,
-    @AuthenticationPrincipal userDetails: CustomUserDetails
-  ): ResponseEntity<ApiResponse<CertificationResponse>> {
-    // 파일을 서버에 저장하고 접근 URL을 받음
-    val photoUrl = fileStorageService.storeFile(file)
-    // 인증 정보에 사진 URL을 업데이트
-    val response = certificationService.uploadCertificationPhoto(id, photoUrl, userDetails.username)
-    return ResponseEntity.ok(ApiResponse.success(response))
-  }
+//  @PostMapping("/{id}/photo")
+//  fun uploadPhoto(
+//    @PathVariable id: Long,
+//    @RequestParam("file") file: MultipartFile,
+//    @AuthenticationPrincipal userDetails: CustomUserDetails
+//  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+//    // 파일을 서버에 저장하고 접근 URL을 받음
+//    val photoUrl = fileStorageService.storeFile(file)
+//    // 인증 정보에 사진 URL을 업데이트
+//    val response = certificationService.uploadCertificationPhoto(id, photoUrl, userDetails.username)
+//    return ResponseEntity.ok(ApiResponse.success(response))
+//  }
 
   /**
    * 특정 ID의 인증 정보를 조회합니다.
