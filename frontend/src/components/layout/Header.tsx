@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
+import { Users } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
@@ -45,7 +46,14 @@ export default function Header() {
               >
                 프로필
               </Link>
-              
+              <Link
+                href="/users"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium"
+              >
+                <Users className="w-4 h-4" />
+                사용자 찾기
+              </Link>
+
               <NotificationDropdown />
               
               <button
