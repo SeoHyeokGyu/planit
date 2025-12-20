@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/providers/Providers";
+import ConditionalHeader from "@/components/layout/ConditionalHeader";
 
 export const metadata: Metadata = {
   title: "Planit - 여행 플래너",
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <ConditionalHeader />
+          {children}
+        </Providers>
       </body>
     </html>
   );

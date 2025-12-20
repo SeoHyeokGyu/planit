@@ -15,8 +15,7 @@ export default function NotificationDropdown() {
   const notifications = useNotificationStore((state) => state.notifications);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
   const markAsRead = useNotificationStore((state) => state.markAsRead);
-  // 추후 store에 clearAll 등의 기능이 추가되면 연동 가능
-  // const clearAll = useNotificationStore((state) => state.clearAll); 
+  const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -59,11 +58,25 @@ export default function NotificationDropdown() {
       {isOpen && (
         <Card className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[500px] overflow-hidden flex flex-col shadow-2xl z-[100] bg-white border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
           <div className="p-4 border-b flex items-center justify-between bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
-            <h3 className="font-semibold text-sm text-gray-900">알림</h3>
-            {unreadCount > 0 && (
-                <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full">
-                    {unreadCount}개의 읽지 않은 알림
-                </span>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm text-gray-900">알림</h3>
+              {unreadCount > 0 && (
+                  <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-full">
+                      {unreadCount} new
+                  </span>
+              )}
+            </div>
+            {notifications.length > 0 && unreadCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={markAllAsRead}
+                className="h-6 px-2 text-xs text-gray-500 hover:text-blue-600 hover:bg-blue-50 !cursor-pointer"
+                title="모두 읽음으로 표시"
+              >
+                <Check className="h-3 w-3 mr-1" />
+                모두 읽음
+              </Button>
             )}
           </div>
           

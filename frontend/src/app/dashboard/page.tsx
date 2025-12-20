@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
-import Header from "@/components/layout/Header";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -46,7 +45,6 @@ export default function DashboardPage() {
   if (isProfileLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="flex items-center justify-center h-[calc(100vh-64px)]">
           <div className="text-gray-500">로딩 중...</div>
         </div>
@@ -56,7 +54,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       <main className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">
           안녕하세요, {userProfile?.data?.nickname || "사용자"}님!
