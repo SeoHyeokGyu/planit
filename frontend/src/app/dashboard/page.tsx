@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
@@ -10,23 +10,40 @@ import Header from "@/components/layout/Header";
 export default function DashboardPage() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
-  const { data: userProfile, isLoading } = useQuery({
+  // SSR과 클라이언트 스토리지 간의 하이드레이션 불일치를 방지하기 위한 상태
+  const [isMounted, setIsMounted] = useState(false);
+
+  const { data: userProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ["userProfile"],
     queryFn: () => userService.getProfile(),
     enabled: !!token,
   });
 
+  const { data: dashboardStats, isLoading: isStatsLoading } = useQuery({
+    queryKey: ["dashboardStats"],
+    queryFn: () => userService.getDashboardStats(),
+    enabled: !!token,
+  });
+
   useEffect(() => {
-    if (!token) {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && !token) {
       router.push("/login");
     }
-  }, [token, router]);
+  }, [isMounted, token, router]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   if (!token) {
     return null;
   }
 
-  if (isLoading) {
+  if (isProfileLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -51,7 +68,16 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               참여 중인 챌린지
             </h2>
-            <div className="text-4xl font-bold text-blue-600 mb-2">0</div>
+            {isStatsLoading ? (
+                <div className="h-10 w-16 bg-gray-200 animate-pulse rounded-md mt-1 mb-3"></div>
+            ) : (
+                <div 
+                  className="text-4xl font-bold text-blue-600 mb-2 cursor-pointer hover:underline decoration-blue-400 underline-offset-4"
+                  onClick={() => router.push("/challenge/my")}
+                >
+                  {dashboardStats?.data?.challengeCount || 0}
+                </div>
+            )}
             <p className="text-gray-500 text-sm">현재 진행 중인 챌린지</p>
             <button
               onClick={() => router.push("/challenge")}
@@ -66,8 +92,23 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               완료한 인증
             </h2>
-            <div className="text-4xl font-bold text-green-600 mb-2">0</div>
+            {isStatsLoading ? (
+                <div className="h-10 w-16 bg-gray-200 animate-pulse rounded-md mt-1 mb-3"></div>
+            ) : (
+                <div 
+                    className="text-4xl font-bold text-green-600 mb-2 cursor-pointer hover:underline decoration-green-400 underline-offset-4"
+                    onClick={() => router.push("/certification/my")}
+                >
+                    {dashboardStats?.data?.certificationCount || 0}
+                </div>
+            )}
             <p className="text-gray-500 text-sm">총 인증 횟수</p>
+            <button
+                onClick={() => router.push("/certification/my")}
+                className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium"
+            >
+                인증 목록 보기 &rarr;
+            </button>
           </div>
 
           {/* 팔로워/팔로잉 */}
