@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import CertificationsSection from "@/components/profile/CertificationsSection";
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -12,9 +13,9 @@ import { useUserProfile } from "@/hooks/useUser";
 import { ArrowLeft } from "lucide-react";
 
 interface ProfilePageProps {
-  params: {
+  params: Promise<{
     loginId: string;
-  };
+  }>;
 }
 
 /**
@@ -25,16 +26,17 @@ export default function OtherUserProfilePage({
   params,
 }: ProfilePageProps) {
   const router = useRouter();
-  const { data: user, isLoading, isError } = useUserProfile(params.loginId);
+  const resolvedParams = React.use(params);
+  const { data: user, isLoading, isError } = useUserProfile(resolvedParams.loginId);
   const { data: currentUser } = useUserProfile(); // 현재 로그인한 사용자 프로필
 
   // 자신의 프로필이면 /profile로 리다이렉트
   useEffect(() => {
-    // 현재 사용자 정보가 로드되고 params.loginId와 같으면 리다이렉트
-    if (currentUser && currentUser.loginId === params.loginId) {
+    // 현재 사용자 정보가 로드되고 resolvedParams.loginId와 같으면 리다이렉트
+    if (currentUser && currentUser.loginId === resolvedParams.loginId) {
       router.push("/profile");
     }
-  }, [currentUser, params.loginId, router]);
+  }, [currentUser, resolvedParams.loginId, router]);
 
   if (isLoading) {
     return (
