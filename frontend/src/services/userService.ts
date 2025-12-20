@@ -7,6 +7,10 @@ export const userService = {
     return api.get("/api/users/me");
   },
 
+  async getProfileByLoginId(loginId: string): Promise<ApiResponse<UserProfile>> {
+    return api.get(`/api/users/${loginId}/profile`);
+  },
+
   async getDashboardStats(): Promise<ApiResponse<UserDashboardStats>> {
     return api.get("/api/users/me/stats");
   },

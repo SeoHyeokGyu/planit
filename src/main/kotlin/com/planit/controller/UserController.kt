@@ -7,13 +7,17 @@ import com.planit.dto.UserProfileResponse
 import com.planit.dto.UserUpdateRequest
 import com.planit.service.UserService
 import jakarta.validation.Valid
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 import com.planit.dto.UserDashboardStats
@@ -58,5 +62,22 @@ class UserController(val userService: UserService) {
   ): ResponseEntity<ApiResponse<UserProfileResponse>> {
     val updatedProfile = userService.updateUser(userDetails.user, request)
     return ResponseEntity.ok(ApiResponse.success(updatedProfile))
+  }
+
+  @GetMapping("/{loginId}/profile")
+  fun getUserProfile(
+      @PathVariable loginId: String
+  ): ResponseEntity<ApiResponse<UserProfileResponse>> {
+    val profile = userService.getUserProfileByLoginId(loginId)
+    return ResponseEntity.ok(ApiResponse.success(profile))
+  }
+
+  @GetMapping("/search")
+  fun searchUsers(
+      @RequestParam keyword: String,
+      @PageableDefault(size = 20) pageable: Pageable
+  ): ResponseEntity<ApiResponse<List<UserProfileResponse>>> {
+    val usersPage = userService.searchUsers(keyword, pageable)
+    return ResponseEntity.ok(ApiResponse.pagedSuccess(usersPage.content, usersPage))
   }
 }

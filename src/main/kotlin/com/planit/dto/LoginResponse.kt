@@ -1,7 +1,8 @@
 package com.planit.dto
 
-// 로그인 응답 DTO (JWT 토큰 포함)
+// 로그인 응답 DTO (JWT 토큰 및 사용자 정보 포함)
 data class LoginResponse(
     val accessToken: String,
-    val tokenType: String = "Bearer" // 토큰 타입 (관례)
+    val tokenType: String = "Bearer", // 토큰 타입 (관례)
+    val loginId: String? = null
 )

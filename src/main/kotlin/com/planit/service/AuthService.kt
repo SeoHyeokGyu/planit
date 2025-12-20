@@ -68,7 +68,7 @@ class AuthService(
         jwtTokenProvider.createToken(
             userDetails.username, // user.loginId
         )
-    return LoginResponse(accessToken = accessToken)
+    return LoginResponse(accessToken = accessToken, loginId = userDetails.username)
   }
 
   /** 로그아웃 */
