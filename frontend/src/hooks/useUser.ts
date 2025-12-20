@@ -10,15 +10,19 @@ import { ApiResponse } from "@/types/api";
 // --- Queries ---
 
 /**
- * 사용자 프로필 조회를 위한 커스텀 훅
+ * 사용자 프로필 조회를 위한 커스텀 훅 (자신 또는 다른 사용자)
+ * @param loginId - 조회할 사용자 loginId (없으면 자신의 프로필)
  */
-export const useUserProfile = () => {
+export const useUserProfile = (loginId?: string) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   return useQuery({
-    queryKey: ["userProfile"],
-    queryFn: userService.getProfile,
-    enabled: isAuthenticated,
+    queryKey: loginId ? ["userProfile", loginId] : ["userProfile"],
+    queryFn: () =>
+      loginId
+        ? userService.getProfileByLoginId(loginId)
+        : userService.getProfile(),
+    enabled: loginId ? true : isAuthenticated,
     staleTime: 1000 * 60 * 5,
     select: (data) => data.data,
   });
