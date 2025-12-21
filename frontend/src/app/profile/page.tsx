@@ -8,16 +8,15 @@ import { useFollowStats, useFollowers, useFollowings } from "@/hooks/useFollow";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import CertificationsSection from "@/components/profile/CertificationsSection";
-import AccountSettingsSection from "@/components/profile/AccountSettingsSection";
 import FollowButton from "@/components/follow/FollowButton";
-import { User, ShieldCheck, Activity, Users, Heart, FileText, Settings } from "lucide-react";
+import { User, ShieldCheck, Activity, Users, Heart, FileText } from "lucide-react";
 
 // --- Main Profile Page Component ---
 export default function ProfilePage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { data: user, isLoading, isError, error } = useUserProfile();
-  const [activeTab, setActiveTab] = useState<"certifications" | "settings" | "followers" | "followings">("certifications");
+  const [activeTab, setActiveTab] = useState<"certifications" | "followers" | "followings">("certifications");
   const [followersPage, setFollowersPage] = useState(0);
   const [followingsPage, setFollowingsPage] = useState(0);
 
@@ -94,28 +93,12 @@ export default function ProfilePage() {
             <Heart className="w-4 h-4" />
             팔로잉 ({followingCount})
           </button>
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
-              activeTab === "settings"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            설정
-          </button>
         </div>
 
         {/* 인증 탭 */}
         {activeTab === "certifications" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              <div className="lg:col-span-2">
-                <CertificationsSection userLoginId={user.loginId} />
-              </div>
-              <div className="space-y-8">
-                <AccountSettingsSection user={user} />
-              </div>
+            <div>
+              <CertificationsSection userLoginId={user.loginId} />
             </div>
         )}
 
@@ -235,15 +218,6 @@ export default function ProfilePage() {
             </div>
         )}
 
-        {/* 설정 탭 */}
-        {activeTab === "settings" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-              <div className="lg:col-span-2"></div>
-              <div className="space-y-8">
-                <AccountSettingsSection user={user} />
-              </div>
-            </div>
-        )}
       </main>
     </div>
   );

@@ -44,20 +44,20 @@ function NicknameForm({ user }: { user: UserProfile }) {
           <User className="w-6 h-6" />
         </div>
         <div>
-          <CardTitle className="text-xl font-bold">닉네임 변경</CardTitle>
-          <CardDescription>새로운 닉네임을 설정합니다.</CardDescription>
+          <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">닉네임 변경</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">새로운 닉네임을 설정합니다.</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nickname" className="font-semibold">새 닉네임</Label>
+            <Label htmlFor="nickname" className="font-semibold text-gray-900 dark:text-white">새 닉네임</Label>
             <Input
               id="nickname"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               disabled={updateProfileMutation.isPending}
-              className="dark:bg-gray-700"
+              className="bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </div>
           {updateProfileMutation.isSuccess && (
@@ -66,7 +66,7 @@ function NicknameForm({ user }: { user: UserProfile }) {
           {updateProfileMutation.isError && (
             <p className="text-sm font-medium text-red-500 dark:text-red-400">{updateProfileMutation.error.message}</p>
           )}
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold" disabled={updateProfileMutation.isPending}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold" disabled={updateProfileMutation.isPending}>
             {updateProfileMutation.isPending ? "변경 중..." : "닉네임 저장"}
           </Button>
         </form>
@@ -112,43 +112,43 @@ function PasswordForm() {
           <ShieldCheck className="w-6 h-6" />
         </div>
         <div>
-          <CardTitle className="text-xl font-bold">비밀번호 변경</CardTitle>
-          <CardDescription>새로운 비밀번호를 설정합니다.</CardDescription>
+          <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">비밀번호 변경</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">새로운 비밀번호를 설정합니다.</CardDescription>
         </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">현재 비밀번호</Label>
+            <Label htmlFor="currentPassword" className="font-semibold text-gray-900 dark:text-white">현재 비밀번호</Label>
             <Input
               id="currentPassword"
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               disabled={updatePasswordMutation.isPending}
-              className="dark:bg-gray-700"
+              className="bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="newPassword">새 비밀번호</Label>
+            <Label htmlFor="newPassword" className="font-semibold text-gray-900 dark:text-white">새 비밀번호</Label>
             <Input
               id="newPassword"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               disabled={updatePasswordMutation.isPending}
-              className="dark:bg-gray-700"
+              className="bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">새 비밀번호 확인</Label>
+            <Label htmlFor="confirmPassword" className="font-semibold text-gray-900 dark:text-white">새 비밀번호 확인</Label>
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={updatePasswordMutation.isPending}
-              className="dark:bg-gray-700"
+              className="bg-white text-gray-900 border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-600"
             />
           </div>
           {updatePasswordMutation.isSuccess && (
@@ -158,7 +158,7 @@ function PasswordForm() {
           {updatePasswordMutation.isError && (
             <p className="text-sm font-medium text-red-500 dark:text-red-400">{updatePasswordMutation.error.message}</p>
           )}
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold" disabled={updatePasswordMutation.isPending}>
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-semibold" disabled={updatePasswordMutation.isPending}>
             {updatePasswordMutation.isPending ? "변경 중..." : "비밀번호 저장"}
           </Button>
         </form>

@@ -119,17 +119,14 @@ export default function Header() {
                       </Link>
 
                       {/* 설정 */}
-                      <button
-                        onClick={() => {
-                          setIsDropdownOpen(false);
-                          // 추후 설정 페이지가 생기면 연결
-                          alert("설정 페이지는 준비 중입니다.");
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors text-left border-b border-gray-100"
+                      <Link
+                        href="/settings"
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100"
+                        onClick={() => setIsDropdownOpen(false)}
                       >
                         <Settings className="w-4 h-4" />
                         설정
-                      </button>
+                      </Link>
 
                       {/* 로그아웃 */}
                       <button

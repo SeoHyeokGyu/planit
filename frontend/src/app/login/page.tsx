@@ -1,10 +1,21 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
 import { LoginForm } from "@/components/auth/LoginForm";
 import Link from "next/link";
 import { Sparkles, TrendingUp, Heart, Award } from 'lucide-react';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isAuthenticated, router]);
   const benefits = [
     {
       icon: Sparkles,

@@ -57,7 +57,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
     return (
       <Card className="shadow-lg rounded-xl">
         <CardHeader>
-          <CardTitle>내 인증 목록</CardTitle>
+          <CardTitle className="text-gray-900 dark:text-white">내 인증 목록</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-500">인증 목록을 불러오는 데 실패했습니다: {(error as Error).message}</p>
@@ -74,8 +74,8 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold">나의 활동</CardTitle>
-            <CardDescription>나의 모든 챌린지 인증 기록입니다.</CardDescription>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">나의 활동</CardTitle>
+            <CardDescription className="text-gray-600 dark:text-gray-300">나의 모든 챌린지 인증 기록입니다.</CardDescription>
           </div>
         </div>
         <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
@@ -121,7 +121,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
                   {selectedDate} 인증 ({selectedDateCertifications.length}개)
                 </h3>
                 {selectedDateCertifications.length === 0 ? (
-                  <p className="text-sm text-center text-gray-500 py-4">이 날짜에는 인증 기록이 없습니다.</p>
+                  <p className="text-sm text-center text-gray-700 dark:text-gray-300 py-4">이 날짜에는 인증 기록이 없습니다.</p>
                 ) : (
                   <div className="grid gap-3">
                     {selectedDateCertifications.map((cert) => (
@@ -129,8 +129,8 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
                         onClick={() => router.push(`/certification/${cert.id}`)}>
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="font-semibold text-md">{cert.title}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{cert.challengeTitle}</p>
+                            <p className="font-semibold text-md text-gray-900 dark:text-white">{cert.title}</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">{cert.challengeTitle}</p>
                           </div>
                           {cert.photoUrl && (
                              <div className="w-12 h-12 relative rounded-md overflow-hidden">
@@ -149,7 +149,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
           <>
             {certificationsList.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">아직 작성된 인증이 없습니다.</p>
+                <p className="text-gray-700 dark:text-gray-300">아직 작성된 인증이 없습니다.</p>
                 <Button className="mt-4" onClick={() => router.push("/challenge")}>챌린지 시작하기</Button>
               </div>
             ) : (
@@ -162,8 +162,8 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
                         <Image src={cert.photoUrl} alt={cert.title} layout="fill" objectFit="cover" className="rounded-md" />
                       </div>
                     )}
-                    <CardTitle className="text-lg font-semibold">{cert.title}</CardTitle>
-                    <CardDescription className="text-sm mt-1">
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">{cert.title}</CardTitle>
+                    <CardDescription className="text-sm mt-1 text-gray-600 dark:text-gray-300">
                       {cert.challengeTitle} | {new Date(cert.createdAt).toLocaleDateString()}
                     </CardDescription>
                   </Card>
