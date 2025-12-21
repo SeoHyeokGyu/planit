@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNotificationStore } from "@/stores/notificationStore";
-import { Bell, Check, Trash2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Bell, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -38,22 +37,21 @@ export default function NotificationDropdown() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="relative !cursor-pointer hover:bg-gray-100"
+      <button
+        className="relative p-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
+        title="알림"
       >
-        <Bell className="h-5 w-5 text-gray-600" />
+        <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <Badge 
-            variant="destructive" 
+          <Badge
+            variant="destructive"
             className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
           >
             {unreadCount > 99 ? "99+" : unreadCount}
           </Badge>
         )}
-      </Button>
+      </button>
 
       {isOpen && (
         <Card className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[500px] overflow-hidden flex flex-col shadow-2xl z-[100] bg-white border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
@@ -67,16 +65,14 @@ export default function NotificationDropdown() {
               )}
             </div>
             {notifications.length > 0 && unreadCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <button
                 onClick={markAllAsRead}
-                className="h-6 px-2 text-xs text-gray-500 hover:text-blue-600 hover:bg-blue-50 !cursor-pointer"
+                className="px-2 py-1 text-xs text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium cursor-pointer flex items-center gap-1"
                 title="모두 읽음으로 표시"
               >
-                <Check className="h-3 w-3 mr-1" />
+                <Check className="h-3 w-3" />
                 모두 읽음
-              </Button>
+              </button>
             )}
           </div>
           

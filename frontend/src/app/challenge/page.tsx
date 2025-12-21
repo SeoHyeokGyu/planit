@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Users, Eye, Calendar, Award, Filter } from "lucide-react";
+import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy } from "lucide-react";
 import { ChallengeListResponse } from "@/types/challenge";
 
 export default function ChallengesPage() {
@@ -77,17 +77,22 @@ export default function ChallengesPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                            챌린지
-                        </h1>
-                        <p className="text-gray-700 font-medium">
+                    <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-white">
+                                <Trophy className="w-6 h-6" />
+                            </div>
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                챌린지
+                            </h1>
+                        </div>
+                        <p className="text-gray-600 font-medium ml-13">
                             다양한 챌린지에 참여하고 함께 성장하세요
                         </p>
                     </div>
                     <Button
                         onClick={() => router.push("/challenge/create")}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all group"
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all group font-semibold"
                     >
                         <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
                         챌린지 만들기

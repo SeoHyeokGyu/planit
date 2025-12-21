@@ -4,12 +4,14 @@ import { useFollow, useFollowings, useUnfollow } from "@/hooks/useFollow";
 import { Button } from "@/components/ui/button";
 import { UserPlus, UserMinus, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 interface FollowButtonProps {
   targetLoginId: string;
   variant?: "default" | "outline";
   size?: "default" | "sm" | "lg";
+  initialIsFollowing?: boolean;
 }
 
 /**
@@ -21,39 +23,42 @@ export default function FollowButton({
   targetLoginId,
   variant = "default",
   size = "default",
+  initialIsFollowing,
 }: FollowButtonProps) {
   const currentLoginId = useAuthStore((state) => state.loginId);
-  const [isFollowing, setIsFollowing] = useState(false);
+  const queryClient = useQueryClient();
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing ?? false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 현재 사용자의 팔로잉 목록 조회
-  const { data: followings, isLoading: isCheckingFollow } = useFollowings(
-    currentLoginId || "",
+  // initialIsFollowing이 제공되지 않으면 팔로잉 상태 조회
+  const { data: followings } = useFollowings(
+    initialIsFollowing === undefined ? (currentLoginId || "") : "",
     0,
-    100 // 임시로 100개씩 조회 (프로덕션에서는 페이지네이션 고려)
+    100
   );
 
   // 팔로우/언팔로우 mutations
   const followMutation = useFollow();
   const unfollowMutation = useUnfollow();
 
-  // 팔로잉 목록에 포함되어 있는지 확인
+  // initialIsFollowing이 제공되지 않으면 followings에서 상태 확인
   useEffect(() => {
-    if (followings) {
+    if (initialIsFollowing === undefined && followings && Array.isArray(followings)) {
       const isUserFollowing = followings.some(
         (user) => user.loginId === targetLoginId
       );
       setIsFollowing(isUserFollowing);
+    } else if (initialIsFollowing !== undefined) {
+      setIsFollowing(initialIsFollowing);
     }
-  }, [followings, targetLoginId]);
+  }, [followings, targetLoginId, initialIsFollowing]);
 
   // 로딩 상태 업데이트
   useEffect(() => {
     setIsLoading(
-      isCheckingFollow || followMutation.isPending || unfollowMutation.isPending
+      followMutation.isPending || unfollowMutation.isPending
     );
   }, [
-    isCheckingFollow,
     followMutation.isPending,
     unfollowMutation.isPending,
   ]);
@@ -65,9 +70,17 @@ export default function FollowButton({
 
   const handleClick = async () => {
     if (isFollowing) {
-      unfollowMutation.mutate(targetLoginId);
+      unfollowMutation.mutate(targetLoginId, {
+        onSuccess: () => {
+          setIsFollowing(false);
+        },
+      });
     } else {
-      followMutation.mutate(targetLoginId);
+      followMutation.mutate(targetLoginId, {
+        onSuccess: () => {
+          setIsFollowing(true);
+        },
+      });
     }
   };
 
@@ -76,11 +89,11 @@ export default function FollowButton({
       onClick={handleClick}
       disabled={isLoading}
       size={size}
-      className={`min-w-[110px] font-semibold transition-all duration-200 ${
+      className={`min-w-[110px] font-semibold transition-all duration-200 cursor-pointer ${
         isFollowing
-          ? "bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-300"
+          ? "bg-gray-300 text-gray-600 border border-gray-400 hover:bg-gray-400 hover:text-gray-700"
           : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg"
-      } disabled:opacity-50 disabled:cursor-not-allowed`}
+      }`}
     >
       {isLoading ? (
         <>
@@ -90,7 +103,7 @@ export default function FollowButton({
       ) : isFollowing ? (
         <>
           <UserMinus className="w-4 h-4 mr-2" />
-          팔로잉
+          언팔로우
         </>
       ) : (
         <>

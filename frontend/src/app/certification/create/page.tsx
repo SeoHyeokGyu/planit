@@ -91,10 +91,15 @@ function CreateCertificationContent() {
         </Button>
 
         <div className="mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-2">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-green-600 to-teal-600 rounded-lg flex items-center justify-center text-white">
+                <CheckCircle className="w-6 h-6" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
                 챌린지 인증하기
-            </h1>
-            <p className="text-gray-700 font-medium">
+              </h1>
+            </div>
+            <p className="text-gray-700 font-medium ml-13">
                 오늘의 노력을 기록하고 공유해보세요
             </p>
         </div>

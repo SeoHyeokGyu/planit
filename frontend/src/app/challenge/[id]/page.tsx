@@ -22,7 +22,8 @@ import {
     Award,
     Clock,
     User,
-    TrendingUp
+    TrendingUp,
+    Trophy
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
@@ -222,6 +223,21 @@ export default function ChallengeDetailPage() {
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     목록으로
                 </Button>
+
+                {/* Header */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-white">
+                            <Trophy className="w-6 h-6" />
+                        </div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            챌린지 상세
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 font-medium ml-13">
+                        챌린지 정보를 확인하고 참여하세요
+                    </p>
+                </div>
 
                 {/* Header Card */}
                 <Card className="mb-6 border-2 shadow-xl bg-white">

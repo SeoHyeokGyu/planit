@@ -124,10 +124,15 @@ export default function CertificationDetailPage() {
         </Button>
 
         <div className="mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white">
+                <CheckCircle className="w-6 h-6" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 인증 상세
-            </h1>
-            <p className="text-gray-600 font-medium">
+              </h1>
+            </div>
+            <p className="text-gray-600 font-medium ml-13">
                 챌린지 인증 내용을 확인하세요
             </p>
         </div>

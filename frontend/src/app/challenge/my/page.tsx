@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Eye, Calendar, Award, Search, ArrowLeft } from "lucide-react";
+import { Users, Eye, Calendar, Award, Search, ArrowLeft, Trophy } from "lucide-react";
 import { ChallengeListResponse } from "@/types/challenge";
 import { Button } from "@/components/ui/button";
 
@@ -55,23 +55,18 @@ export default function MyChallengesPage() {
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => router.push("/dashboard")}
-                        className="hover:bg-blue-100"
-                    >
-                        <ArrowLeft className="w-6 h-6 text-gray-700" />
-                    </Button>
-                    <div>
-                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-white">
+                            <Trophy className="w-6 h-6" />
+                        </div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             참여 중인 챌린지
                         </h1>
-                        <p className="text-gray-700 font-medium">
-                            현재 진행 중인 나의 챌린지 목록입니다
-                        </p>
                     </div>
+                    <p className="text-gray-600 font-medium ml-13">
+                        현재 진행 중인 나의 챌린지 목록입니다
+                    </p>
                 </div>
 
                 {/* Challenge List */}

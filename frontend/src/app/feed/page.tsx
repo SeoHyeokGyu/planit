@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
@@ -50,32 +50,18 @@ export default function FeedPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push("/dashboard")}
-            className="hover:bg-blue-100"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-700" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
+              <Zap className="w-6 h-6" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               피드
             </h1>
-            <p className="text-gray-600 text-sm">
-              팔로우하는 사람들의 최근 활동을 확인하세요
-            </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(0)}
-            className="gap-2"
-          >
-            <Repeat2 className="w-4 h-4" />
-            새로고침
-          </Button>
+          <p className="text-gray-600 text-sm font-medium ml-13">
+            팔로우하는 사람들의 최근 활동을 확인하세요
+          </p>
         </div>
 
         {/* Feed List */}

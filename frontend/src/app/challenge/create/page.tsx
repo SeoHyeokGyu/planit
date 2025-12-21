@@ -107,10 +107,15 @@ export default function CreateChallengePage() {
                 </Button>
 
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                        새 챌린지 만들기
-                    </h1>
-                    <p className="text-gray-700 font-medium">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center text-white">
+                            <Sparkles className="w-6 h-6" />
+                        </div>
+                        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            새 챌린지 만들기
+                        </h1>
+                    </div>
+                    <p className="text-gray-700 font-medium ml-13">
                         새로운 챌린지를 만들고 사람들과 함께 도전해보세요
                     </p>
                 </div>

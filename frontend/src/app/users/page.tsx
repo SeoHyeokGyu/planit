@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { ApiResponse } from "@/types/api";
 import { UserProfile } from "@/types/user";
+import { useFollowings } from "@/hooks/useFollow";
+import { useAuthStore } from "@/stores/authStore";
 import FollowButton from "@/components/follow/FollowButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,11 +20,15 @@ import { Search, Users, Loader2 } from "lucide-react";
  */
 export default function UsersPage() {
   const router = useRouter();
+  const currentLoginId = useAuthStore((state) => state.loginId);
   const [keyword, setKeyword] = useState("");
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+
+  // 현재 사용자의 팔로잉 목록 조회
+  const { data: followings } = useFollowings(currentLoginId || "", 0, 100);
 
   // Debounce 검색 (500ms)
   useEffect(() => {
@@ -175,7 +181,7 @@ export default function UsersPage() {
                     <div className="flex gap-2 pt-2">
                       <Button
                         variant="outline"
-                        className="flex-1 font-semibold hover:bg-gray-100 transition-colors"
+                        className="flex-1 font-semibold cursor-pointer border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-600 transition-all duration-200"
                         onClick={() => handleNavigateToProfile(user.loginId)}
                       >
                         프로필
@@ -185,6 +191,7 @@ export default function UsersPage() {
                           targetLoginId={user.loginId}
                           variant="default"
                           size="default"
+                          initialIsFollowing={followings?.some(f => f.loginId === user.loginId) ?? false}
                         />
                       </div>
                     </div>

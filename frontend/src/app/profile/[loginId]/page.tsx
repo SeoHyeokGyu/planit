@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserProfile } from "@/hooks/useUser";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
 
 interface ProfilePageProps {
   params: Promise<{
@@ -77,6 +77,26 @@ export default function OtherUserProfilePage({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* 페이지 헤더 */}
+      <div className="mb-6 pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          돌아가기
+        </Button>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white">
+            <User className="w-6 h-6" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            {user.nickname}님의 프로필
+          </h1>
+        </div>
+      </div>
+
       {/* 프로필 헤더 */}
       <div className="relative">
         <ProfileHeader user={user} />
