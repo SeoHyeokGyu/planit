@@ -143,13 +143,14 @@ export default function ProfilePage() {
                             >
                               프로필
                             </button>
-                          <div className="flex-1">
-                            <FollowButton
-                              targetLoginId={follower.loginId}
-                              variant="outline"
-                              size="sm"
-                              initialIsFollowing={followings?.some(f => f.loginId === follower.loginId) ?? false}
-                            />
+                            <div className="flex-1">
+                              <FollowButton
+                                targetLoginId={follower.loginId}
+                                variant="outline"
+                                size="sm"
+                                initialIsFollowing={followings?.some(f => f.loginId === follower.loginId) ?? false}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -205,13 +206,14 @@ export default function ProfilePage() {
                             >
                               프로필
                             </button>
-                          <div className="flex-1">
-                            <FollowButton
-                              targetLoginId={following.loginId}
-                              variant="outline"
-                              size="sm"
-                              initialIsFollowing={true}
-                            />
+                            <div className="flex-1">
+                              <FollowButton
+                                targetLoginId={following.loginId}
+                                variant="outline"
+                                size="sm"
+                                initialIsFollowing={true}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
