@@ -117,28 +117,32 @@ export default function ProfilePage() {
                 </div>
               ) : (followers?.length ?? 0) > 0 ? (
                 <>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-700 font-medium">
                     총 <span className="font-bold text-blue-600">{followers?.length}</span>명의 팔로워
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {followers?.map((follower) => (
                       <div
                         key={follower.loginId}
-                        className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700"
+                        className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-lg"
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 cursor-pointer" onClick={() => router.push(`/profile/${follower.loginId}`)}>
-                            <p className="font-semibold text-gray-900 dark:text-white">{follower.nickname}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">@{follower.loginId}</p>
+                        <div className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div
+                              className="flex-1 hover:opacity-80 transition-opacity"
+                              onClick={() => router.push(`/profile/${follower.loginId}`)}
+                            >
+                              <p className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-1">{follower.nickname}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">@{follower.loginId}</p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => router.push(`/profile/${follower.loginId}`)}
-                            className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors border border-blue-200 dark:border-gray-600"
-                          >
-                            프로필
-                          </button>
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              onClick={() => router.push(`/profile/${follower.loginId}`)}
+                              className="flex-1 px-3 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400 rounded-lg transition-all border border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                            >
+                              프로필
+                            </button>
                           <div className="flex-1">
                             <FollowButton
                               targetLoginId={follower.loginId}
@@ -175,28 +179,32 @@ export default function ProfilePage() {
                 </div>
               ) : (followings?.length ?? 0) > 0 ? (
                 <>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-gray-700 font-medium">
                     총 <span className="font-bold text-blue-600">{followings?.length}</span>명을 팔로우 중
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {followings?.map((following) => (
                       <div
                         key={following.loginId}
-                        className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700"
+                        className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-lg"
                       >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 cursor-pointer" onClick={() => router.push(`/profile/${following.loginId}`)}>
-                            <p className="font-semibold text-gray-900 dark:text-white">{following.nickname}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">@{following.loginId}</p>
+                        <div className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div
+                              className="flex-1 hover:opacity-80 transition-opacity"
+                              onClick={() => router.push(`/profile/${following.loginId}`)}
+                            >
+                              <p className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-1">{following.nickname}</p>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">@{following.loginId}</p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => router.push(`/profile/${following.loginId}`)}
-                            className="flex-1 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors border border-blue-200 dark:border-gray-600"
-                          >
-                            프로필
-                          </button>
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              onClick={() => router.push(`/profile/${following.loginId}`)}
+                              className="flex-1 px-3 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400 rounded-lg transition-all border border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                            >
+                              프로필
+                            </button>
                           <div className="flex-1">
                             <FollowButton
                               targetLoginId={following.loginId}
