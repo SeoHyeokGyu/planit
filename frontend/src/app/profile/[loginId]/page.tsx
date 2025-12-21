@@ -40,7 +40,7 @@ export default function OtherUserProfilePage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900">
         <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 shadow-lg h-64">
           <Skeleton className="w-full h-full" />
         </div>
@@ -53,7 +53,7 @@ export default function OtherUserProfilePage({
 
   if (isError || !user) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900 flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">사용자를 찾을 수 없습니다</CardTitle>
@@ -76,7 +76,7 @@ export default function OtherUserProfilePage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900">
       {/* 페이지 헤더 */}
       <div className="mb-6 pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <Button

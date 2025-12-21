@@ -48,14 +48,14 @@ export default function ProfilePage() {
 
   if (isError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4 text-red-500">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 via-white to-blue-50 p-4 text-red-500">
         <p>프로필 정보를 불러오는 데 실패했습니다: {error.message}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900">
       <ProfileHeader user={user} isOwnProfile={true} onFollowersClick={() => setActiveTab("followers")} onFollowingsClick={() => setActiveTab("followings")} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -252,7 +252,7 @@ export default function ProfilePage() {
 // --- Skeleton Component for the new layout ---
 function ProfilePageSkeleton() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 animate-pulse">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900 animate-pulse">
       {/* Header Skeleton */}
       <header className="bg-white dark:bg-gray-800/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
