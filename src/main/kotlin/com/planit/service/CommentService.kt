@@ -2,7 +2,9 @@ package com.planit.service
 
 import com.planit.dto.CommentCreateRequest
 import com.planit.dto.CommentResponse
+import com.planit.dto.NotificationResponse
 import com.planit.entity.Comment
+import com.planit.enums.NotificationType
 import com.planit.exception.CertificationNotFoundException
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.CertificationRepository
@@ -10,12 +12,14 @@ import com.planit.repository.CommentRepository
 import com.planit.repository.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class CommentService(
     private val commentRepository: CommentRepository,
     private val certificationRepository: CertificationRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationService
 ) {
 
     @Transactional
@@ -30,6 +34,27 @@ class CommentService(
         )
 
         val savedComment = commentRepository.save(comment)
+
+        // Send real-time notification if commenter is not the author (Redis Broadcast)
+        if (certification.user.loginId != userLoginId) {
+            notificationService.sendNotification(
+                NotificationResponse(
+                    id = -1L,
+                    receiverId = certification.user.id!!,
+                    receiverLoginId = certification.user.loginId,
+                    senderId = user.id,
+                    senderLoginId = user.loginId,
+                    senderNickname = user.nickname,
+                    type = NotificationType.COMMENT,
+                    message = "${user.nickname ?: user.loginId}님이 회원님의 인증에 댓글을 남겼습니다: ${request.content}",
+                    relatedId = certification.id.toString(),
+                    relatedType = "CERTIFICATION",
+                    isRead = false,
+                    createdAt = LocalDateTime.now()
+                )
+            )
+        }
+
         return CommentResponse.from(savedComment, userLoginId)
     }
 
