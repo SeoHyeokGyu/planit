@@ -54,7 +54,7 @@ export const challengeService = {
     joinChallenge: (id: string) =>
         api.post<ApiResponse<ParticipateResponse>>(`/api/challenge/${id}/join`),
 
-    // 탈퇴
+    // 포기
     withdrawChallenge: (id: string) =>
         api.post<ApiResponse<void>>(`/api/challenge/${id}/withdraw`),
 

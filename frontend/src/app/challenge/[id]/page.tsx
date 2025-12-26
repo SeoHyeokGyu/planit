@@ -120,11 +120,11 @@ export default function ChallengeDetailPage() {
     const handleWithdraw = () => {
         withdrawMutation.mutate(challengeId, {
             onSuccess: () => {
-                toast.success("챌린지에서 탈퇴했습니다.");
+                toast.success("챌린지를 포기했습니다.");
                 window.location.reload();
             },
             onError: (error: any) => {
-                toast.error(error.message || "탈퇴에 실패했습니다.");
+                toast.error(error.message || "포기에 실패했습니다.");
             }
         });
     };
@@ -358,7 +358,7 @@ export default function ChallengeDetailPage() {
                                     variant="outline"
                                     className="flex-1 border-2 border-red-400 text-red-700 hover:bg-red-50 h-12 font-bold"
                                 >
-                                    {withdrawMutation.isPending ? "탈퇴 중..." : "챌린지 탈퇴"}
+                                    {withdrawMutation.isPending ? "포기 중..." : "챌린지 포기"}
                                 </Button>
                             </>
                         )}
@@ -368,9 +368,9 @@ export default function ChallengeDetailPage() {
                 <AlertDialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>챌린지 탈퇴</AlertDialogTitle>
+                            <AlertDialogTitle>챌린지 포기</AlertDialogTitle>
                             <AlertDialogDescription>
-                                정말로 이 챌린지에서 탈퇴하시겠습니까? 탈퇴 후에도 다시 참여할 수 있습니다.
+                                정말로 이 챌린지를 포기하시겠습니까? 포기 후에도 다시 참여할 수 있습니다.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -379,7 +379,7 @@ export default function ChallengeDetailPage() {
                                 onClick={handleWithdraw}
                                 className="bg-red-600 hover:bg-red-700 text-white"
                             >
-                                탈퇴하기
+                                포기하기
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
