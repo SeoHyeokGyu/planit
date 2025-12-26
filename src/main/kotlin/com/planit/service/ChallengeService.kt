@@ -235,7 +235,7 @@ class ChallengeService(
      * 참여자 목록 조회
      */
     fun getParticipants(challengeId: String): List<ParticipateResponse> {
-        val challenge = findChallengeById(challengeId)
+        findChallengeById(challengeId)
         val participants = participantRepository.findByChallenge_Id(challengeId)
         return participants.map { ParticipateResponse.from(it) }
     }

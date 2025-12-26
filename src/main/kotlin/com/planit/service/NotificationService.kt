@@ -70,6 +70,7 @@ class NotificationService(
   fun sendNotification(notification: NotificationResponse) {
     if (redisTemplate != null) {
       try {
+        logger.info("Redis 알림 발행 시도: $notification")
         // Redis 채널로 알림 발행 (모든 서버 인스턴스가 수신)
         redisTemplate.convertAndSend(RedisConfig.NOTIFICATION_CHANNEL, notification)
         logger.info("Redis 알림 발행 완료: ${notification.receiverLoginId}")
