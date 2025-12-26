@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useFeed } from "@/hooks/useFeed";
+import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
 import { likeCommentService } from "@/services/likeCommentService";
 import {
@@ -19,17 +19,24 @@ import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send } 
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FeedResponse } from "@/types/feed";
+import { useInView } from "react-intersection-observer";
 
 export default function FeedPage() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const [isMounted, setIsMounted] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const { ref, inView } = useInView();
 
-  const { data: feedData, isLoading } = useFeed(currentPage, 10);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useFeedInfinite(10);
 
   useEffect(() => {
     setIsMounted(true);
@@ -41,6 +48,12 @@ export default function FeedPage() {
     }
   }, [isMounted, token, router]);
 
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
   if (!isMounted) {
     return null;
   }
@@ -49,8 +62,7 @@ export default function FeedPage() {
     return null;
   }
 
-  const feed = feedData?.content || [];
-  const hasMorePages = currentPage < (feedData?.totalPages || 1) - 1;
+  const feedItems = data?.pages.flatMap((page) => page.data || []) || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -77,10 +89,10 @@ export default function FeedPage() {
               <FeedItemSkeleton key={i} />
             ))}
           </div>
-        ) : feed && feed.length > 0 ? (
+        ) : feedItems.length > 0 ? (
           <>
             <div className="space-y-4">
-              {feed.map((cert: FeedResponse) => (
+              {feedItems.map((cert: FeedResponse) => (
                 <FeedItem
                   key={cert.id}
                   certification={cert}
@@ -89,25 +101,18 @@ export default function FeedPage() {
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="mt-8 flex justify-between items-center">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                disabled={currentPage === 0}
-              >
-                이전
-              </Button>
-              <span className="text-sm text-gray-600">
-                {currentPage + 1} / {feedData?.totalPages || 1} 페이지
-              </span>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={!hasMorePages}
-              >
-                다음
-              </Button>
+            {/* Infinite Scroll Loader & Trigger */}
+            <div ref={ref} className="mt-8 flex justify-center py-4">
+              {isFetchingNextPage ? (
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                  불러오는 중...
+                </div>
+              ) : hasNextPage ? (
+                <div className="h-4" /> // Invisible trigger area
+              ) : (
+                <p className="text-gray-400 text-sm">모든 피드를 확인했습니다.</p>
+              )}
             </div>
           </>
         ) : (
@@ -184,7 +189,7 @@ function FeedItem({
         toast.error("댓글 작성에 실패했습니다.");
     }
   });
-  
+
   const handleCommentSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       if (!newComment.trim()) return;
@@ -201,9 +206,16 @@ function FeedItem({
               {certification.authorNickname?.charAt(0) || "?"}
             </div>
             <div>
-              <p className="font-semibold text-gray-900">
-                {certification.authorNickname || "알 수 없는 사용자"}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-gray-900">
+                  {certification.authorNickname || "알 수 없는 사용자"}
+                </p>
+                {certification.isMine && (
+                  <Badge className="text-[10px] h-5 px-1.5 py-0 bg-blue-100 text-blue-700 hover:bg-blue-200 border-0 shadow-none flex-shrink-0">
+                    나
+                  </Badge>
+                )}
+              </div>
               <p className="text-xs text-gray-500">
                 @{certification.authorLoginId || "unknown"}
               </p>
@@ -250,14 +262,14 @@ function FeedItem({
 
       {/* 액션 버튼 */}
       <div className="px-6 py-3 border-t border-gray-100 flex items-center gap-4">
-        <button 
+        <button
             onClick={(e) => { e.stopPropagation(); toggleLikeMutation.mutate(); }}
             className={`flex items-center gap-1 transition-colors text-sm ${isLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
         >
           <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
           <span>{likeCount}</span>
         </button>
-        <button 
+        <button
             onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
             className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors text-sm"
         >
@@ -285,10 +297,10 @@ function FeedItem({
                   {comments?.length === 0 && <p className="text-center text-gray-500 text-sm py-2">첫 댓글을 남겨보세요!</p>}
               </div>
               <form onSubmit={handleCommentSubmit} className="flex gap-2">
-                  <Input 
+                  <Input
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="댓글 달기..." 
+                    placeholder="댓글 달기..."
                     className="flex-1 bg-white h-9 text-sm focus-visible:ring-blue-500"
                   />
                   <Button type="submit" size="sm" disabled={createCommentMutation.isPending || !newComment.trim()} className="h-9 w-9 p-0 bg-blue-600 hover:bg-blue-700">

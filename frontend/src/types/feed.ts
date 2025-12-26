@@ -10,6 +10,7 @@ export interface FeedResponse {
   likeCount: number;
   commentCount: number;
   isLiked: boolean;
+  isMine: boolean;
   createdAt: string;
   updatedAt: string;
 }
