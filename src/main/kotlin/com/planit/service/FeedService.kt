@@ -35,7 +35,7 @@ class FeedService(
             ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
         // 팔로우하는 사람들의 ID 조회
-        val followingUserIds = followRepository.findFollowingIdsByFollowerId(currentUser.id).toMutableList()
+        val followingUserIds = followRepository.findFollowingIdsByFollowerId(currentUser.id!!).toMutableList()
         
         // 내 인증도 포함
         followingUserIds.add(currentUser.id)
@@ -46,7 +46,7 @@ class FeedService(
             pageable
         )
 
-        val certificationIds = certificationPage.content.map { it.id }
+        val certificationIds = certificationPage.content.mapNotNull { it.id }
         
         if (certificationIds.isEmpty()) {
             return PageImpl(emptyList(), pageable, certificationPage.totalElements)
