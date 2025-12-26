@@ -1,5 +1,11 @@
 package com.planit.config
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.planit.service.NotificationSubscriber
 import java.time.Duration
 import org.springframework.cache.CacheManager
@@ -27,19 +33,38 @@ class RedisConfig {
   }
 
   /**
+   * Redis 직렬화를 위한 Serializer 빈 생성
+   * JavaTimeModule 등록으로 LocalDateTime 직렬화 지원
+   */
+  @Bean
+  fun redisSerializer(): GenericJackson2JsonRedisSerializer {
+    val objectMapper = ObjectMapper().apply {
+      registerModule(JavaTimeModule())
+      registerModule(KotlinModule.Builder().build())
+      disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      activateDefaultTyping(
+          LaissezFaireSubTypeValidator.instance,
+          ObjectMapper.DefaultTyping.EVERYTHING,
+          JsonTypeInfo.As.PROPERTY
+      )
+    }
+    return GenericJackson2JsonRedisSerializer(objectMapper)
+  }
+
+  /**
    * Redis 데이터 작업을 위한 RedisTemplate을 구성합니다. key는 String, value는 JSON 형식으로 직렬화하여 저장합니다.
    *
    * @param connectionFactory Redis 연결 팩토리
    * @return 구성된 RedisTemplate
    */
   @Bean
-  fun redisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
+  fun redisTemplate(connectionFactory: RedisConnectionFactory, redisSerializer: GenericJackson2JsonRedisSerializer): RedisTemplate<String, Any> {
     return RedisTemplate<String, Any>().apply {
       setConnectionFactory(connectionFactory)
       keySerializer = StringRedisSerializer() // Key 직렬화
-      valueSerializer = GenericJackson2JsonRedisSerializer() // Value 직렬화 (JSON)
+      valueSerializer = redisSerializer // Value 직렬화 (JSON + JavaTime)
       hashKeySerializer = StringRedisSerializer() // Hash Key 직렬화
-      hashValueSerializer = GenericJackson2JsonRedisSerializer() // Hash Value 직렬화 (JSON)
+      hashValueSerializer = redisSerializer // Hash Value 직렬화 (JSON + JavaTime)
     }
   }
 
@@ -69,7 +94,7 @@ class RedisConfig {
    * @return 구성된 CacheManager
    */
   @Bean
-  fun cacheManager(connectionFactory: RedisConnectionFactory): CacheManager {
+  fun cacheManager(connectionFactory: RedisConnectionFactory, redisSerializer: GenericJackson2JsonRedisSerializer): CacheManager {
     // 기본 캐시 설정
     val redisCacheConfiguration =
         RedisCacheConfiguration.defaultCacheConfig()
@@ -78,7 +103,7 @@ class RedisConfig {
             ) // Key 직렬화
             .serializeValuesWith(
                 RedisSerializationContext.SerializationPair.fromSerializer(
-                    GenericJackson2JsonRedisSerializer()
+                    redisSerializer
                 )
             ) // Value 직렬화
             .entryTtl(Duration.ofMinutes(10)) // 캐시 엔트리의 기본 TTL (10분)
