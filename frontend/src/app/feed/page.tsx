@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { formatTimeAgo } from "@/lib/utils";
 
 export default function FeedPage() {
   const router = useRouter();
@@ -142,14 +143,14 @@ function FeedItem({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              {certification.senderNickname?.charAt(0) || "?"}
+              {certification.authorNickname?.charAt(0) || "?"}
             </div>
             <div>
               <p className="font-semibold text-gray-900">
-                {certification.senderNickname || "알 수 없는 사용자"}
+                {certification.authorNickname || "알 수 없는 사용자"}
               </p>
               <p className="text-xs text-gray-500">
-                @{certification.senderLoginId || "unknown"}
+                @{certification.authorLoginId || "unknown"}
               </p>
             </div>
           </div>
@@ -246,16 +247,4 @@ function FeedItemSkeleton() {
       </div>
     </Card>
   );
-}
-
-function formatTimeAgo(date: Date): string {
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return "방금 전";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}분 전`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}시간 전`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}일 전`;
-
-  return date.toLocaleDateString("ko-KR");
 }

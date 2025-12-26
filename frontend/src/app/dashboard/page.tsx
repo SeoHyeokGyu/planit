@@ -7,7 +7,12 @@ import { useAuthStore } from "@/stores/authStore";
 import { userService } from "@/services/userService";
 import { useFollowStats } from "@/hooks/useFollow";
 import { useUserProfile } from "@/hooks/useUser";
-import { Trophy, Check, Heart, Zap } from "lucide-react";
+import { useFeed } from "@/hooks/useFeed";
+import { Trophy, Check, Heart, Zap, Calendar } from "lucide-react";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { formatTimeAgo } from "@/lib/utils";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -30,6 +35,10 @@ export default function DashboardPage() {
   // 팔로워/팔로잉 통계
   const { data: currentUser } = useUserProfile();
   const { followerCount, followingCount } = useFollowStats(currentUser?.loginId || "");
+
+  // 최근 피드 (3개만 조회)
+  const { data: feedData, isLoading: isFeedLoading } = useFeed(0, 3);
+  const feedList = feedData?.content || [];
 
   useEffect(() => {
     setIsMounted(true);
@@ -154,15 +163,72 @@ export default function DashboardPage() {
             <Zap className="w-5 h-5 text-blue-500" />
             최근 피드
           </h2>
-          <div className="text-center py-8 text-gray-500">
-            아직 피드가 없습니다. 챌린지에 참여하고 인증해보세요!
-          </div>
-          <div className="flex justify-center">
+          
+          {isFeedLoading ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                 <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : feedList.length > 0 ? (
+            <div className="space-y-4">
+              {feedList.map((cert: any) => (
+                <div 
+                  key={cert.id} 
+                  className="flex gap-4 p-4 rounded-lg bg-gray-50 border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => router.push(`/certification/${cert.id}`)}
+                >
+                  {/* 사진이 있으면 썸네일 표시 */}
+                  {cert.photoUrl ? (
+                    <div className="relative w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
+                      <Image 
+                        src={cert.photoUrl} 
+                        alt={cert.title} 
+                        layout="fill" 
+                        objectFit="cover" 
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-20 h-20 rounded-md bg-gray-200 flex items-center justify-center flex-shrink-0 text-gray-400">
+                      <Zap className="w-8 h-8" />
+                    </div>
+                  )}
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1">
+                      <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                        {cert.challengeTitle}
+                      </Badge>
+                      <span className="text-xs text-gray-500 flex-shrink-0">
+                        {formatTimeAgo(new Date(cert.createdAt))}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 truncate mb-1">{cert.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2">{cert.content}</p>
+                    <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                      <span className="font-semibold text-gray-700">{cert.authorNickname}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(cert.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              아직 피드가 없습니다. 챌린지에 참여하고 인증해보세요!
+            </div>
+          )}
+
+          <div className="flex justify-center mt-6">
             <button
               onClick={() => router.push("/feed")}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-sm transition-all"
             >
-              피드 보기
+              피드 더보기
               <span>→</span>
             </button>
           </div>

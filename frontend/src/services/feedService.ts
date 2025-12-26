@@ -1,14 +1,14 @@
 // frontend/src/services/feedService.ts
 import { api } from "@/lib/api";
 import { ApiResponse, Page } from "@/types/api";
-import { CertificationResponse } from "@/types/certification";
+import { FeedResponse } from "@/types/feed";
 
 export const feedService = {
   // 팔로우하는 사람들의 최근 인증 피드 조회
   getFeed: async (
     page: number = 0,
     size: number = 10
-  ): Promise<ApiResponse<Page<CertificationResponse>>> => {
+  ): Promise<ApiResponse<FeedResponse[]>> => {
     return api.get(`/api/feed?page=${page}&size=${size}`);
   },
 

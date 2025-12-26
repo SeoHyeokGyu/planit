@@ -1,7 +1,7 @@
 package com.planit.controller
 
 import com.planit.dto.ApiResponse
-import com.planit.dto.CertificationResponse
+import com.planit.dto.FeedResponse
 import com.planit.dto.CustomUserDetails
 import com.planit.service.FeedService
 import org.springframework.data.domain.Pageable
@@ -26,7 +26,7 @@ class FeedController(private val feedService: FeedService) {
     fun getFeed(
         @AuthenticationPrincipal userDetails: CustomUserDetails,
         @PageableDefault(size = 20) pageable: Pageable
-    ): ResponseEntity<ApiResponse<List<CertificationResponse>>> {
+    ): ResponseEntity<ApiResponse<List<FeedResponse>>> {
         val feedPage = feedService.getFeed(userDetails.username, pageable)
         return ResponseEntity.ok(ApiResponse.pagedSuccess(feedPage.content, feedPage))
     }

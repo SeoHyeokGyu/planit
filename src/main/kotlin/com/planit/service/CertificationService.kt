@@ -23,7 +23,8 @@ class CertificationService(
   private val certificationRepository: CertificationRepository,
   private val userRepository: UserRepository,
   private val challengeRepository: ChallengeRepository,
-  private val participantRepository: ChallengeParticipantRepository
+  private val participantRepository: ChallengeParticipantRepository,
+  private val notificationService: NotificationService
 ) {
 
   /**
