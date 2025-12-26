@@ -60,7 +60,10 @@ export default function CertificationDetailPage() {
 
   const handleDelete = async () => {
     try {
-      await deleteMutation.mutateAsync(certificationId);
+      await deleteMutation.mutateAsync({ 
+        id: certificationId, 
+        challengeId: data?.challengeId
+      });
       toast.success("인증이 성공적으로 삭제되었습니다!");
       router.push("/");
     } catch (err) {

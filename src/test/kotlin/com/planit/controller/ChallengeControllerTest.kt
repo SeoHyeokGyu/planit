@@ -54,7 +54,7 @@ class ChallengeControllerTest {
         )
 
         val response = ChallengeResponse(
-            challengeId = "CHL-12345678",
+            id = "CHL-12345678",
             title = "30일 운동 챌린지",
             description = "매일 30분씩 운동하기",
             category = "EXERCISE",
@@ -86,7 +86,7 @@ class ChallengeControllerTest {
     fun `getChallengeById should return 200 OK on success`() {
         // Given
         val response = ChallengeResponse(
-            challengeId = "CHL-12345678",
+            id = "CHL-12345678",
             title = "30일 운동 챌린지",
             description = "매일 30분씩 운동하기",
             category = "EXERCISE",
@@ -133,7 +133,7 @@ class ChallengeControllerTest {
         // Given
         val challenges = listOf(
             ChallengeListResponse(
-                challengeId = "CHL-12345678",
+                id = "CHL-12345678",
                 title = "30일 운동 챌린지",
                 description = "매일 30분씩 운동하기",
                 category = "EXERCISE",
@@ -165,7 +165,7 @@ class ChallengeControllerTest {
         // Given
         val challenges = listOf(
             ChallengeListResponse(
-                challengeId = "CHL-12345678",
+                id = "CHL-12345678",
                 title = "30일 운동 챌린지",
                 description = "매일 30분씩 운동하기",
                 category = "EXERCISE",
@@ -206,7 +206,7 @@ class ChallengeControllerTest {
         )
 
         val response = ChallengeResponse(
-            challengeId = "CHL-12345678",
+            id = "CHL-12345678",
             title = "수정된 챌린지",
             description = "수정된 설명",
             category = "HEALTH",
@@ -388,7 +388,7 @@ class ChallengeControllerTest {
     fun `getChallengeStatistics should return 200 OK with statistics`() {
         // Given
         val statistics = ChallengeStatisticsResponse(
-            challengeId = "CHL-12345678",
+            id = "CHL-12345678",
             totalParticipants = 100,
             activeParticipants = 80,
             completedParticipants = 15,

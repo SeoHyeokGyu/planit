@@ -8,6 +8,7 @@ import com.planit.entity.User
 import com.planit.exception.CertificationUpdateForbiddenException
 import com.planit.exception.CertificationUpdatePeriodExpiredException
 import com.planit.repository.CertificationRepository
+import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
 import com.planit.util.setPrivateProperty
@@ -33,6 +34,8 @@ class CertificationServiceTest {
 
   @MockK private lateinit var challengeRepository: ChallengeRepository
 
+  @MockK private lateinit var participantRepository: ChallengeParticipantRepository
+
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -53,8 +56,9 @@ class CertificationServiceTest {
             endDate = LocalDateTime.now().plusDays(10),
             difficulty = "Easy",
             createdId = "creator",
+            certificationCnt = 0
         )
-    challenge.setPrivateProperty("id", 1L)
+    challenge.setPrivateProperty("id", challengeId)
   }
 
   @Nested
@@ -82,6 +86,8 @@ class CertificationServiceTest {
       every { userRepository.findByLoginId(user.loginId) } returns user
       every { challengeRepository.findById(request.challengeId) } returns Optional.of(challenge)
       every { certificationRepository.save(any()) } returns certification
+      every { challengeRepository.save(any()) } returns challenge
+      every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns Optional.empty()
 
       // When
       val response = certificationService.createCertification(request, user.loginId)
@@ -89,7 +95,9 @@ class CertificationServiceTest {
       // Then
       assertThat(response.title).isEqualTo(request.title)
       assertThat(response.content).isEqualTo(request.content)
+      assertThat(challenge.certificationCnt).isEqualTo(1L)
       verify(exactly = 1) { certificationRepository.save(any()) }
+      verify(exactly = 1) { challengeRepository.save(any()) }
     }
   }
 
@@ -181,14 +189,19 @@ class CertificationServiceTest {
     @DisplayName("자신이 작성한 인증을 성공적으로 삭제한다")
     fun `deletes a certification successfully`() {
       // Given
+      challenge.certificationCnt = 1L
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
       justRun { certificationRepository.delete(certification) }
+      every { challengeRepository.save(any()) } returns challenge
+      every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns Optional.empty()
 
       // When
       certificationService.deleteCertification(1L, user.loginId)
 
       // Then
+      assertThat(challenge.certificationCnt).isEqualTo(0L)
       verify(exactly = 1) { certificationRepository.delete(certification) }
+      verify(exactly = 1) { challengeRepository.save(any()) }
     }
 
     @Test
