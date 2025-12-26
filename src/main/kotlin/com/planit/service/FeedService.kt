@@ -3,7 +3,9 @@ package com.planit.service
 import com.planit.dto.FeedResponse
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.CertificationRepository
+import com.planit.repository.CommentRepository
 import com.planit.repository.FollowRepository
+import com.planit.repository.LikeRepository
 import com.planit.repository.UserRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -15,7 +17,9 @@ import org.springframework.transaction.annotation.Transactional
 class FeedService(
     private val followRepository: FollowRepository,
     private val certificationRepository: CertificationRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val likeRepository: LikeRepository,
+    private val commentRepository: CommentRepository
 ) {
 
     /**
@@ -42,8 +46,31 @@ class FeedService(
             pageable
         )
 
+        val certificationIds = certificationPage.content.map { it.id!! }
+        
+        if (certificationIds.isEmpty()) {
+            return PageImpl(emptyList(), pageable, certificationPage.totalElements)
+        }
+
+        // 일괄 조회 (N+1 문제 해결)
+        val likeCounts = likeRepository.countByCertificationIdIn(certificationIds)
+            .associate { it.getCertificationId() to it.getCount() }
+            
+        val commentCounts = commentRepository.countByCertificationIdIn(certificationIds)
+            .associate { it.getCertificationId() to it.getCount() }
+            
+        val likedCertificationIds = likeRepository.findLikedCertificationIds(certificationIds, userLoginId).toSet()
+
         // Certification을 FeedResponse로 변환
-        val feedResponses = certificationPage.content.map { FeedResponse.from(it) }
+        val feedResponses = certificationPage.content.map { certification ->
+            val id = certification.id!!
+            FeedResponse.from(
+                certification,
+                likeCounts[id] ?: 0L,
+                commentCounts[id] ?: 0L,
+                likedCertificationIds.contains(id)
+            )
+        }
 
         return PageImpl(feedResponses, pageable, certificationPage.totalElements)
     }

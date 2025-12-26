@@ -25,11 +25,19 @@ data class FeedResponse(
     val authorLoginId: String,
     val challengeId: String,
     val challengeTitle: String,
+    val likeCount: Long,
+    val commentCount: Long,
+    val isLiked: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
     companion object {
-        fun from(certification: Certification): FeedResponse {
+        fun from(
+            certification: Certification,
+            likeCount: Long,
+            commentCount: Long,
+            isLiked: Boolean
+        ): FeedResponse {
             return FeedResponse(
                 id = certification.id!!,
                 title = certification.title,
@@ -39,6 +47,9 @@ data class FeedResponse(
                 authorLoginId = certification.user.loginId,
                 challengeId = certification.challenge.id,
                 challengeTitle = certification.challenge.title,
+                likeCount = likeCount,
+                commentCount = commentCount,
+                isLiked = isLiked,
                 createdAt = certification.createdAt,
                 updatedAt = certification.updatedAt
             )

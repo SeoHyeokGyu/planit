@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFeed } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
+import { likeCommentService } from "@/services/likeCommentService";
 import {
   Card,
   CardContent,
@@ -12,11 +13,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { FeedResponse } from "@/types/feed";
 
 export default function FeedPage() {
   const router = useRouter();
@@ -75,7 +80,7 @@ export default function FeedPage() {
         ) : feed && feed.length > 0 ? (
           <>
             <div className="space-y-4">
-              {feed.map((cert: any) => (
+              {feed.map((cert: FeedResponse) => (
                 <FeedItem
                   key={cert.id}
                   certification={cert}
@@ -133,11 +138,61 @@ function FeedItem({
   certification,
   onClick,
 }: {
-  certification: any;
+  certification: FeedResponse;
   onClick: () => void;
 }) {
+  const [isLiked, setIsLiked] = useState(certification.isLiked);
+  const [likeCount, setLikeCount] = useState(certification.likeCount);
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(certification.commentCount);
+  const [newComment, setNewComment] = useState("");
+
+  const toggleLikeMutation = useMutation({
+    mutationFn: () => likeCommentService.toggleLike(certification.id),
+    onMutate: () => {
+      // Optimistic update
+      const previousLiked = isLiked;
+      setIsLiked(!isLiked);
+      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+      return { previousLiked };
+    },
+    onError: (err, newTodo, context) => {
+        // Revert on error
+        if (context) {
+            setIsLiked(context.previousLiked);
+            setLikeCount((prev) => (context.previousLiked ? prev + 1 : prev - 1));
+        }
+        toast.error("좋아요 처리에 실패했습니다.");
+    }
+  });
+
+  const { data: comments, refetch: refetchComments } = useQuery({
+    queryKey: ["comments", certification.id],
+    queryFn: () => likeCommentService.getComments(certification.id),
+    enabled: showComments,
+    select: (data) => data.data
+  });
+
+  const createCommentMutation = useMutation({
+    mutationFn: (content: string) => likeCommentService.createComment(certification.id, content),
+    onSuccess: () => {
+        setNewComment("");
+        refetchComments();
+        setCommentCount((prev) => prev + 1);
+    },
+    onError: () => {
+        toast.error("댓글 작성에 실패했습니다.");
+    }
+  });
+  
+  const handleCommentSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newComment.trim()) return;
+      createCommentMutation.mutate(newComment);
+  };
+
   return (
-    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-0 bg-white overflow-hidden">
+    <Card className="border-0 bg-white overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow">
       {/* 작성자 정보 */}
       <div className="px-6 py-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
@@ -161,7 +216,7 @@ function FeedItem({
       </div>
 
       {/* 인증 콘텐츠 */}
-      <div onClick={onClick}>
+      <div onClick={onClick} className="cursor-pointer">
         {/* 사진 */}
         {certification.photoUrl && (
           <div className="relative h-80 w-full bg-gray-100">
@@ -190,38 +245,58 @@ function FeedItem({
           <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
             {certification.content}
           </p>
-
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <Calendar className="w-4 h-4" />
-            {new Date(certification.createdAt).toLocaleDateString("ko-KR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
         </div>
       </div>
 
       {/* 액션 버튼 */}
       <div className="px-6 py-3 border-t border-gray-100 flex items-center gap-4">
-        <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors text-sm">
-          <Heart className="w-5 h-5" />
-          <span>23</span>
+        <button 
+            onClick={(e) => { e.stopPropagation(); toggleLikeMutation.mutate(); }}
+            className={`flex items-center gap-1 transition-colors text-sm ${isLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
+        >
+          <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+          <span>{likeCount}</span>
         </button>
-        <button className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors text-sm">
+        <button 
+            onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
+            className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors text-sm"
+        >
           <MessageCircle className="w-5 h-5" />
-          <span>5</span>
-        </button>
-        <button className="flex items-center gap-1 text-gray-600 hover:text-green-500 transition-colors text-sm">
-          <Repeat2 className="w-5 h-5" />
-          <span>2</span>
+          <span>{commentCount}</span>
         </button>
         <button className="ml-auto text-gray-600 hover:text-gray-900 transition-colors">
           <Share className="w-5 h-5" />
         </button>
       </div>
+
+      {/* 댓글 섹션 */}
+      {showComments && (
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
+              <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                  {comments?.map((comment) => (
+                      <div key={comment.id} className="flex gap-2 text-sm group">
+                          <span className="font-bold text-gray-900 flex-shrink-0">{comment.authorNickname}</span>
+                          <span className="text-gray-700 break-all">{comment.content}</span>
+                          <span className="text-xs text-gray-400 ml-auto flex-shrink-0 flex items-center gap-2">
+                              {formatTimeAgo(new Date(comment.createdAt))}
+                          </span>
+                      </div>
+                  ))}
+                  {comments?.length === 0 && <p className="text-center text-gray-500 text-sm py-2">첫 댓글을 남겨보세요!</p>}
+              </div>
+              <form onSubmit={handleCommentSubmit} className="flex gap-2">
+                  <Input 
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="댓글 달기..." 
+                    className="flex-1 bg-white h-9 text-sm focus-visible:ring-blue-500"
+                  />
+                  <Button type="submit" size="sm" disabled={createCommentMutation.isPending || !newComment.trim()} className="h-9 w-9 p-0 bg-blue-600 hover:bg-blue-700">
+                      <Send className="w-4 h-4 text-white" />
+                  </Button>
+              </form>
+          </div>
+      )}
     </Card>
   );
 }

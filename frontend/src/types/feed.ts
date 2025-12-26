@@ -7,6 +7,9 @@ export interface FeedResponse {
   authorLoginId: string;
   challengeId: string;
   challengeTitle: string;
+  likeCount: number;
+  commentCount: number;
+  isLiked: boolean;
   createdAt: string;
   updatedAt: string;
 }
