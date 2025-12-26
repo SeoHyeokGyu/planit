@@ -35,10 +35,10 @@ class FeedService(
             ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
         // 팔로우하는 사람들의 ID 조회
-        val followingUserIds = followRepository.findFollowingIdsByFollowerId(currentUser.id!!).toMutableList()
+        val followingUserIds = followRepository.findFollowingIdsByFollowerId(currentUser.id).toMutableList()
         
         // 내 인증도 포함
-        followingUserIds.add(currentUser.id!!)
+        followingUserIds.add(currentUser.id)
 
         // 팔로우하는 사람들의 최근 인증 조회 (시간 역순)
         val certificationPage = certificationRepository.findByUser_IdInOrderByCreatedAtDesc(
@@ -46,7 +46,7 @@ class FeedService(
             pageable
         )
 
-        val certificationIds = certificationPage.content.map { it.id!! }
+        val certificationIds = certificationPage.content.map { it.id }
         
         if (certificationIds.isEmpty()) {
             return PageImpl(emptyList(), pageable, certificationPage.totalElements)
@@ -63,13 +63,13 @@ class FeedService(
 
         // Certification을 FeedResponse로 변환
         val feedResponses = certificationPage.content.map { certification ->
-            val id = certification.id!!
+            val id = certification.id
             FeedResponse.from(
                 certification,
                 likeCounts[id] ?: 0L,
                 commentCounts[id] ?: 0L,
                 likedCertificationIds.contains(id),
-                currentUser.id!!
+                currentUser.id
             )
         }
 

@@ -29,7 +29,7 @@ class ViewCountScheduler(
         logger.info("=== 조회수 동기화 스케줄러 시작 ===")
 
         try {
-            val keys = redisTemplate.keys(VIEW_COUNT_KEY_PATTERN) ?: emptySet()
+            val keys = redisTemplate.keys(VIEW_COUNT_KEY_PATTERN)
             var successCount = 0
             var failCount = 0
 
