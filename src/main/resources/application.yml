@@ -46,5 +46,6 @@ weather:
 logging:
   level:
     com.planit: DEBUG
+    com.planit.aspect: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG

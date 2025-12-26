@@ -36,15 +36,16 @@ export default function CertificationDetailPage() {
 
   const { data, isLoading, error } = useCertification(certificationId);
 
-  useEffect(() => {
+  const updateMutation = useUpdateCertification();
+  const deleteMutation = useDeleteCertification();
+
+  const handleEditClick = () => {
     if (data) {
       setEditedTitle(data.title);
       setEditedContent(data.content);
+      setIsEditing(true);
     }
-  }, [data]);
-
-  const updateMutation = useUpdateCertification();
-  const deleteMutation = useDeleteCertification();
+  };
 
   const handleUpdate = async () => {
     try {
@@ -249,7 +250,7 @@ export default function CertificationDetailPage() {
                         <>
                             <Button 
                                 variant="outline" 
-                                onClick={() => setIsEditing(true)}
+                                onClick={handleEditClick}
                                 className="border-gray-300 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all"
                             >
                                 <Edit2 className="w-4 h-4 mr-2" />

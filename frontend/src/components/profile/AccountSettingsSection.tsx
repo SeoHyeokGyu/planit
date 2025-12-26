@@ -16,7 +16,7 @@ interface AccountSettingsSectionProps {
 export default function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
   return (
     <div className="space-y-8">
-      <NicknameForm user={user} />
+      <NicknameForm user={user} key={user.nickname} />
       <PasswordForm />
     </div>
   );
@@ -25,12 +25,6 @@ export default function AccountSettingsSection({ user }: AccountSettingsSectionP
 function NicknameForm({ user }: { user: UserProfile }) {
   const [nickname, setNickname] = useState(user?.nickname || "");
   const updateProfileMutation = useUpdateProfile();
-
-  useEffect(() => {
-    if (user?.nickname) {
-      setNickname(user.nickname);
-    }
-  }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
