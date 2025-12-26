@@ -28,6 +28,7 @@ data class FeedResponse(
     val likeCount: Long,
     val commentCount: Long,
     val isLiked: Boolean,
+    val isMine: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 ) {
@@ -36,7 +37,8 @@ data class FeedResponse(
             certification: Certification,
             likeCount: Long,
             commentCount: Long,
-            isLiked: Boolean
+            isLiked: Boolean,
+            currentUserId: Long
         ): FeedResponse {
             return FeedResponse(
                 id = certification.id!!,
@@ -50,6 +52,7 @@ data class FeedResponse(
                 likeCount = likeCount,
                 commentCount = commentCount,
                 isLiked = isLiked,
+                isMine = certification.user.id == currentUserId,
                 createdAt = certification.createdAt,
                 updatedAt = certification.updatedAt
             )

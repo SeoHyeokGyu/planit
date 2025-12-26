@@ -68,7 +68,8 @@ class FeedService(
                 certification,
                 likeCounts[id] ?: 0L,
                 commentCounts[id] ?: 0L,
-                likedCertificationIds.contains(id)
+                likedCertificationIds.contains(id),
+                currentUser.id!!
             )
         }
 
