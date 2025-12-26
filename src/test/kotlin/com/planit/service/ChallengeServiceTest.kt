@@ -336,7 +336,7 @@ class ChallengeServiceTest {
     fun `withdrawChallenge should succeed when actively participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns Optional.of(participant)
+        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns Optional.of(participant).isPresent
         every { participantRepository.save(any()) } returns participant
         every { challengeRepository.save(any()) } returns challenge
 
@@ -356,7 +356,7 @@ class ChallengeServiceTest {
     fun `withdrawChallenge should throw NoSuchElementException when not participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns Optional.empty()
+        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns false
 
         // When & Then
         val exception = assertThrows<NoSuchElementException> {
@@ -404,7 +404,7 @@ class ChallengeServiceTest {
         // Given
         val participants = listOf(participant)
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByIdAndLoginId(challengeId, loginId) } returns participants
+        every { participantRepository.existsByIdAndLoginId(challengeId, loginId) } returns participants.isEmpty()
 
         // When
         val result = challengeService.getParticipants(challengeId)

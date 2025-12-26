@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useFeed } from "@/hooks/useFeed";
+import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
+import { likeCommentService } from "@/services/likeCommentService";
 import {
   Card,
   CardContent,
@@ -12,18 +13,30 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
+import { formatTimeAgo } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { FeedResponse } from "@/types/feed";
+import { useInView } from "react-intersection-observer";
 
 export default function FeedPage() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const [isMounted, setIsMounted] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
+  const { ref, inView } = useInView();
 
-  const { data: feedData, isLoading } = useFeed(currentPage, 10);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useFeedInfinite(10);
 
   useEffect(() => {
     setIsMounted(true);
@@ -35,6 +48,12 @@ export default function FeedPage() {
     }
   }, [isMounted, token, router]);
 
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
   if (!isMounted) {
     return null;
   }
@@ -43,8 +62,7 @@ export default function FeedPage() {
     return null;
   }
 
-  const feed = feedData?.content || [];
-  const hasMorePages = currentPage < (feedData?.totalPages || 1) - 1;
+  const feedItems = data?.pages.flatMap((page) => page.data || []) || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -71,10 +89,10 @@ export default function FeedPage() {
               <FeedItemSkeleton key={i} />
             ))}
           </div>
-        ) : feed && feed.length > 0 ? (
+        ) : feedItems.length > 0 ? (
           <>
             <div className="space-y-4">
-              {feed.map((cert: any) => (
+              {feedItems.map((cert: FeedResponse) => (
                 <FeedItem
                   key={cert.id}
                   certification={cert}
@@ -83,25 +101,18 @@ export default function FeedPage() {
               ))}
             </div>
 
-            {/* Pagination */}
-            <div className="mt-8 flex justify-between items-center">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                disabled={currentPage === 0}
-              >
-                이전
-              </Button>
-              <span className="text-sm text-gray-600">
-                {currentPage + 1} / {feedData?.totalPages || 1} 페이지
-              </span>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={!hasMorePages}
-              >
-                다음
-              </Button>
+            {/* Infinite Scroll Loader & Trigger */}
+            <div ref={ref} className="mt-8 flex justify-center py-4">
+              {isFetchingNextPage ? (
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                  불러오는 중...
+                </div>
+              ) : hasNextPage ? (
+                <div className="h-4" /> // Invisible trigger area
+              ) : (
+                <p className="text-gray-400 text-sm">모든 피드를 확인했습니다.</p>
+              )}
             </div>
           </>
         ) : (
@@ -132,24 +143,81 @@ function FeedItem({
   certification,
   onClick,
 }: {
-  certification: any;
+  certification: FeedResponse;
   onClick: () => void;
 }) {
+  const [isLiked, setIsLiked] = useState(certification.isLiked);
+  const [likeCount, setLikeCount] = useState(certification.likeCount);
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(certification.commentCount);
+  const [newComment, setNewComment] = useState("");
+
+  const toggleLikeMutation = useMutation({
+    mutationFn: () => likeCommentService.toggleLike(certification.id),
+    onMutate: () => {
+      // Optimistic update
+      const previousLiked = isLiked;
+      setIsLiked(!isLiked);
+      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+      return { previousLiked };
+    },
+    onError: (err, newTodo, context) => {
+        // Revert on error
+        if (context) {
+            setIsLiked(context.previousLiked);
+            setLikeCount((prev) => (context.previousLiked ? prev + 1 : prev - 1));
+        }
+        toast.error("좋아요 처리에 실패했습니다.");
+    }
+  });
+
+  const { data: comments, refetch: refetchComments } = useQuery({
+    queryKey: ["comments", certification.id],
+    queryFn: () => likeCommentService.getComments(certification.id),
+    enabled: showComments,
+    select: (data) => data.data
+  });
+
+  const createCommentMutation = useMutation({
+    mutationFn: (content: string) => likeCommentService.createComment(certification.id, content),
+    onSuccess: () => {
+        setNewComment("");
+        refetchComments();
+        setCommentCount((prev) => prev + 1);
+    },
+    onError: () => {
+        toast.error("댓글 작성에 실패했습니다.");
+    }
+  });
+
+  const handleCommentSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newComment.trim()) return;
+      createCommentMutation.mutate(newComment);
+  };
+
   return (
-    <Card className="cursor-pointer hover:shadow-lg transition-shadow border-0 bg-white overflow-hidden">
+    <Card className="border-0 bg-white overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow">
       {/* 작성자 정보 */}
       <div className="px-6 py-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              {certification.senderNickname?.charAt(0) || "?"}
+              {certification.authorNickname?.charAt(0) || "?"}
             </div>
             <div>
-              <p className="font-semibold text-gray-900">
-                {certification.senderNickname || "알 수 없는 사용자"}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold text-gray-900">
+                  {certification.authorNickname || "알 수 없는 사용자"}
+                </p>
+                {certification.isMine && (
+                  <Badge className="text-[10px] h-5 px-1.5 py-0 bg-blue-100 text-blue-700 hover:bg-blue-200 border-0 shadow-none flex-shrink-0">
+                    나
+                  </Badge>
+                )}
+              </div>
               <p className="text-xs text-gray-500">
-                @{certification.senderLoginId || "unknown"}
+                @{certification.authorLoginId || "unknown"}
               </p>
             </div>
           </div>
@@ -160,7 +228,7 @@ function FeedItem({
       </div>
 
       {/* 인증 콘텐츠 */}
-      <div onClick={onClick}>
+      <div onClick={onClick} className="cursor-pointer">
         {/* 사진 */}
         {certification.photoUrl && (
           <div className="relative h-80 w-full bg-gray-100">
@@ -189,38 +257,58 @@ function FeedItem({
           <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
             {certification.content}
           </p>
-
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <Calendar className="w-4 h-4" />
-            {new Date(certification.createdAt).toLocaleDateString("ko-KR", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
         </div>
       </div>
 
       {/* 액션 버튼 */}
       <div className="px-6 py-3 border-t border-gray-100 flex items-center gap-4">
-        <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors text-sm">
-          <Heart className="w-5 h-5" />
-          <span>23</span>
+        <button
+            onClick={(e) => { e.stopPropagation(); toggleLikeMutation.mutate(); }}
+            className={`flex items-center gap-1 transition-colors text-sm ${isLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
+        >
+          <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+          <span>{likeCount}</span>
         </button>
-        <button className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors text-sm">
+        <button
+            onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
+            className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors text-sm"
+        >
           <MessageCircle className="w-5 h-5" />
-          <span>5</span>
-        </button>
-        <button className="flex items-center gap-1 text-gray-600 hover:text-green-500 transition-colors text-sm">
-          <Repeat2 className="w-5 h-5" />
-          <span>2</span>
+          <span>{commentCount}</span>
         </button>
         <button className="ml-auto text-gray-600 hover:text-gray-900 transition-colors">
           <Share className="w-5 h-5" />
         </button>
       </div>
+
+      {/* 댓글 섹션 */}
+      {showComments && (
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100" onClick={(e) => e.stopPropagation()}>
+              <div className="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                  {comments?.map((comment) => (
+                      <div key={comment.id} className="flex gap-2 text-sm group">
+                          <span className="font-bold text-gray-900 flex-shrink-0">{comment.authorNickname}</span>
+                          <span className="text-gray-700 break-all">{comment.content}</span>
+                          <span className="text-xs text-gray-400 ml-auto flex-shrink-0 flex items-center gap-2">
+                              {formatTimeAgo(new Date(comment.createdAt))}
+                          </span>
+                      </div>
+                  ))}
+                  {comments?.length === 0 && <p className="text-center text-gray-500 text-sm py-2">첫 댓글을 남겨보세요!</p>}
+              </div>
+              <form onSubmit={handleCommentSubmit} className="flex gap-2">
+                  <Input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="댓글 달기..."
+                    className="flex-1 bg-white h-9 text-sm focus-visible:ring-blue-500"
+                  />
+                  <Button type="submit" size="sm" disabled={createCommentMutation.isPending || !newComment.trim()} className="h-9 w-9 p-0 bg-blue-600 hover:bg-blue-700">
+                      <Send className="w-4 h-4 text-white" />
+                  </Button>
+              </form>
+          </div>
+      )}
     </Card>
   );
 }
@@ -246,16 +334,4 @@ function FeedItemSkeleton() {
       </div>
     </Card>
   );
-}
-
-function formatTimeAgo(date: Date): string {
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return "방금 전";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}분 전`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}시간 전`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}일 전`;
-
-  return date.toLocaleDateString("ko-KR");
 }

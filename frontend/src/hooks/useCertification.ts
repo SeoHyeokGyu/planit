@@ -74,8 +74,9 @@ export const useCreateCertification = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CertificationCreateRequest) => certificationService.createCertification(data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      queryClient.invalidateQueries({ queryKey: ["challenge", variables.challengeId] });
       toast.success("인증글이 작성되었습니다.");
     },
     onError: (error) => {
@@ -119,9 +120,13 @@ export const useUpdateCertification = () => {
 export const useDeleteCertification = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => certificationService.deleteCertification(id),
-    onSuccess: () => {
+    mutationFn: ({ id, challengeId }: { id: number; challengeId?: string }) =>
+      certificationService.deleteCertification(id),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      if (variables.challengeId) {
+        queryClient.invalidateQueries({ queryKey: ["challenge", variables.challengeId] });
+      }
       toast.success("인증글이 삭제되었습니다.");
     },
     onError: (error) => {

@@ -6,6 +6,7 @@ import com.planit.dto.CertificationUpdateRequest
 import com.planit.entity.Certification
 import com.planit.exception.*
 import com.planit.repository.CertificationRepository
+import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
 import org.springframework.data.domain.Page
@@ -21,7 +22,9 @@ import java.time.LocalDateTime
 class CertificationService(
   private val certificationRepository: CertificationRepository,
   private val userRepository: UserRepository,
-  private val challengeRepository: ChallengeRepository
+  private val challengeRepository: ChallengeRepository,
+  private val participantRepository: ChallengeParticipantRepository,
+  private val notificationService: NotificationService
 ) {
 
   /**
@@ -45,6 +48,17 @@ class CertificationService(
     )
 
     val savedCertification = certificationRepository.save(certification)
+
+    // 챌린지 전체 인증 수 증가
+    challenge.certificationCnt++
+    challengeRepository.save(challenge)
+
+    // 참여자별 인증 수 증가
+    participantRepository.findByIdAndLoginId(challenge.id, userLoginId).ifPresent { participant ->
+      participant.certificationCnt++
+      participantRepository.save(participant)
+    }
+
     return CertificationResponse.from(savedCertification)
   }
 
@@ -155,8 +169,24 @@ class CertificationService(
       throw CertificationUpdateForbiddenException("이 인증을 삭제할 권한이 없습니다")
     }
 
+    val challenge = certification.challenge
+
     // 실제 삭제 대신 isDeleted 플래그를 true로 변경 (Soft Delete)
     certificationRepository.delete(certification)
+
+    // 챌린지 전체 인증 수 감소
+    if (challenge.certificationCnt > 0) {
+      challenge.certificationCnt--
+      challengeRepository.save(challenge)
+    }
+
+    // 참여자별 인증 수 감소
+    participantRepository.findByIdAndLoginId(challenge.id, userLoginId).ifPresent { participant ->
+      if (participant.certificationCnt > 0) {
+        participant.certificationCnt--
+        participantRepository.save(participant)
+      }
+    }
   }
 
   /**
