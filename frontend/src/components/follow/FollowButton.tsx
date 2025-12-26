@@ -28,7 +28,6 @@ export default function FollowButton({
   const currentLoginId = useAuthStore((state) => state.loginId);
   const queryClient = useQueryClient();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing ?? false);
-  const [isLoading, setIsLoading] = useState(false);
 
   // initialIsFollowing이 제공되지 않으면 팔로잉 상태 조회
   const { data: followings } = useFollowings(
@@ -41,6 +40,8 @@ export default function FollowButton({
   const followMutation = useFollow();
   const unfollowMutation = useUnfollow();
 
+  const isLoading = followMutation.isPending || unfollowMutation.isPending;
+
   // initialIsFollowing이 제공되지 않으면 followings에서 상태 확인
   useEffect(() => {
     if (initialIsFollowing === undefined && followings && Array.isArray(followings)) {
@@ -52,16 +53,6 @@ export default function FollowButton({
       setIsFollowing(initialIsFollowing);
     }
   }, [followings, targetLoginId, initialIsFollowing]);
-
-  // 로딩 상태 업데이트
-  useEffect(() => {
-    setIsLoading(
-      followMutation.isPending || unfollowMutation.isPending
-    );
-  }, [
-    followMutation.isPending,
-    unfollowMutation.isPending,
-  ]);
 
   // 자신의 프로필이면 버튼 표시 안 함
   if (currentLoginId === targetLoginId) {

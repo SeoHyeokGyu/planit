@@ -85,7 +85,7 @@ export default function NotificationDropdown() {
             ) : (
               notifications.map((notification) => (
                 <div
-                  key={notification.id || Math.random().toString()}
+                  key={notification.id}
                   onClick={() => handleNotificationClick(notification.id)}
                   className={cn(
                     "p-3 rounded-xl text-sm transition-all duration-200 relative group border !cursor-pointer",
