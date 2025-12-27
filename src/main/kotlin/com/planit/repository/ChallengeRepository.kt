@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 
 @Repository
 interface ChallengeRepository : JpaRepository<Challenge, String> {
@@ -27,6 +28,13 @@ interface ChallengeRepository : JpaRepository<Challenge, String> {
 
     // 카테고리와 난이도로 조회
     fun findByCategoryAndDifficulty(category: String, difficulty: String): List<Challenge>
+
+    // 특정 날짜에 종료되는 챌린지 조회
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE DATE(c.endDate) = :targetDate
+    """)
+    fun findByEndDateOn(@Param("targetDate") targetDate: LocalDate): List<Challenge>
 
     // 조회수 증가
     @Modifying

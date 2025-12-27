@@ -3,12 +3,17 @@ package com.planit.service
 import com.planit.dto.*
 import com.planit.entity.Challenge
 import com.planit.entity.ChallengeParticipant
+import com.planit.enums.NotificationType
 import com.planit.enums.ParticipantStatusEnum
+import com.planit.exception.UserNotFoundException
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
+import com.planit.repository.LikeRepository
+import com.planit.repository.UserRepository
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.NoSuchElementException
 import java.util.concurrent.TimeUnit
 
@@ -17,7 +22,12 @@ import java.util.concurrent.TimeUnit
 class ChallengeService(
     private val challengeRepository: ChallengeRepository,
     private val participantRepository: ChallengeParticipantRepository,
-    private val redisTemplate: RedisTemplate<String, String>
+    private val redisTemplate: RedisTemplate<String, String>,
+    private val likeRepository: LikeRepository,
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationService
+
+
 ) {
 
     companion object {
@@ -44,6 +54,7 @@ class ChallengeService(
         )
 
         val savedChallenge = challengeRepository.save(challenge)
+
         return ChallengeResponse.from(savedChallenge)
     }
 
@@ -179,6 +190,31 @@ class ChallengeService(
         challenge.participantCnt++
         challengeRepository.save(challenge)
 
+        val user = userRepository.findByLoginId(loginId) ?: throw UserNotFoundException()
+        if (challenge.createdId != loginId) {
+
+            // 챌린지 생성자 조회
+            val challengeCreator = userRepository.findByLoginId(challenge.createdId)
+                ?: throw UserNotFoundException()
+
+            notificationService.sendNotification(
+                NotificationResponse(
+                    id = -1L,
+                    receiverId = challengeCreator.id!!,
+                    receiverLoginId = challenge.createdId,
+                    senderId = user.id,
+                    senderLoginId = user.loginId,
+                    senderNickname = user.nickname,
+                    type = NotificationType.CHALLENGE,
+                    message = "${user.nickname ?: user.loginId}님이 회원님의 챌린지에 참여했습니다.",
+                    relatedId = challenge.id,
+                    relatedType = "CHALLENGE",
+                    isRead = false,
+                    createdAt = LocalDateTime.now()
+                )
+            )
+        }
+
         return ParticipateResponse.from(savedParticipant)
     }
 
@@ -202,6 +238,31 @@ class ChallengeService(
         // 참여자 수 감소
         challenge.participantCnt--
         challengeRepository.save(challenge)
+
+        val user = userRepository.findByLoginId(loginId) ?: throw UserNotFoundException()
+        if (challenge.createdId != loginId) {
+
+            // 챌린지 생성자 조회
+            val challengeCreator = userRepository.findByLoginId(challenge.createdId)
+                ?: throw UserNotFoundException()
+
+            notificationService.sendNotification(
+                NotificationResponse(
+                    id = -1L,
+                    receiverId = challengeCreator.id!!,
+                    receiverLoginId = challenge.createdId,
+                    senderId = user.id,
+                    senderLoginId = user.loginId,
+                    senderNickname = user.nickname,
+                    type = NotificationType.CHALLENGE,
+                    message = "${user.nickname ?: user.loginId}님이 회원님의 챌린지를 포기했습니다.",
+                    relatedId = challenge.id,
+                    relatedType = "CHALLENGE",
+                    isRead = false,
+                    createdAt = LocalDateTime.now()
+                )
+            )
+        }
     }
 
     /**

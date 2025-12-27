@@ -63,15 +63,15 @@ export default function ChallengeDetailPage() {
             // 마지막 방문 시간 확인
             if (lastViewTime) {
                 const timeDiff = Date.now() - parseInt(lastViewTime);
-                const fiveMinutes = 1 * 60 * 1000; // 5분을 밀리초로
+                const fiveMinutes = 1 * 60 * 1000; // 1분을 밀리초로
 
-                // 5분 이내 재방문은 카운트 안 함
+                // 1분 이내 재방문은 카운트 안 함
                 if (timeDiff < fiveMinutes) {
                     console.log('Viewed within 5 minutes, skipping:', challengeId);
                     return;
                 }
 
-                // 5분 경과 → 조회수 증가
+                // 1분 경과 → 조회수 증가
                 console.log('5 minutes passed, incrementing:', challengeId);
             }
 
