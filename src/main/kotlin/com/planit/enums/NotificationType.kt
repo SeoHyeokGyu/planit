@@ -8,5 +8,6 @@ enum class NotificationType {
     COMMENT,     // 댓글 알림
     LIKE,        // 좋아요 알림
     BADGE,       // 배지 획득 알림
-    LEVEL_UP     // 레벨업 알림
+    LEVEL_UP,    // 레벨업 알림
+    CHALLENGE    // 챌린지 알림
 }
