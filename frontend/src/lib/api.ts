@@ -29,6 +29,10 @@ export const api = {
     const result = await response.json();
 
     if (!response.ok) {
+      if (response.status === 401) {
+        useAuthStore.getState().clearToken();
+      }
+
       const errorMessage = result?.error?.message || result?.message || `HTTP error! status: ${response.status}`;
       throw new Error(errorMessage);
     }
