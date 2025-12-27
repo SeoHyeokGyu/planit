@@ -27,11 +27,13 @@ export default function FollowButton({
 }: FollowButtonProps) {
   const currentLoginId = useAuthStore((state) => state.loginId);
   const queryClient = useQueryClient();
-  const [isFollowing, setIsFollowing] = useState(initialIsFollowing ?? false);
+  const [manualIsFollowing, setManualIsFollowing] = useState<boolean | null>(
+    null
+  );
 
   // initialIsFollowing이 제공되지 않으면 팔로잉 상태 조회
   const { data: followings } = useFollowings(
-    initialIsFollowing === undefined ? (currentLoginId || "") : "",
+    initialIsFollowing === undefined ? currentLoginId || "" : "",
     0,
     100
   );
@@ -42,17 +44,15 @@ export default function FollowButton({
 
   const isLoading = followMutation.isPending || unfollowMutation.isPending;
 
-  // initialIsFollowing이 제공되지 않으면 followings에서 상태 확인
-  useEffect(() => {
-    if (initialIsFollowing === undefined && followings && Array.isArray(followings)) {
-      const isUserFollowing = followings.some(
-        (user) => user.loginId === targetLoginId
-      );
-      setIsFollowing(isUserFollowing);
-    } else if (initialIsFollowing !== undefined) {
-      setIsFollowing(initialIsFollowing);
-    }
-  }, [followings, targetLoginId, initialIsFollowing]);
+  // 팔로우 여부 결정
+  const isFollowing =
+    manualIsFollowing !== null
+      ? manualIsFollowing
+      : initialIsFollowing !== undefined
+      ? initialIsFollowing
+      : followings && Array.isArray(followings)
+      ? followings.some((user) => user.loginId === targetLoginId)
+      : false;
 
   // 자신의 프로필이면 버튼 표시 안 함
   if (currentLoginId === targetLoginId) {
@@ -63,13 +63,13 @@ export default function FollowButton({
     if (isFollowing) {
       unfollowMutation.mutate(targetLoginId, {
         onSuccess: () => {
-          setIsFollowing(false);
+          setManualIsFollowing(false);
         },
       });
     } else {
       followMutation.mutate(targetLoginId, {
         onSuccess: () => {
-          setIsFollowing(true);
+          setManualIsFollowing(true);
         },
       });
     }
