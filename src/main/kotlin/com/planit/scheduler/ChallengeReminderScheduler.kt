@@ -26,7 +26,7 @@ class ChallengeReminderScheduler(
     /**
      * 매일 오전 9시 실행 - 종료 3일 전 알림
      */
-    @Scheduled(cron = "0 0 9 * * *")
+    @Scheduled(cron = "0 40 20 * * *")
     @Transactional(readOnly = true)
     fun sendThreeDaysBeforeReminder() {
         logger.info("챌린지 종료 3일 전 리마인드 시작")
