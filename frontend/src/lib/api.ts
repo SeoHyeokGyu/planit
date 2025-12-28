@@ -26,13 +26,23 @@ export const api = {
       headers,
     });
 
-    const result = await response.json();
+    // 401 체크를 먼저 수행 (JSON 파싱 실패와 무관하게 로그아웃 처리)
+    if (response.status === 401) {
+      useAuthStore.getState().clearToken();
+    }
+
+    let result = null;
+    try {
+      result = await response.json();
+    } catch (error) {
+      // JSON 파싱 실패시, 응답이 ok가 아니면 에러 처리를 위해 무시하고 넘어감
+      // 응답이 ok인데 파싱 실패면 에러 throw
+      if (response.ok) {
+        throw error;
+      }
+    }
 
     if (!response.ok) {
-      if (response.status === 401) {
-        useAuthStore.getState().clearToken();
-      }
-
       const errorMessage = result?.error?.message || result?.message || `HTTP error! status: ${response.status}`;
       throw new Error(errorMessage);
     }

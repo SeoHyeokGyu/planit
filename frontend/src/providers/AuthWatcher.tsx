@@ -14,14 +14,18 @@ export default function AuthWatcher() {
   const router = useRouter();
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const _hasHydrated = useAuthStore((state) => state._hasHydrated);
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    // 스토리지가 아직 로드되지 않았으면 체크하지 않음
+    if (!_hasHydrated) return;
+
     // 인증이 필요 없는 공개 경로
     const publicPaths = ["/login", "/signup", "/"];
     const isPublicPath =
       publicPaths.includes(pathname) || pathname.startsWith("/api-test");
-
+    
     // 인증이 안 된 상태로 보호된 경로에 있으면 로그인 페이지로 보냄
     if (!isAuthenticated && !isPublicPath) {
       // 1. 캐시 데이터 정리
@@ -31,7 +35,7 @@ export default function AuthWatcher() {
       // 3. 로그인 페이지로 이동
       router.push("/login");
     }
-  }, [isAuthenticated, pathname, router, queryClient]);
+  }, [isAuthenticated, pathname, router, queryClient, _hasHydrated]);
 
   return null;
 }

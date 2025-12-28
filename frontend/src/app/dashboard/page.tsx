@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
@@ -15,8 +14,6 @@ import { FeedResponse } from "@/types/feed";
 export default function DashboardPage() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
-  // SSR과 클라이언트 스토리지 간의 하이드레이션 불일치를 방지하기 위한 상태
-  const [isMounted, setIsMounted] = useState(false);
 
   const { data: userProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ["userProfile"],
@@ -37,21 +34,6 @@ export default function DashboardPage() {
   // 최근 피드 (3개만 조회)
   const { data: feedData, isLoading: isFeedLoading } = useFeed(0, 3);
   const feedList = feedData?.content || [];
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isMounted && !token) {
-      router.push("/login");
-    }
-  }, [isMounted, token, router]);
-
-  if (!isMounted) {
-    return null;
-  }
 
   if (!token) {
     return null;
