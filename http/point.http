@@ -1,0 +1,36 @@
+### 포인트/경험치/레벨 시스템 API
+
+### 1. 포인트 조회
+GET http://localhost:8080/api/points/me
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+###
+
+### 2. 포인트 히스토리 조회 (페이징)
+GET http://localhost:8080/api/points/me/history?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+###
+
+### 3. 경험치/레벨 조회
+GET http://localhost:8080/api/points/experience/me
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+###
+
+### 4. 경험치 히스토리 조회 (페이징)
+GET http://localhost:8080/api/points/experience/me/history?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+###
+
+### 5. 종합 진행도 조회 (포인트 + 경험치 + 레벨)
+GET http://localhost:8080/api/points/me/progress
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+###
