@@ -16,6 +16,11 @@ class JwtAuthenticationFilter(
     private val redisTemplate: RedisTemplate<String, Any>,
 ) : OncePerRequestFilter() {
 
+  /** OPTIONS 요청(CORS 프리플라이트)은 필터링하지 않음 */
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+    return request.method == "OPTIONS"
+  }
+
   /** 실제 필터링 로직이 수행되는 곳 */
   override fun doFilterInternal(
       request: HttpServletRequest,
