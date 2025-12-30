@@ -116,7 +116,8 @@ jobs:
         command_timeout: 10m
         script: |
           cd ~/planit
-          git pull origin main
+          git fetch origin
+          git reset --hard origin/main
 
           # Stop and rebuild only backend and frontend (keep postgres, redis, dozzle running)
           docker compose --env-file .env.prod -f docker-compose.prod.yml stop backend frontend
