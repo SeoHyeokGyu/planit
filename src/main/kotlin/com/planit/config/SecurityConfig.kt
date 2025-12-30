@@ -3,6 +3,7 @@ package com.planit.config
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -31,6 +32,8 @@ class SecurityConfig {
         .httpBasic { it.disable() } // HTTP Basic 인증 비활성화
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .authorizeHttpRequests {
+          // Preflight 요청은 인증 없이 허용 (CORS 문제 방지)
+          it.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
           // Swagger UI 접근 허용
           it.requestMatchers(
                   "/swagger-ui/**",
