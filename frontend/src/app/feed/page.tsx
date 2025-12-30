@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
@@ -27,7 +27,6 @@ import { useInView } from "react-intersection-observer";
 export default function FeedPage() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
-  const [isMounted, setIsMounted] = useState(false);
   const { ref, inView } = useInView();
 
   const {
@@ -39,25 +38,10 @@ export default function FeedPage() {
   } = useFeedInfinite(10);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (isMounted && !token) {
-      router.push("/login");
-    }
-  }, [isMounted, token, router]);
-
-  useEffect(() => {
     if (inView && hasNextPage) {
       fetchNextPage();
     }
   }, [inView, hasNextPage, fetchNextPage]);
-
-  if (!isMounted) {
-    return null;
-  }
 
   if (!token) {
     return null;

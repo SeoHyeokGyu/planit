@@ -1,5 +1,6 @@
 package com.planit.config
 
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -56,12 +57,14 @@ class SecurityConfig {
               // 인증 관련 엔드포인트 허용
               .requestMatchers("/api/auth/**")
               .permitAll()
-              //챌린지 관련 엔드포인트 허용
-              it.requestMatchers("/api/challenge/**")
-                  .permitAll()
               // 나머지는 인증 필요
               .anyRequest()
               .authenticated()
+        }
+        .exceptionHandling {
+            it.authenticationEntryPoint { _, response, _ ->
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+            }
         }
         // ★★★ JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가 ★★★
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)

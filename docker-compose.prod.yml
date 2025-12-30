@@ -10,6 +10,7 @@ services:
       POSTGRES_DB: planit
       POSTGRES_USER: ${POSTGRES_USER:-planit}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-planit123}
+      TZ: Asia/Seoul
     ports:
       - "5432:5432"
     volumes:
@@ -58,6 +59,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
       WEATHER_API_KEY: ${WEATHER_API_KEY}
+      TZ: Asia/Seoul
     ports:
       - "8080:8080"
     networks:
