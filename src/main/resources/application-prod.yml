@@ -58,6 +58,7 @@ logging:
   level:
     com.planit: DEBUG
     org.springframework: WARN
+    org.springframework.web.cors: DEBUG
     org.hibernate: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
