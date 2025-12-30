@@ -24,7 +24,8 @@ class CertificationService(
   private val userRepository: UserRepository,
   private val challengeRepository: ChallengeRepository,
   private val participantRepository: ChallengeParticipantRepository,
-  private val notificationService: NotificationService
+  private val notificationService: NotificationService,
+  private val rewardService: RewardService,
 ) {
 
   /**
@@ -58,6 +59,9 @@ class CertificationService(
       participant.certificationCnt++
       participantRepository.save(participant)
     }
+
+    // 인증 보상 지급 (경험치 +15, 포인트 +10)
+    rewardService.grantCertificationReward(userLoginId)
 
     return CertificationResponse.from(savedCertification)
   }

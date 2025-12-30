@@ -34,3 +34,109 @@ Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
 ###
+
+### ========================================
+### 보상 테스트 시나리오
+### ========================================
+### 보상 규칙:
+### - 인증: 경험치 +15, 포인트 +10
+### - 댓글: 경험치 +5, 포인트 +2 (향후)
+### - 좋아요: 경험치 +2, 포인트 +1 (향후)
+### - 배지 획득: 경험치 +25, 포인트 +5 (향후)
+### - 첫 챌린지 참여: 경험치 +10, 포인트 +5 (향후)
+### - 7일 연속 인증: 경험치 +20, 포인트 +10 (향후)
+### - 30일 연속 인증: 경험치 +50, 포인트 +25 (향후)
+### ========================================
+
+### 6. [테스트 전] 현재 진행도 확인
+# @name beforeReward
+GET http://localhost:8080/api/points/me/progress
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    client.global.set("before_exp", response.body.data.totalExperience);
+    client.global.set("before_point", response.body.data.totalPoints);
+    console.log("Before - EXP:", response.body.data.totalExperience, "Point:", response.body.data.totalPoints);
+%}
+
+###
+
+### 7. [인증 생성] 챌린지 인증하기 (경험치 +15, 포인트 +10 자동 지급)
+# @name createCertification
+POST http://localhost:8080/api/certifications
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "challengeId": "challenge-001",
+  "title": "오늘의 인증",
+  "content": "챌린지 인증 완료!"
+}
+
+###
+
+### 8. [테스트 후] 보상 지급 확인
+# @name afterReward
+GET http://localhost:8080/api/points/me/progress
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    const beforeExp = client.global.get("before_exp") || 0;
+    const beforePoint = client.global.get("before_point") || 0;
+    const afterExp = response.body.data.totalExperience;
+    const afterPoint = response.body.data.totalPoints;
+
+    console.log("=== 보상 지급 결과 ===");
+    console.log("경험치: ", beforeExp, " -> ", afterExp, " (+", afterExp - beforeExp, ")");
+    console.log("포인트: ", beforePoint, " -> ", afterPoint, " (+", afterPoint - beforePoint, ")");
+
+    // 검증: 인증 보상 (EXP +15, Point +10)
+    const expDiff = afterExp - beforeExp;
+    const pointDiff = afterPoint - beforePoint;
+    if (expDiff >= 15) {
+        console.log("✅ 경험치 보상 정상 지급");
+    } else {
+        console.log("❌ 경험치 보상 오류 (예상: +15, 실제: +", expDiff, ")");
+    }
+    if (pointDiff >= 10) {
+        console.log("✅ 포인트 보상 정상 지급");
+    } else {
+        console.log("❌ 포인트 보상 오류 (예상: +10, 실제: +", pointDiff, ")");
+    }
+%}
+
+###
+
+### 9. 최근 경험치 히스토리 (보상 지급 확인)
+GET http://localhost:8080/api/points/experience/me/history?page=0&size=5
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 최근 경험치 히스토리 ===");
+    if (response.body.data && response.body.data.content) {
+        response.body.data.content.forEach((item, idx) => {
+            console.log((idx+1) + ". " + item.reason + " (+" + item.experience + " EXP)");
+        });
+    }
+%}
+
+###
+
+### 10. 최근 포인트 히스토리 (보상 지급 확인)
+GET http://localhost:8080/api/points/me/history?page=0&size=5
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 최근 포인트 히스토리 ===");
+    if (response.body.data && response.body.data.content) {
+        response.body.data.content.forEach((item, idx) => {
+            console.log((idx+1) + ". " + item.reason + " (+" + item.points + " P)");
+        });
+    }
+%}
+
+###
