@@ -64,11 +64,14 @@ export default function CreateChallengePage() {
             return;
         }
 
-        // 날짜만 전송 (시간 정보 없이)
+        // 날짜를 LocalDateTime 형식으로 변환 (YYYY-MM-DDTHH:mm:ss)
+        const startDateTime = `${formData.startDate}T00:00:00`;
+        const endDateTime = `${formData.endDate}T23:59:59`;
+
         const requestData = {
             ...formData,
-            startDate: formData.startDate,  // "2024-12-30" 형식
-            endDate: formData.endDate,      // "2024-12-31" 형식
+            startDate: startDateTime,
+            endDate: endDateTime,
         };
 
         createMutation.mutate(requestData, {
@@ -260,7 +263,7 @@ export default function CreateChallengePage() {
                             <Alert className="border-blue-200 bg-blue-50">
                                 <Info className="h-4 w-4 text-blue-600" />
                                 <AlertDescription className="text-sm text-blue-900 font-semibold">
-                                    선택한 날짜의 시작일부터 종료일까지 챌린지가 진행됩니다.
+                                    시작일은 00:00:00부터, 종료일은 23:59:59까지 자동 설정됩니다.
                                 </AlertDescription>
                             </Alert>
 
