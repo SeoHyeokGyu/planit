@@ -1,7 +1,7 @@
 package com.planit.dto
 
 import com.planit.entity.Challenge
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class ChallengeListResponse(
     val id: String,
@@ -9,15 +9,12 @@ data class ChallengeListResponse(
     val description: String,
     val category: String,
     val difficulty: String,
-    val startDate: LocalDate,
-    val endDate: LocalDate,
+    val startDate: LocalDateTime,
+    val endDate: LocalDateTime,
     val createdId: String,
     val viewCnt: Long,
     val participantCnt: Long,
-    val certificationCnt: Long,
-    val isActive: Boolean,
-    val isUpcoming: Boolean,
-    val isEnded: Boolean
+    val certificationCnt: Long
 ) {
     companion object {
         fun from(challenge: Challenge): ChallengeListResponse {
@@ -32,10 +29,7 @@ data class ChallengeListResponse(
                 createdId = challenge.createdId,
                 viewCnt = challenge.viewCnt,
                 participantCnt = challenge.participantCnt,
-                certificationCnt = challenge.certificationCnt,
-                isActive = challenge.isActive(),
-                isUpcoming = challenge.isUpcoming(),
-                isEnded = challenge.isEnded()
+                certificationCnt = challenge.certificationCnt
             )
         }
     }
