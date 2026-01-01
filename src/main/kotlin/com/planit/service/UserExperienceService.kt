@@ -1,9 +1,11 @@
 package com.planit.service
 
+import com.planit.dto.NotificationCreateRequest
 import com.planit.dto.UserExperienceResponse
 import com.planit.dto.UserLevelResponse
 import com.planit.dto.UserProgressResponse
 import com.planit.entity.UserExperience
+import com.planit.enums.NotificationType
 import com.planit.repository.UserRepository
 import com.planit.repository.UserExperienceRepository
 import org.springframework.data.domain.Page
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class UserExperienceService(
     private val userExperienceRepository: UserExperienceRepository,
     private val userRepository: UserRepository,
+    private val notificationService: NotificationService,
 ) {
   companion object {
     private const val EXP_PER_LEVEL = 100L
@@ -34,9 +37,25 @@ class UserExperienceService(
     val userExperience = UserExperience(user, experience, reason)
     userExperienceRepository.save(userExperience)
 
-    // 레벨업 감지 (필요시 알림 등의 로직 추가)
+    // 레벨업 감지 및 알림 발송
     if (user.level > previousLevel) {
-      // 레벨업 알림 로직은 별도로 구현할 수 있음
+      val levelUpCount = user.level - previousLevel
+      val message = if (levelUpCount == 1) {
+        "축하합니다! 레벨 ${user.level}로 레벨업했습니다!"
+      } else {
+        "축하합니다! ${levelUpCount}레벨 상승하여 레벨 ${user.level}이 되었습니다!"
+      }
+
+      notificationService.createNotification(
+          NotificationCreateRequest(
+              receiverLoginId = userLoginId,
+              senderLoginId = null, // 시스템 알림
+              type = NotificationType.LEVEL_UP,
+              message = message,
+              relatedId = user.level.toString(),
+              relatedType = "LEVEL"
+          )
+      )
     }
   }
 
