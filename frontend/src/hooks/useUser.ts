@@ -28,6 +28,20 @@ export const useUserProfile = (loginId?: string) => {
   });
 };
 
+/**
+ * 대시보드 통계 조회를 위한 커스텀 훅
+ */
+export const useDashboardStats = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  return useQuery({
+    queryKey: ["dashboardStats"],
+    queryFn: () => userService.getDashboardStats(),
+    enabled: isAuthenticated,
+    select: (data) => data.data,
+  });
+};
+
 
 // --- Mutations ---
 
