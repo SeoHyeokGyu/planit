@@ -1,6 +1,7 @@
 package com.planit.controller
 
 import com.planit.dto.ApiResponse
+import com.planit.dto.PointDeductRequest
 import com.planit.dto.UserExperienceResponse
 import com.planit.dto.UserLevelResponse
 import com.planit.dto.UserPointResponse
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -61,6 +64,17 @@ class PointController(
   fun getMyProgress(authentication: Authentication): ResponseEntity<ApiResponse<UserProgressResponse>> {
     val loginId = authentication.name
     val response = userExperienceService.getUserProgress(loginId)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  @PostMapping("/me/deduct")
+  fun deductMyPoints(
+      authentication: Authentication,
+      @RequestBody request: PointDeductRequest,
+  ): ResponseEntity<ApiResponse<UserPointSummaryResponse>> {
+    val loginId = authentication.name
+    userPointService.subtractPoint(loginId, request.points, request.reason)
+    val response = userPointService.getUserPointSummary(loginId)
     return ResponseEntity.ok(ApiResponse.success(response))
   }
 }

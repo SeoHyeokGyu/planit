@@ -35,6 +35,18 @@ Authorization: Bearer {{auth_token}}
 
 ###
 
+### 5-1. 포인트 차감 (상점 구매 등)
+POST http://localhost:8080/api/points/me/deduct
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "points": 10,
+  "reason": "아이템 구매"
+}
+
+###
+
 ### ========================================
 ### 보상 테스트 시나리오
 ### ========================================

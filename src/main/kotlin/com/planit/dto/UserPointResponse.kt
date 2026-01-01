@@ -13,3 +13,8 @@ data class UserPointSummaryResponse(
     val totalPoint: Long,
     val pointCount: Long,
 )
+
+data class PointDeductRequest(
+    val points: Long,
+    val reason: String,
+)
