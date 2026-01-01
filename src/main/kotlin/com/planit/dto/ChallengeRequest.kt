@@ -1,6 +1,6 @@
 package com.planit.dto
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 data class ChallengeRequest(
     var title: String,
@@ -8,6 +8,6 @@ data class ChallengeRequest(
     var category: String,
     var difficulty: String,
     var loginId: String = "",
-    var startDate: LocalDateTime,
-    var endDate: LocalDateTime
+    var startDate: LocalDate,
+    var endDate: LocalDate
 )
