@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useCreateChallenge } from "@/hooks/useChallenge";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useChallenge, useUpdateChallenge } from "@/hooks/useChallenge";
+import { useUserProfile } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -25,16 +26,16 @@ import { ArrowLeft, Info, Sparkles, Calendar, Target } from "lucide-react";
 import { ChallengeRequest } from "@/types/challenge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CreateChallengePage() {
+export default function EditChallengePage() {
+    const params = useParams();
     const router = useRouter();
-    const createMutation = useCreateChallenge();
+    const challengeId = params.id as string;
 
-    // 오늘 날짜를 YYYY-MM-DD 형식으로
-    const getTodayString = () => {
-        const today = new Date();
-        return today.toISOString().split('T')[0];
-    };
+    // 기존 챌린지 데이터 조회
+    const { data: challenge, isLoading } = useChallenge(challengeId);
+    const updateMutation = useUpdateChallenge(challengeId);
 
     const [formData, setFormData] = useState<ChallengeRequest>({
         title: "",
@@ -45,6 +46,41 @@ export default function CreateChallengePage() {
         endDate: "",
         loginId: "",
     });
+
+    // 챌린지 데이터 로드되면 폼에 채우기
+    useEffect(() => {
+        if (challenge) {
+            setFormData({
+                title: challenge.title,
+                description: challenge.description,
+                category: challenge.category,
+                difficulty: challenge.difficulty,
+                startDate: challenge.startDate,
+                endDate: challenge.endDate,
+                loginId: "",
+            });
+        }
+    }, [challenge]);
+
+    // 챌린지가 진행 중인지 확인
+    const isActive = challenge?.isActive;
+    const isUpcoming = challenge?.isUpcoming;
+
+    // 현재 로그인한 사용자 정보 가져오기
+    const { data: currentUser } = useUserProfile();
+    const currentUserLoginId = currentUser?.loginId;
+
+    // 생성자 확인 (createdId는 loginId)
+    const isCreator = challenge && currentUserLoginId &&
+        challenge.createdId === currentUserLoginId;
+
+    // 권한 체크: 생성자가 아니면 리다이렉트
+    useEffect(() => {
+        if (challenge && currentUserLoginId && !isCreator) {
+            toast.error("챌린지를 수정할 권한이 없습니다.");
+            router.push(`/challenge/${challengeId}`);
+        }
+    }, [challenge, isCreator, currentUserLoginId, challengeId, router]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,19 +100,21 @@ export default function CreateChallengePage() {
             return;
         }
 
-        // 날짜만 전송 (시간 정보 없이)
+        // 날짜만 전송
         const requestData = {
             ...formData,
-            startDate: formData.startDate,  // "2024-12-30" 형식
-            endDate: formData.endDate,      // "2024-12-31" 형식
+            startDate: formData.startDate,
+            endDate: formData.endDate,
         };
 
-        createMutation.mutate(requestData, {
+        updateMutation.mutate(requestData, {
             onSuccess: (response) => {
-                router.push(`/challenge/${response.data.id}`);
+                toast.success("챌린지가 수정되었습니다.");
+                router.push(`/challenge/${challengeId}`);
             },
-            onError: (error) => {
-                console.error("챌린지 생성 실패:", error);
+            onError: (error: any) => {
+                console.error("챌린지 수정 실패:", error);
+                toast.error(error?.response?.data?.message || "챌린지 수정에 실패했습니다.");
             },
         });
     };
@@ -90,6 +128,34 @@ export default function CreateChallengePage() {
             [name]: value,
         }));
     };
+
+    // 로딩 중
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <Skeleton className="h-10 w-32 mb-6" />
+                    <Skeleton className="h-40 w-full mb-4" />
+                    <Skeleton className="h-96 w-full" />
+                </div>
+            </div>
+        );
+    }
+
+    // 챌린지를 찾을 수 없음
+    if (!challenge) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <Alert variant="destructive">
+                        <AlertDescription>
+                            챌린지를 찾을 수 없습니다.
+                        </AlertDescription>
+                    </Alert>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
@@ -109,11 +175,11 @@ export default function CreateChallengePage() {
                             <Sparkles className="w-6 h-6" />
                         </div>
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            새 챌린지 만들기
+                            챌린지 수정하기
                         </h1>
                     </div>
                     <p className="text-gray-700 font-medium ml-13">
-                        새로운 챌린지를 만들고 사람들과 함께 도전해보세요
+                        챌린지 정보를 수정하세요
                     </p>
                 </div>
 
@@ -126,12 +192,22 @@ export default function CreateChallengePage() {
                             <div>
                                 <CardTitle className="text-xl font-bold text-gray-900">챌린지 정보</CardTitle>
                                 <CardDescription className="text-gray-700 font-medium">
-                                    모든 필수 항목을 입력해주세요
+                                    수정할 내용을 입력해주세요
                                 </CardDescription>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="pt-6 bg-white">
+                        {/* 진행 중 챌린지 안내 */}
+                        {isActive && (
+                            <Alert className="mb-6 border-amber-200 bg-amber-50">
+                                <Info className="h-4 w-4 text-amber-600" />
+                                <AlertDescription className="text-amber-800 font-medium">
+                                    진행 중인 챌린지는 <strong>설명만 수정</strong>할 수 있습니다. 제목, 카테고리, 난이도, 날짜는 변경할 수 없습니다.
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* Title */}
                             <div className="space-y-2">
@@ -146,8 +222,14 @@ export default function CreateChallengePage() {
                                     onChange={handleChange}
                                     placeholder="예: 30일 운동 챌린지"
                                     className="h-12 border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-gray-400"
+                                    disabled={isActive}
                                     required
                                 />
+                                {isActive && (
+                                    <p className="text-xs text-amber-600 font-medium">
+                                        ⚠️ 진행 중인 챌린지는 제목을 수정할 수 없습니다.
+                                    </p>
+                                )}
                             </div>
 
                             {/* Description */}
@@ -177,10 +259,12 @@ export default function CreateChallengePage() {
                                         카테고리 *
                                     </Label>
                                     <Select
-                                        value={formData.category || undefined}
+                                        key={`category-${formData.category}`}
+                                        value={formData.category}
                                         onValueChange={(value) =>
                                             setFormData((prev) => ({ ...prev, category: value }))
                                         }
+                                        disabled={isActive}
                                     >
                                         <SelectTrigger className="h-12 border-2 border-gray-300 bg-white text-gray-900 font-medium">
                                             <SelectValue placeholder="카테고리 선택" />
@@ -192,6 +276,11 @@ export default function CreateChallengePage() {
                                             <SelectItem value="LIFESTYLE" className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100">🌱 라이프스타일</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {isActive && (
+                                        <p className="text-xs text-amber-600 font-medium">
+                                            ⚠️ 진행 중인 챌린지는 카테고리를 수정할 수 없습니다.
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -199,10 +288,12 @@ export default function CreateChallengePage() {
                                         난이도 *
                                     </Label>
                                     <Select
-                                        value={formData.difficulty || undefined}
+                                        key={`difficulty-${formData.difficulty}`}
+                                        value={formData.difficulty}
                                         onValueChange={(value) =>
                                             setFormData((prev) => ({ ...prev, difficulty: value }))
                                         }
+                                        disabled={isActive}
                                     >
                                         <SelectTrigger className="h-12 border-2 border-gray-300 bg-white text-gray-900 font-medium">
                                             <SelectValue placeholder="난이도 선택" />
@@ -213,6 +304,11 @@ export default function CreateChallengePage() {
                                             <SelectItem value="HARD" className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100">⭐⭐⭐ 어려움</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {isActive && (
+                                        <p className="text-xs text-amber-600 font-medium">
+                                            ⚠️ 진행 중인 챌린지는 난이도를 수정할 수 없습니다.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -221,6 +317,11 @@ export default function CreateChallengePage() {
                                 <Label className="text-base font-bold flex items-center gap-2 text-gray-900">
                                     <Calendar className="w-4 h-4 text-blue-600" />
                                     챌린지 기간 *
+                                    {isActive && (
+                                        <span className="ml-2 px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded">
+                                            진행 중 - 날짜 수정 불가
+                                        </span>
+                                    )}
                                 </Label>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -233,8 +334,8 @@ export default function CreateChallengePage() {
                                             type="date"
                                             value={formData.startDate}
                                             onChange={handleChange}
-                                            min={getTodayString()}
-                                            className="border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                                            className="border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 font-medium disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                            disabled={isActive}
                                             required
                                         />
                                     </div>
@@ -248,8 +349,9 @@ export default function CreateChallengePage() {
                                             type="date"
                                             value={formData.endDate}
                                             onChange={handleChange}
-                                            min={formData.startDate || getTodayString()}
-                                            className="border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 font-medium"
+                                            min={formData.startDate}
+                                            className="border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 font-medium disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                            disabled={isActive}
                                             required
                                         />
                                     </div>
@@ -257,40 +359,59 @@ export default function CreateChallengePage() {
                             </div>
 
                             {/* Info Alert */}
-                            <Alert className="border-blue-200 bg-blue-50">
-                                <Info className="h-4 w-4 text-blue-600" />
-                                <AlertDescription className="text-sm text-blue-900 font-semibold">
-                                    선택한 날짜의 시작일부터 종료일까지 챌린지가 진행됩니다.
-                                </AlertDescription>
-                            </Alert>
+                            {isActive ? (
+                                <Alert className="border-blue-200 bg-blue-50">
+                                    <Info className="h-4 w-4 text-blue-600" />
+                                    <AlertDescription className="text-sm text-blue-900 font-semibold">
+                                        진행 중인 챌린지입니다. 제목, 설명, 카테고리, 난이도는 수정할 수 있지만 날짜는 수정할 수 없습니다.
+                                    </AlertDescription>
+                                </Alert>
+                            ) : (
+                                <Alert className="border-green-200 bg-green-50">
+                                    <Info className="h-4 w-4 text-green-600" />
+                                    <AlertDescription className="text-sm text-green-900 font-semibold">
+                                        시작 전 챌린지입니다. 모든 정보를 자유롭게 수정할 수 있습니다.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
 
                             {/* Error Alert */}
-                            {createMutation.isError && (
+                            {updateMutation.isError && (
                                 <Alert variant="destructive" className="border-red-200">
                                     <AlertDescription className="font-semibold">
-                                        {createMutation.error.message || "챌린지 생성에 실패했습니다. 다시 시도해주세요."}
+                                        {updateMutation.error?.message || "챌린지 수정에 실패했습니다. 다시 시도해주세요."}
                                     </AlertDescription>
                                 </Alert>
                             )}
 
                             {/* Submit Button */}
-                            <Button
-                                type="submit"
-                                className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all text-base font-bold"
-                                disabled={createMutation.isPending}
-                            >
-                                {createMutation.isPending ? (
-                                    <>
-                                        <span className="animate-spin mr-2">⏳</span>
-                                        생성 중...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-5 h-5 mr-2" />
-                                        챌린지 만들기
-                                    </>
-                                )}
-                            </Button>
+                            <div className="flex gap-3">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => router.back()}
+                                    className="flex-1 h-12 border-2"
+                                >
+                                    취소
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all text-base font-bold"
+                                    disabled={updateMutation.isPending}
+                                >
+                                    {updateMutation.isPending ? (
+                                        <>
+                                            <span className="animate-spin mr-2">⏳</span>
+                                            수정 중...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-5 h-5 mr-2" />
+                                            수정 완료
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
                         </form>
                     </CardContent>
                 </Card>
@@ -299,12 +420,12 @@ export default function CreateChallengePage() {
                 <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
                     <h3 className="font-bold text-purple-900 mb-2 flex items-center gap-2">
                         <Sparkles className="w-4 h-4" />
-                        챌린지 생성 팁
+                        수정 시 주의사항
                     </h3>
                     <ul className="text-sm text-purple-900 space-y-1 font-medium">
-                        <li>• 명확하고 구체적인 목표를 설정하세요</li>
-                        <li>• 달성 가능한 난이도를 선택하세요</li>
-                        <li>• 충분한 설명으로 참여자들의 이해를 도와주세요</li>
+                        <li>• 제목, 설명, 카테고리, 난이도는 언제든지 수정 가능합니다</li>
+                        <li>• 진행 중인 챌린지의 날짜는 수정할 수 없습니다</li>
+                        <li>• 시작 전 챌린지는 모든 정보를 수정할 수 있습니다</li>
                     </ul>
                 </div>
             </div>

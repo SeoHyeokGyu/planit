@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useChallenge, useJoinChallenge, useWithdrawChallenge, useMyChallenges } from "@/hooks/useChallenge";
+import { useUserProfile } from "@/hooks/useUser";
 import { challengeService } from "@/services/challengeService";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,8 @@ import {
     Clock,
     User,
     TrendingUp,
-    Trophy
+    Trophy,
+    Edit
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
@@ -104,6 +106,17 @@ export default function ChallengeDetailPage() {
     const withdrawMutation = useWithdrawChallenge();
 
     const isParticipating = myChallenges?.some((c) => c.id === challengeId);
+
+    // 현재 로그인한 사용자 정보 가져오기 (loginId 없이 호출하면 자신의 프로필)
+    const { data: currentUser } = useUserProfile();
+    const currentUserLoginId = currentUser?.loginId;
+
+    // 생성자 확인 (createdId는 loginId)
+    const isCreator = challenge && currentUserLoginId &&
+        challenge.createdId === currentUserLoginId;
+
+    // 챌린지 상태 확인 (백엔드에서 제공)
+    const isEnded = challenge?.isEnded;
 
     const handleJoin = () => {
         joinMutation.mutate(challengeId, {
@@ -214,15 +227,28 @@ export default function ChallengeDetailPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Back Button */}
-                <Button
-                    variant="ghost"
-                    onClick={() => router.push("/challenge")}
-                    className="mb-6 hover:bg-blue-50 text-gray-900 font-semibold"
-                >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    목록으로
-                </Button>
+                {/* Back Button and Edit Button */}
+                <div className="flex items-center justify-between mb-6">
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.push("/challenge")}
+                        className="hover:bg-blue-50 text-gray-900 font-semibold"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        목록으로
+                    </Button>
+
+                    {/* 수정 버튼 - 생성자이고 종료되지 않은 경우만 표시 */}
+                    {isCreator && !isEnded && (
+                        <Button
+                            onClick={() => router.push(`/challenge/${challengeId}/edit`)}
+                            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold"
+                        >
+                            <Edit className="w-4 h-4 mr-2" />
+                            수정하기
+                        </Button>
+                    )}
+                </div>
 
                 {/* Header */}
                 <div className="mb-8">

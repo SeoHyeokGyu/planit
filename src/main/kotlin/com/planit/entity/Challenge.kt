@@ -1,6 +1,7 @@
 package com.planit.entity
 
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -18,8 +19,8 @@ class Challenge(
     title: String,
     description: String,
     category: String,
-    startDate: LocalDateTime,
-    endDate: LocalDateTime,
+    startDate: LocalDate,
+    endDate: LocalDate,
     difficulty: String,
     createdId: String,
     viewCnt: Long? = 0,
@@ -68,21 +69,28 @@ class Challenge(
     var updatedAt: LocalDateTime = LocalDateTime.now()
 
     fun isActive(): Boolean {
-        val now = LocalDateTime.now()
-        return startDate.isBefore(now) && endDate.isAfter(now)
+        val today = LocalDate.now()
+        return !startDate.isAfter(today) && !endDate.isBefore(today)
     }
 
     fun isEnded(): Boolean {
-        return endDate.isBefore(LocalDateTime.now())
+        return endDate.isBefore(LocalDate.now())
     }
 
     fun isUpcoming(): Boolean {
-        return startDate.isAfter(LocalDateTime.now())
+        return startDate.isAfter(LocalDate.now())
     }
 
     companion object {
         private fun generateId(): String {
             return "CHL-${UUID.randomUUID().toString().substring(0, 8).uppercase()}"
         }
+    }
+
+    override fun toString(): String {
+        return "Challenge(id='$id', title='$title', category='$category', " +
+                "difficulty='$difficulty', startDate=$startDate, endDate=$endDate, " +
+                "createdId='$createdId', viewCnt=$viewCnt, participantCnt=$participantCnt, " +
+                "certificationCnt=$certificationCnt, createdAt=$createdAt, updatedAt=$updatedAt)"
     }
 }

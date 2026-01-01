@@ -129,22 +129,121 @@ class ChallengeService(
             throw IllegalArgumentException("챌린지를 수정할 권한이 없습니다")
         }
 
-        // 진행중인 챌린지는 수정 제한
-        if (challenge.isActive()) {
-            throw IllegalStateException("진행중인 챌린지는 수정할 수 없습니다")
+        // 변경 사항 추적
+        val changes = mutableListOf<String>()
+
+        if (challenge.title != request.title) {
+            changes.add("제목이 '${challenge.title}'에서 '${request.title}'로 변경되었습니다")
+        }
+        if (challenge.description != request.description) {
+            changes.add("설명이 수정되었습니다")
+        }
+        if (challenge.category != request.category) {
+            changes.add("카테고리가 변경되었습니다")
+        }
+        if (challenge.difficulty != request.difficulty) {
+            changes.add("난이도가 변경되었습니다")
         }
 
+        // 내용 수정 (제목, 설명, 카테고리, 난이도는 언제든지 가능)
         challenge.apply {
             title = request.title
             description = request.description
             category = request.category
-            startDate = request.startDate
-            endDate = request.endDate
             difficulty = request.difficulty
         }
 
+        // 날짜 수정 (진행 중이 아닐 때만 가능)
+        if (challenge.isActive()) {
+            // 진행 중인 챌린지는 날짜 변경 불가
+            if (challenge.startDate != request.startDate || challenge.endDate != request.endDate) {
+                throw IllegalStateException("진행 중인 챌린지의 날짜는 수정할 수 없습니다")
+            }
+        } else {
+            // 진행 전 챌린지는 날짜 변경 가능
+            if (challenge.startDate != request.startDate) {
+                changes.add("시작일이 변경되었습니다")
+            }
+            if (challenge.endDate != request.endDate) {
+                changes.add("종료일이 변경되었습니다")
+            }
+            challenge.startDate = request.startDate
+            challenge.endDate = request.endDate
+        }
+
         val updatedChallenge = challengeRepository.save(challenge)
+
+        // 변경사항이 있고 참여자가 있으면 알림 전송
+        if (changes.isNotEmpty()) {
+            sendUpdateNotificationToParticipants(challenge, changes, loginId)
+        }
+
         return ChallengeResponse.from(updatedChallenge)
+    }
+
+    /**
+     * 챌린지 수정 시 참여자들에게 알림 전송
+     */
+    private fun sendUpdateNotificationToParticipants(
+        challenge: Challenge,
+        changes: List<String>,
+        editorLoginId: String
+    ) {
+        // 활성 참여자 조회 (생성자 제외)
+        val activeParticipants = participantRepository.findByIdAndStatus(
+            challenge.id,
+            ParticipantStatusEnum.ACTIVE
+        ).filter { it.loginId != editorLoginId } // 수정한 사람은 제외
+
+        if (activeParticipants.isEmpty()) {
+            return
+        }
+
+        // 수정한 사용자 정보 조회
+        val editor = userRepository.findByLoginId(editorLoginId)
+            ?: throw UserNotFoundException()
+
+        // 변경 내용 요약 메시지 생성
+        val changeMessage = if (changes.size == 1) {
+            changes[0]
+        } else {
+            "${changes.size}개 항목이 수정되었습니다"
+        }
+
+        var successCount = 0
+        var failCount = 0
+
+        // 각 참여자에게 알림 전송
+        activeParticipants.forEach { participant ->
+            try {
+                val user = userRepository.findByLoginId(participant.loginId)
+
+                if (user != null) {
+                    notificationService.sendNotification(
+                        NotificationResponse(
+                            id = -1L,
+                            receiverId = user.id!!,
+                            receiverLoginId = user.loginId,
+                            senderId = editor.id,
+                            senderLoginId = editor.loginId,
+                            senderNickname = editor.nickname,
+                            type = NotificationType.CHALLENGE,
+                            message = "'${challenge.title}' 챌린지가 수정되었습니다. $changeMessage",
+                            relatedId = challenge.id,
+                            relatedType = "CHALLENGE",
+                            isRead = false,
+                            createdAt = LocalDateTime.now()
+                        )
+                    )
+                    successCount++
+                } else {
+                    failCount++
+                }
+            } catch (e: Exception) {
+                failCount++
+            }
+        }
+
     }
 
     /**
