@@ -10,8 +10,8 @@ import org.hibernate.annotations.SQLRestriction
 @SQLRestriction("is_deleted = false")
 class Comment(
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    @JoinColumn(name = "user_id", nullable = true)
+    val user: User?,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "certification_id", nullable = false)

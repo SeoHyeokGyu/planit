@@ -64,4 +64,8 @@ interface FollowRepository : JpaRepository<Follow, Long> {
    */
   @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :followerId")
   fun findFollowingIdsByFollowerId(@Param("followerId") followerId: Long): List<Long>
+
+  fun deleteByFollower_Id(followerId: Long): Int
+
+  fun deleteByFollowing_Id(followingId: Long): Int
 }

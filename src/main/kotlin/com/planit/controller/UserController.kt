@@ -2,6 +2,8 @@ package com.planit.controller
 
 import com.planit.dto.ApiResponse
 import com.planit.dto.CustomUserDetails
+import com.planit.dto.UserDashboardStats
+import com.planit.dto.UserDeleteRequest
 import com.planit.dto.UserPasswordUpdateRequest
 import com.planit.dto.UserProfileResponse
 import com.planit.dto.UserUpdateRequest
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-
-import com.planit.dto.UserDashboardStats
 
 @RestController
 @RequestMapping("/api/users")
@@ -79,5 +80,14 @@ class UserController(val userService: UserService) {
   ): ResponseEntity<ApiResponse<List<UserProfileResponse>>> {
     val usersPage = userService.searchUsers(keyword, pageable)
     return ResponseEntity.ok(ApiResponse.pagedSuccess(usersPage.content, usersPage))
+  }
+
+  @DeleteMapping("/me")
+  fun deleteMyAccount(
+      @AuthenticationPrincipal userDetails: CustomUserDetails,
+      @Valid @RequestBody request: UserDeleteRequest
+  ): ResponseEntity<ApiResponse<Unit>> {
+    userService.deleteUser(userDetails.username, request)
+    return ResponseEntity.ok(ApiResponse.success(message = "회원 탈퇴가 완료되었습니다."))
   }
 }

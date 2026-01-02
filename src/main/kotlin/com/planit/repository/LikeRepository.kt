@@ -16,4 +16,6 @@ interface LikeRepository : JpaRepository<Like, Long> {
 
     @Query("SELECT l.certification.id FROM Like l WHERE l.certification.id IN :certificationIds AND l.user.loginId = :userLoginId")
     fun findLikedCertificationIds(@Param("certificationIds") certificationIds: List<Long>, @Param("userLoginId") userLoginId: String): List<Long>
+
+    fun deleteByUser_LoginId(userLoginId: String): Int
 }

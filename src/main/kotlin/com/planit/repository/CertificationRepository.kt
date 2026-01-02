@@ -4,6 +4,9 @@ import com.planit.entity.Certification
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import java.time.LocalDateTime
 
 /**
@@ -49,4 +52,13 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
      * @return 인증 개수
      */
     fun countByUser_LoginId(userLoginId: String): Long
+
+    /**
+     * 특정 사용자의 모든 인증의 user를 NULL로 설정합니다 (회원 탈퇴 시 익명화).
+     * @param userId 사용자 ID
+     * @return 업데이트된 레코드 수
+     */
+    @Modifying
+    @Query("UPDATE Certification c SET c.user = null WHERE c.user.id = :userId")
+    fun nullifyUserByUserId(@Param("userId") userId: Long): Int
 }

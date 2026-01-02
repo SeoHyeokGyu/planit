@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 
 /**
  * 알림(Notification) 엔티티를 관리하는 JpaRepository 인터페이스
@@ -94,4 +95,20 @@ interface NotificationRepository : JpaRepository<Notification, Long> {
      * @return 존재 여부
      */
     fun existsByIdAndReceiverId(id: Long, receiverId: Long): Boolean
+
+    /**
+     * 특정 수신자의 모든 알림을 삭제합니다.
+     * @param receiverId 수신자 사용자 ID
+     * @return 삭제된 레코드 수
+     */
+    fun deleteByReceiver_Id(receiverId: Long): Int
+
+    /**
+     * 특정 발신자가 보낸 알림의 발신자를 NULL로 설정합니다.
+     * @param senderId 발신자 사용자 ID
+     * @return 업데이트된 레코드 수
+     */
+    @Modifying
+    @Query("UPDATE Notification n SET n.sender = null WHERE n.sender.id = :senderId")
+    fun nullifySenderBySenderId(@Param("senderId") senderId: Long): Int
 }

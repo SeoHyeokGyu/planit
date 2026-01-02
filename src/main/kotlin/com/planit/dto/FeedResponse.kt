@@ -40,19 +40,23 @@ data class FeedResponse(
             isLiked: Boolean,
             currentUserId: Long
         ): FeedResponse {
+            val author = certification.user
+            val authorNickname = author?.nickname ?: author?.loginId ?: "탈퇴한 사용자"
+            val authorLoginId = author?.loginId ?: "deleted_user"
+
             return FeedResponse(
                 id = certification.id!!,
                 title = certification.title,
                 content = certification.content,
                 photoUrl = certification.photoUrl,
-                authorNickname = certification.user.nickname ?: certification.user.loginId,
-                authorLoginId = certification.user.loginId,
+                authorNickname = authorNickname,
+                authorLoginId = authorLoginId,
                 challengeId = certification.challenge.id,
                 challengeTitle = certification.challenge.title,
                 likeCount = likeCount,
                 commentCount = commentCount,
                 isLiked = isLiked,
-                isMine = certification.user.id == currentUserId,
+                isMine = author?.id == currentUserId,
                 createdAt = certification.createdAt,
                 updatedAt = certification.updatedAt
             )

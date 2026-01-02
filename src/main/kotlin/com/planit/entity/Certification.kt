@@ -18,10 +18,11 @@ import org.hibernate.annotations.SQLRestriction
 class Certification(
   /**
    * 인증을 작성한 사용자 (User 엔티티와 다대일 관계)
+   * 탈퇴한 사용자의 인증을 유지하기 위해 nullable 처리
    */
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  val user: User,
+  @JoinColumn(name = "user_id", nullable = true)
+  val user: User?,
   /**
    * 인증이 속한 챌린지 (Challenge 엔티티와 다대일 관계)
    */

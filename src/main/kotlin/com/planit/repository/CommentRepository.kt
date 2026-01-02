@@ -3,6 +3,7 @@ package com.planit.repository
 import com.planit.dto.CertificationCountProjection
 import com.planit.entity.Comment
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
@@ -12,4 +13,8 @@ interface CommentRepository : JpaRepository<Comment, Long> {
 
     @Query("SELECT c.certification.id as certificationId, COUNT(c) as count FROM Comment c WHERE c.certification.id IN :certificationIds GROUP BY c.certification.id")
     fun countByCertificationIdIn(@Param("certificationIds") certificationIds: List<Long>): List<CertificationCountProjection>
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.user = null WHERE c.user.id = :userId")
+    fun nullifyUserByUserId(@Param("userId") userId: Long): Int
 }

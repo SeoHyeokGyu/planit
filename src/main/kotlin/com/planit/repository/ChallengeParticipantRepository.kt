@@ -46,9 +46,12 @@ interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, S
 
     // 챌린지의 전체 인증 수 합계
     @Query("""
-        SELECT COALESCE(SUM(p.certificationCnt), 0) 
-        FROM ChallengeParticipant p 
+        SELECT COALESCE(SUM(p.certificationCnt), 0)
+        FROM ChallengeParticipant p
         WHERE p.id = :id
     """)
     fun sumCertificationCountById(@Param("id") id: String): Long
+
+    // 특정 사용자의 모든 챌린지 참여 정보 삭제
+    fun deleteByLoginId(loginId: String): Int
 }

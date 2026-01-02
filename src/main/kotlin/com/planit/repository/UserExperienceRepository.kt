@@ -9,4 +9,6 @@ interface UserExperienceRepository : JpaRepository<UserExperience, Long> {
   fun findByUser_LoginId(loginId: String, pageable: Pageable): Page<UserExperience>
 
   fun countByUser_LoginId(loginId: String): Long
+
+  fun deleteByUser_Id(userId: Long): Int
 }
