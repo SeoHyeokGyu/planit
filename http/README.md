@@ -107,6 +107,7 @@ http/
 ### badge/badge.http
 - **전체 배지 조회**: `GET /api/badges`
 - **내 배지 조회**: `GET /api/badges/my`
+- **타인 배지 조회**: `GET /api/badges/user/{loginId}`
 
 ### notification/notification.http
 - **알림 목록**: `GET /api/notifications`
