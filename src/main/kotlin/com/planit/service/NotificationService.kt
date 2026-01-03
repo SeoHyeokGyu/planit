@@ -25,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Service
 class NotificationService(
-    private val notificationRepository: NotificationRepository? = null,
-    private val userRepository: UserRepository? = null,
-    private val cacheManager: CacheManager? = null,
-    private val redisTemplate: RedisTemplate<String, Any>? = null,
+  private val notificationRepository: NotificationRepository? = null,
+  private val userRepository: UserRepository? = null,
+  private val cacheManager: CacheManager? = null,
+  private val redisTemplate: RedisTemplate<String, Any>? = null,
 ) {
 
   private val logger = LoggerFactory.getLogger(NotificationService::class.java)
@@ -60,6 +60,7 @@ class NotificationService(
     try {
       emitter.send(SseEmitter.event().name("connect").data("연결 성공!"))
     } catch (e: IOException) {
+      logger.warn("SSE 연결 중 데이터 전송 실패: $userLoginId", e)
       emitters.remove(userLoginId)
     }
 
@@ -101,27 +102,28 @@ class NotificationService(
 
   /** 새로운 알림을 생성하고 DB에 저장합니다. */
   @Transactional
+  @Deprecated("sendNotification을 사용하세요.", ReplaceWith("sendNotification(notification)"))
   fun createNotification(request: NotificationCreateRequest) {
     if (notificationRepository == null || userRepository == null) return
 
     val receiver =
-        userRepository.findByLoginId(request.receiverLoginId)
-            ?: throw UserNotFoundException("수신자를 찾을 수 없습니다: ${request.receiverLoginId}")
+      userRepository.findByLoginId(request.receiverLoginId)
+        ?: throw UserNotFoundException("수신자를 찾을 수 없습니다: ${request.receiverLoginId}")
 
     val sender =
-        request.senderLoginId?.let {
-          userRepository.findByLoginId(it) ?: throw UserNotFoundException("발신자를 찾을 수 없습니다: $it")
-        }
+      request.senderLoginId?.let {
+        userRepository.findByLoginId(it) ?: throw UserNotFoundException("발신자를 찾을 수 없습니다: $it")
+      }
 
     val notification =
-        Notification(
-            receiver = receiver,
-            sender = sender,
-            type = request.type,
-            message = request.message,
-            relatedId = request.relatedId,
-            relatedType = request.relatedType,
-        )
+      Notification(
+        receiver = receiver,
+        sender = sender,
+        type = request.type,
+        message = request.message,
+        relatedId = request.relatedId,
+        relatedType = request.relatedType,
+      )
 
     notificationRepository.save(notification)
 
@@ -137,6 +139,10 @@ class NotificationService(
    *
    * @deprecated 이 메서드 대신 NotificationResponse를 인자로 받는 sendNotification을 사용하세요.
    */
+  @Deprecated(
+    message = "이 메서드 대신 NotificationResponse를 인자로 받는 sendNotification을 사용하세요.",
+    ReplaceWith("sendNotification(NotificationResponse)"),
+  )
   fun sendNotification(userLoginId: String, notification: NotificationDto) {
     // 하위 호환성을 위해 유지하되, Redis 브로드캐스트 방식을 권장
     val emitter = emitters[userLoginId]
@@ -148,47 +154,47 @@ class NotificationService(
   /** 특정 사용자의 알림 목록을 조회합니다. */
   @Transactional(readOnly = true)
   fun getNotifications(
-      userLoginId: String,
-      isRead: Boolean? = null,
-      type: NotificationType? = null,
-      pageable: Pageable,
+    userLoginId: String,
+    isRead: Boolean? = null,
+    type: NotificationType? = null,
+    pageable: Pageable,
   ): Page<NotificationResponse> {
     if (notificationRepository == null || userRepository == null) {
       return Page.empty()
     }
 
     val user =
-        userRepository.findByLoginId(userLoginId)
-            ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
+      userRepository.findByLoginId(userLoginId)
+        ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
     val notificationPage =
-        when {
-          isRead != null && type != null -> {
-            notificationRepository.findAllByReceiverIdAndIsReadAndTypeOrderByCreatedAtDesc(
-                user.id!!,
-                isRead,
-                type,
-                pageable,
-            )
-          }
-          isRead != null -> {
-            notificationRepository.findAllByReceiverIdAndIsReadOrderByCreatedAtDesc(
-                user.id!!,
-                isRead,
-                pageable,
-            )
-          }
-          type != null -> {
-            notificationRepository.findAllByReceiverIdAndTypeOrderByCreatedAtDesc(
-                user.id!!,
-                type,
-                pageable,
-            )
-          }
-          else -> {
-            notificationRepository.findAllByReceiverIdOrderByCreatedAtDesc(user.id!!, pageable)
-          }
+      when {
+        isRead != null && type != null -> {
+          notificationRepository.findAllByReceiverIdAndIsReadAndTypeOrderByCreatedAtDesc(
+            user.id!!,
+            isRead,
+            type,
+            pageable,
+          )
         }
+        isRead != null -> {
+          notificationRepository.findAllByReceiverIdAndIsReadOrderByCreatedAtDesc(
+            user.id!!,
+            isRead,
+            pageable,
+          )
+        }
+        type != null -> {
+          notificationRepository.findAllByReceiverIdAndTypeOrderByCreatedAtDesc(
+            user.id!!,
+            type,
+            pageable,
+          )
+        }
+        else -> {
+          notificationRepository.findAllByReceiverIdOrderByCreatedAtDesc(user.id!!, pageable)
+        }
+      }
 
     return notificationPage.map { NotificationResponse.from(it) }
   }
@@ -201,8 +207,8 @@ class NotificationService(
     }
 
     val user =
-        userRepository.findByLoginId(userLoginId)
-            ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
+      userRepository.findByLoginId(userLoginId)
+        ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
     val cache = cacheManager.getCache("unreadNotificationCount")
     val cachedCount = cache?.get(user.id.toString(), Long::class.java)
@@ -221,13 +227,13 @@ class NotificationService(
     if (notificationRepository == null || userRepository == null) return
 
     val user =
-        userRepository.findByLoginId(userLoginId)
-            ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
+      userRepository.findByLoginId(userLoginId)
+        ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
     val notification =
-        notificationRepository.findById(notificationId).orElseThrow {
-          NotificationNotFoundException("알림을 찾을 수 없습니다: $notificationId")
-        }
+      notificationRepository.findById(notificationId).orElseThrow {
+        NotificationNotFoundException("알림을 찾을 수 없습니다: $notificationId")
+      }
 
     if (notification.receiver.id != user.id) {
       throw NotificationAccessForbiddenException("이 알림에 접근할 권한이 없습니다")
@@ -246,8 +252,8 @@ class NotificationService(
     if (notificationRepository == null || userRepository == null || cacheManager == null) return 0
 
     val user =
-        userRepository.findByLoginId(userLoginId)
-            ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
+      userRepository.findByLoginId(userLoginId)
+        ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
     val updatedCount = notificationRepository.markAllAsReadByReceiverId(user.id!!)
 
@@ -263,13 +269,13 @@ class NotificationService(
     if (notificationRepository == null || userRepository == null) return
 
     val user =
-        userRepository.findByLoginId(userLoginId)
-            ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
+      userRepository.findByLoginId(userLoginId)
+        ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
     val notification =
-        notificationRepository.findById(notificationId).orElseThrow {
-          NotificationNotFoundException("알림을 찾을 수 없습니다: $notificationId")
-        }
+      notificationRepository.findById(notificationId).orElseThrow {
+        NotificationNotFoundException("알림을 찾을 수 없습니다: $notificationId")
+      }
 
     if (notification.receiver.id != user.id) {
       throw NotificationAccessForbiddenException("이 알림을 삭제할 권한이 없습니다")
@@ -288,8 +294,8 @@ class NotificationService(
     if (notificationRepository == null || userRepository == null) return 0
 
     val user =
-        userRepository.findByLoginId(userLoginId)
-            ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
+      userRepository.findByLoginId(userLoginId)
+        ?: throw UserNotFoundException("사용자를 찾을 수 없습니다: $userLoginId")
 
     val deletedCount = notificationRepository.deleteAllReadByReceiverId(user.id!!)
     return deletedCount
