@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 class RewardService(
   private val userExperienceService: UserExperienceService,
   private val userPointService: UserPointService,
-  private val badgeChecker: com.planit.service.badge.BadgeChecker,
+  private val badgeChecker: PointBadgeChecker,
 ) {
 
   /**

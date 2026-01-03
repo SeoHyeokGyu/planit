@@ -62,7 +62,7 @@ class BadgeServiceTest {
     every { badgeRepository.findByCode(badge.code) } returns badge
     every { userBadgeRepository.existsByUserIdAndBadgeCode(user.id!!, badge.code) } returns false
     every { userBadgeRepository.save(any()) } returns UserBadge(user = user, badge = badge)
-    every { notificationService.createNotification(any()) } returns Unit
+    every { notificationService.sendNotification(any()) } returns Unit
 
     // When: 배지 지급 시도
     val result = badgeService.awardBadge(user.loginId, badge.code)
@@ -70,7 +70,7 @@ class BadgeServiceTest {
     // Then: 지급 결과가 true이고 저장 로직이 호출되었는지 검증
     assertTrue(result)
     verify { userBadgeRepository.save(any()) }
-    verify { notificationService.createNotification(any()) }
+    verify { notificationService.sendNotification(any()) }
   }
 
   @Test

@@ -1,7 +1,9 @@
 package com.planit.service
 
 import com.planit.dto.BadgeResponse
+import com.planit.dto.NotificationResponse
 import com.planit.entity.UserBadge
+import com.planit.enums.NotificationType
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.BadgeRepository
 import com.planit.repository.UserBadgeRepository
@@ -9,6 +11,7 @@ import com.planit.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional(readOnly = true)
@@ -40,21 +43,22 @@ class BadgeService(
     userBadgeRepository.save(userBadge)
 
     // 알림 발송
-    try {
-      notificationService.createNotification(
-        com.planit.dto.NotificationCreateRequest(
-          receiverLoginId = userLoginId,
-          type = com.planit.enums.NotificationType.BADGE,
-          message = "새로운 배지를 획득했습니다: ${badge.name}",
-          relatedId = badge.code,
-          relatedType = "BADGE",
-        )
+    notificationService.sendNotification(
+      NotificationResponse(
+        id = -1L,
+        receiverId = user.id,
+        receiverLoginId = user.loginId,
+        senderId = null,
+        senderLoginId = null,
+        senderNickname = null,
+        type = NotificationType.BADGE,
+        message = "새로운 배지를 획득했습니다: ${badge.name}",
+        relatedId = badge.id.toString(),
+        relatedType = "BADGE",
+        isRead = false,
+        createdAt = LocalDateTime.now(),
       )
-    } catch (e: Exception) {
-      // 알림 발송 실패가 배지 지급 트랜잭션을 롤백시키지 않도록 로깅만 함
-      // (혹은 필요에 따라 롤백시킬 수도 있지만, 알림은 부가 기능이므로 보통 무시)
-      logger.error("배지 알림 발송 실패", e)
-    }
+    )
 
     return true
   }

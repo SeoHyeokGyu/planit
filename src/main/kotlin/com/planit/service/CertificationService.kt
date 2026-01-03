@@ -25,7 +25,7 @@ class CertificationService(
   private val participantRepository: ChallengeParticipantRepository,
   private val notificationService: NotificationService,
   private val rewardService: RewardService,
-  private val badgeChecker: com.planit.service.badge.BadgeChecker,
+  private val badgeChecker: CertificationBadgeChecker,
 ) {
 
   /**
