@@ -1,19 +1,21 @@
+"use client";
+
 import React from "react";
-import { 
-  Footprints, 
-  Medal, 
-  Trophy, 
-  Flame, 
+import {
+  Footprints,
+  Medal,
+  Trophy,
+  Flame,
   Zap, // Use Zap for 'Fire' as Lucide doesn't have exactly 'Fire' (Flame is close)
-  User, 
-  Users, 
-  Crown, 
-  Coins, 
+  User,
+  Users,
+  Crown,
+  Coins,
   Banknote,
   Award,
   Star,
   Shield,
-  HelpCircle
+  HelpCircle,
 } from "lucide-react";
 
 interface BadgeIconProps {
@@ -32,14 +34,14 @@ export default function BadgeIcon({ iconCode, className }: BadgeIconProps) {
       return <Medal className={className} />;
     case "TROPHY":
       return <Trophy className={className} />;
-    
+
     // Streak
     case "FLAME":
       return <Flame className={className} />;
     case "FIRE":
       return <Zap className={className} />; // Zap or Flame
     case "PHOENIX":
-       return <Award className={className} />; // Abstract mapping
+      return <Award className={className} />; // Abstract mapping
 
     // Social
     case "USER":

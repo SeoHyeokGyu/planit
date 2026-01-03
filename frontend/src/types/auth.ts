@@ -12,7 +12,9 @@ export interface LoginRequest {
 export interface LoginResponse {
   success: boolean;
   data: {
+    type: string;
     accessToken: string;
+    loginId: string;
   };
   message: string;
 }

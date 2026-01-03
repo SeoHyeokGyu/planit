@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useUserProfile } from "@/hooks/useUser";
 import { useFollowStats, useFollowers, useFollowings } from "@/hooks/useFollow";
@@ -9,14 +9,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import CertificationsSection from "@/components/profile/CertificationsSection";
 import FollowButton from "@/components/follow/FollowButton";
-import { User, ShieldCheck, Activity, Users, Heart, FileText } from "lucide-react";
+import { User, ShieldCheck, Activity, Users, Heart, FileText, Medal } from "lucide-react";
+import BadgesSection from "@/components/profile/BadgesSection";
 
-// --- Main Profile Page Component ---
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") as "certifications" | "followers" | "followings" | "badges" | null;
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { data: user, isLoading, isError, error } = useUserProfile();
-  const [activeTab, setActiveTab] = useState<"certifications" | "followers" | "followings">("certifications");
+  
+  const [activeTab, setActiveTab] = useState<"certifications" | "followers" | "followings" | "badges">(
+    (initialTab && ["certifications", "followers", "followings", "badges"].includes(initialTab))
+      ? initialTab
+      : "certifications"
+  );
+
   const [followersPage, setFollowersPage] = useState(0);
   const [followingsPage, setFollowingsPage] = useState(0);
 
@@ -248,6 +257,15 @@ export default function ProfilePage() {
 
       </main>
     </div>
+  );
+}
+
+// --- Main Profile Page Component ---
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<ProfilePageSkeleton />}>
+      <ProfileContent />
+    </Suspense>
   );
 }
 
