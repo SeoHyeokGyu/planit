@@ -93,12 +93,30 @@ export default function ProfilePage() {
             <Heart className="w-4 h-4" />
             팔로잉 ({followingCount})
           </button>
+          <button
+            onClick={() => setActiveTab("badges")}
+            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
+              activeTab === "badges"
+                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
+                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            <Medal className="w-4 h-4" />
+            배지
+          </button>
         </div>
 
         {/* 인증 탭 */}
         {activeTab === "certifications" && (
             <div>
               <CertificationsSection userLoginId={user.loginId} />
+            </div>
+        )}
+
+        {/* 배지 탭 */}
+        {activeTab === "badges" && (
+            <div>
+              <BadgesSection userLoginId={user.loginId} isOwnProfile={true} />
             </div>
         )}
 
