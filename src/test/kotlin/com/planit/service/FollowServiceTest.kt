@@ -4,6 +4,7 @@ import com.planit.entity.Follow
 import com.planit.entity.User
 import com.planit.repository.FollowRepository
 import com.planit.repository.UserRepository
+import com.planit.service.badge.BadgeService
 import com.planit.util.setPrivateProperty
 import com.planit.exception.UserNotFoundException
 import io.mockk.every
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
+import org.springframework.cache.support.SimpleValueWrapper
 
 @ExtendWith(MockKExtension::class)
 @DisplayName("FollowService 테스트")
@@ -28,6 +30,13 @@ class FollowServiceTest {
 
   @MockK
   private lateinit var cacheManager: CacheManager
+  
+  @MockK
+  private lateinit var notificationService: NotificationService
+  
+  @MockK
+  private lateinit var badgeService: BadgeService
+  
   @InjectMockKs private lateinit var followService: FollowService
 
   private lateinit var userA: User
@@ -72,8 +81,11 @@ class FollowServiceTest {
       every { followRepository.existsByFollowerIdAndFollowingId(userA.id!!, userB.id!!) } returns false
       every { followRepository.save(any()) } returns Follow(follower = userA, following = userB)
       // 캐시 동작 모킹 (기존 캐시 값이 없다고 가정)
-      every { followingCountCache.get(userA.loginId, Long::class.java) } returns null
-      every { followerCountCache.get(userB.loginId, Long::class.java) } returns null
+      every { followingCountCache.get(userA.loginId) } returns null
+      every { followerCountCache.get(userB.loginId) } returns null
+      
+      every { badgeService.checkAndAwardBadges(any(), any()) } returns Unit
+      every { notificationService.sendNotification(any(), any()) } returns Unit
 
       // When
       followService.follow(userA.loginId, userB.loginId)
@@ -129,8 +141,8 @@ class FollowServiceTest {
           followRelation
       justRun { followRepository.delete(followRelation) }
       // 캐시 동작 모킹 (기존 캐시 값이 있다고 가정)
-      every { followingCountCache.get(userA.loginId, Long::class.java) } returns 5L
-      every { followerCountCache.get(userB.loginId, Long::class.java) } returns 10L
+      every { followingCountCache.get(userA.loginId) } returns SimpleValueWrapper(5L)
+      every { followerCountCache.get(userB.loginId) } returns SimpleValueWrapper(10L)
 
       // When
       followService.unfollow(userA.loginId, userB.loginId)
@@ -163,7 +175,7 @@ class FollowServiceTest {
     fun `returns from DB and saves to cache if not in cache`() {
       // Given
       val expectedCount = 10L
-      every { followerCountCache.get(userB.loginId, Long::class.java) } returns null // 캐시 없음
+      every { followerCountCache.get(userB.loginId) } returns null // 캐시 없음
       every { userRepository.findByLoginId(userB.loginId) } returns userB
       every { followRepository.countByFollowingId(userB.id!!) } returns expectedCount
 
@@ -181,7 +193,7 @@ class FollowServiceTest {
     fun `returns from cache if present`() {
       // Given
       val expectedCount = 10L
-      every { followerCountCache.get(userB.loginId, Long::class.java) } returns expectedCount // 캐시 있음
+      every { followerCountCache.get(userB.loginId) } returns SimpleValueWrapper(expectedCount) // 캐시 있음
 
       // When
       val count = followService.getFollowerCount(userB.loginId)
@@ -201,7 +213,7 @@ class FollowServiceTest {
     fun `returns from DB and saves to cache if not in cache`() {
       // Given
       val expectedCount = 5L
-      every { followingCountCache.get(userA.loginId, Long::class.java) } returns null // 캐시 없음
+      every { followingCountCache.get(userA.loginId) } returns null // 캐시 없음
       every { userRepository.findByLoginId(userA.loginId) } returns userA
       every { followRepository.countByFollowerId(userA.id!!) } returns expectedCount
 

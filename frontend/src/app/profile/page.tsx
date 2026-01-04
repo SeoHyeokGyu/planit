@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useUserProfile } from "@/hooks/useUser";
 import { useFollowStats, useFollowers, useFollowings } from "@/hooks/useFollow";
@@ -9,14 +9,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import CertificationsSection from "@/components/profile/CertificationsSection";
 import FollowButton from "@/components/follow/FollowButton";
-import { User, ShieldCheck, Activity, Users, Heart, FileText } from "lucide-react";
+import { User, ShieldCheck, Activity, Users, Heart, FileText, Medal } from "lucide-react";
+import BadgesSection from "@/components/profile/BadgesSection";
 
-// --- Main Profile Page Component ---
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") as "certifications" | "followers" | "followings" | "badges" | null;
+
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { data: user, isLoading, isError, error } = useUserProfile();
-  const [activeTab, setActiveTab] = useState<"certifications" | "followers" | "followings">("certifications");
+  
+  const [activeTab, setActiveTab] = useState<"certifications" | "followers" | "followings" | "badges">(
+    (initialTab && ["certifications", "followers", "followings", "badges"].includes(initialTab))
+      ? initialTab
+      : "certifications"
+  );
+
   const [followersPage, setFollowersPage] = useState(0);
   const [followingsPage, setFollowingsPage] = useState(0);
 
@@ -93,12 +102,30 @@ export default function ProfilePage() {
             <Heart className="w-4 h-4" />
             팔로잉 ({followingCount})
           </button>
+          <button
+            onClick={() => setActiveTab("badges")}
+            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
+              activeTab === "badges"
+                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
+                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            <Medal className="w-4 h-4" />
+            배지
+          </button>
         </div>
 
         {/* 인증 탭 */}
         {activeTab === "certifications" && (
             <div>
               <CertificationsSection userLoginId={user.loginId} />
+            </div>
+        )}
+
+        {/* 배지 탭 */}
+        {activeTab === "badges" && (
+            <div>
+              <BadgesSection userLoginId={user.loginId} isOwnProfile={true} />
             </div>
         )}
 
@@ -230,6 +257,15 @@ export default function ProfilePage() {
 
       </main>
     </div>
+  );
+}
+
+// --- Main Profile Page Component ---
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<ProfilePageSkeleton />}>
+      <ProfileContent />
+    </Suspense>
   );
 }
 

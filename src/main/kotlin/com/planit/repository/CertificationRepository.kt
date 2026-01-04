@@ -61,4 +61,11 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
     @Modifying
     @Query("UPDATE Certification c SET c.user = null WHERE c.user.id = :userId")
     fun nullifyUserByUserId(@Param("userId") userId: Long): Int
+
+    /**
+     * 특정 사용자(ID)가 작성한 전체 인증 개수를 조회합니다.
+     * @param userId 사용자 ID
+     * @return 인증 개수
+     */
+    fun countByUserId(userId: Long): Long
 }
