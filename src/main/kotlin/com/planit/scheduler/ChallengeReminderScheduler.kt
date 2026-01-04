@@ -151,7 +151,7 @@ class ChallengeReminderScheduler(
                     // SSE 실시간 알림만 발송 (DB 저장 X)
                     notificationService.sendNotification(
                         NotificationResponse(
-                            id = -1L,  // DB에 저장하지 않으므로 임시 ID
+                            id = java.util.UUID.randomUUID().toString(),  // DB에 저장하지 않으므로 임시 ID
                             receiverId = user.id!!,
                             receiverLoginId = user.loginId,
                             senderId = null,  // 시스템 알림

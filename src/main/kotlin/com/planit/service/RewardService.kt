@@ -1,7 +1,10 @@
 package com.planit.service
 
+import com.planit.enums.BadgeType
 import com.planit.enums.RewardType
-import com.planit.service.badge.PointBadgeChecker
+import com.planit.exception.UserNotFoundException
+import com.planit.repository.UserRepository
+import com.planit.service.badge.BadgeService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -11,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional
 class RewardService(
   private val userExperienceService: UserExperienceService,
   private val userPointService: UserPointService,
-  private val badgeChecker: PointBadgeChecker,
+  private val badgeService: BadgeService,
+  private val userRepository: UserRepository
 ) {
 
   /**
@@ -35,8 +39,9 @@ class RewardService(
       reason = rewardType.description,
     )
 
-    // 배지 체크 (비동기)
-    badgeChecker.checkBadges(userLoginId)
+    // 배지 체크
+    val user = userRepository.findByLoginId(userLoginId) ?: throw UserNotFoundException()
+    badgeService.checkAndAwardBadges(user, BadgeType.POINT_ACCUMULATION)
   }
 
   /** 인증 보상 지급 */

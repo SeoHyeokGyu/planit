@@ -3,10 +3,11 @@ package com.planit.service
 import com.planit.dto.NotificationDto
 import com.planit.dto.UserProfileResponse
 import com.planit.entity.Follow
+import com.planit.enums.BadgeType
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.FollowRepository
 import com.planit.repository.UserRepository
-import com.planit.service.badge.SocialBadgeChecker
+import com.planit.service.badge.BadgeService
 import org.springframework.cache.CacheManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -25,7 +26,7 @@ class FollowService(
   private val userRepository: UserRepository,
   private val cacheManager: CacheManager,
   private val notificationService: NotificationService,
-  private val badgeChecker: SocialBadgeChecker,
+  private val badgeService: BadgeService,
 ) {
 
   /**
@@ -60,7 +61,7 @@ class FollowService(
     incrementCacheValue("followerCount", followingLoginId)
 
     // 배지 획득 체크 (비동기) - 팔로우 당한 사람 기준
-    badgeChecker.checkBadges(followingLoginId)
+    badgeService.checkAndAwardBadges(following, BadgeType.FOLLOWER_COUNT)
 
     // 알림 전송
     notificationService.sendNotification(

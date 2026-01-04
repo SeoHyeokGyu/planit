@@ -49,4 +49,11 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
      * @return 인증 개수
      */
     fun countByUser_LoginId(userLoginId: String): Long
+
+    /**
+     * 특정 사용자(ID)가 작성한 전체 인증 개수를 조회합니다.
+     * @param userId 사용자 ID
+     * @return 인증 개수
+     */
+    fun countByUserId(userId: Long): Long
 }

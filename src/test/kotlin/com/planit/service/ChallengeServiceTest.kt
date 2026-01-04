@@ -25,6 +25,9 @@ import org.springframework.data.redis.core.ValueOperations
 import java.time.LocalDateTime
 import java.util.*
 
+import com.planit.repository.LikeRepository
+import com.planit.repository.UserRepository
+
 @ExtendWith(MockKExtension::class)
 class ChallengeServiceTest {
     @MockK
@@ -38,6 +41,15 @@ class ChallengeServiceTest {
 
     @MockK
     private lateinit var valueOperations: ValueOperations<String, String>
+    
+    @MockK
+    private lateinit var likeRepository: LikeRepository
+
+    @MockK
+    private lateinit var userRepository: UserRepository
+
+    @MockK
+    private lateinit var notificationService: NotificationService
 
     @InjectMockKs
     private lateinit var challengeService: ChallengeService

@@ -1,13 +1,18 @@
-package com.planit.service
+package com.planit.service.badge
 
 import com.planit.dto.BadgeResponse
 import com.planit.dto.NotificationResponse
+import com.planit.entity.Badge
+import com.planit.entity.User
 import com.planit.entity.UserBadge
+import com.planit.enums.BadgeType
 import com.planit.enums.NotificationType
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.BadgeRepository
 import com.planit.repository.UserBadgeRepository
 import com.planit.repository.UserRepository
+import com.planit.service.NotificationService
+import com.planit.service.badge.checker.BadgeCheckerFactory
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,11 +25,38 @@ class BadgeService(
   private val userBadgeRepository: UserBadgeRepository,
   private val userRepository: UserRepository,
   private val notificationService: NotificationService,
+  private val badgeCheckerFactory: BadgeCheckerFactory,
 ) {
   private val logger = LoggerFactory.getLogger(BadgeService::class.java)
 
   /**
-   * 배지 지급 (조건 만족 시 호출)
+   * 특정 타입의 배지 획득 조건을 일괄 검사하고 지급
+   *
+   * @param user 대상 사용자
+   * @param type 검사할 배지 타입 (예: CERTIFICATION_COUNT)
+   */
+  @Transactional
+  fun checkAndAwardBadges(user: User, type: BadgeType) {
+    val badges = badgeRepository.findAllByType(type)
+    if (badges.isEmpty()) return
+
+    val checker = badgeCheckerFactory.getChecker(type)
+
+    badges.forEach { badge ->
+      // 이미 획득한 배지는 건너뜀
+      if (userBadgeRepository.existsByUserIdAndBadgeCode(user.id!!, badge.code)) {
+        return@forEach
+      }
+
+      // 조건 충족 시 지급
+      if (checker.check(user, badge.requiredValue)) {
+        giveBadge(user, badge)
+      }
+    }
+  }
+
+  /**
+   * 배지 지급 (조건 만족 시 호출 - 레거시 지원용)
    *
    * @return 배지를 새로 획득했으면 true, 이미 가지고 있으면 false
    */
@@ -33,20 +65,25 @@ class BadgeService(
     val user = userRepository.findByLoginId(userLoginId) ?: throw UserNotFoundException()
     val badge = badgeRepository.findByCode(badgeCode) ?: return false
 
-    // 이미 획득했는지 확인
     if (userBadgeRepository.existsByUserIdAndBadgeCode(user.id!!, badgeCode)) {
       return false
     }
 
-    // 배지 지급
+    giveBadge(user, badge)
+    return true
+  }
+
+  /** 실제 배지 지급 및 알림 발송 로직 */
+  private fun giveBadge(user: User, badge: Badge) {
     val userBadge = UserBadge(user = user, badge = badge)
     userBadgeRepository.save(userBadge)
 
-    // 알림 발송
+    logger.info("Badge awarded to user ${user.loginId}: ${badge.name} (${badge.code})")
+
     notificationService.sendNotification(
       NotificationResponse(
-        id = -1L,
-        receiverId = user.id,
+        id = java.util.UUID.randomUUID().toString(),
+        receiverId = user.id!!,
         receiverLoginId = user.loginId,
         senderId = null,
         senderLoginId = null,
@@ -59,8 +96,6 @@ class BadgeService(
         createdAt = LocalDateTime.now(),
       )
     )
-
-    return true
   }
 
   /** 전체 배지 목록 조회 (획득 여부 포함) */

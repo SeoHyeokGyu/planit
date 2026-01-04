@@ -11,7 +11,8 @@ import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
-import com.planit.service.badge.CertificationBadgeChecker
+import com.planit.enums.BadgeType
+import com.planit.service.badge.BadgeService
 import com.planit.util.setPrivateProperty
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -34,7 +35,7 @@ class CertificationServiceTest {
   @MockK private lateinit var participantRepository: ChallengeParticipantRepository
   @MockK private lateinit var notificationService: NotificationService
   @MockK private lateinit var rewardService: RewardService
-  @MockK private lateinit var badgeChecker: CertificationBadgeChecker
+  @MockK private lateinit var badgeService: BadgeService
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -89,7 +90,7 @@ class CertificationServiceTest {
       every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns
         Optional.empty()
       every { rewardService.grantCertificationReward(any()) } answers {}
-      every { badgeChecker.checkBadges(any()) } answers {}
+      every { badgeService.checkAndAwardBadges(any(), any()) } answers {}
 
       // When
       val response = certificationService.createCertification(request, user.loginId)

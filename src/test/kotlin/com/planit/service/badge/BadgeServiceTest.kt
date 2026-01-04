@@ -1,4 +1,4 @@
-package com.planit.service
+package com.planit.service.badge
 
 import com.planit.entity.Badge
 import com.planit.entity.User
@@ -9,11 +9,15 @@ import com.planit.exception.UserNotFoundException
 import com.planit.repository.BadgeRepository
 import com.planit.repository.UserBadgeRepository
 import com.planit.repository.UserRepository
+import com.planit.service.NotificationService
+import com.planit.service.badge.checker.BadgeCheckerFactory
+import com.planit.service.badge.checker.BadgeConditionChecker
 import com.planit.util.setPrivateProperty
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -30,6 +34,7 @@ class BadgeServiceTest {
   @MockK private lateinit var userBadgeRepository: UserBadgeRepository
   @MockK private lateinit var userRepository: UserRepository
   @MockK private lateinit var notificationService: NotificationService
+  @MockK private lateinit var badgeCheckerFactory: BadgeCheckerFactory
   @InjectMockKs private lateinit var badgeService: BadgeService
 
   private lateinit var user: User
@@ -52,6 +57,28 @@ class BadgeServiceTest {
         grade = BadgeGrade.BRONZE,
         requiredValue = 10,
       )
+  }
+
+  @Test
+  @DisplayName("배지 일괄 검사 및 지급 성공")
+  fun `checkAndAwardBadges should award badges when conditions are met`() {
+    // Given
+    val type = BadgeType.CERTIFICATION_COUNT
+    val checker = mockk<BadgeConditionChecker>()
+    
+    every { badgeRepository.findAllByType(type) } returns listOf(badge)
+    every { badgeCheckerFactory.getChecker(type) } returns checker
+    every { userBadgeRepository.existsByUserIdAndBadgeCode(user.id!!, badge.code) } returns false
+    every { checker.check(user, badge.requiredValue) } returns true
+    every { userBadgeRepository.save(any()) } returns UserBadge(user = user, badge = badge)
+    every { notificationService.sendNotification(any()) } returns Unit
+
+    // When
+    badgeService.checkAndAwardBadges(user, type)
+
+    // Then
+    verify { userBadgeRepository.save(any()) }
+    verify { notificationService.sendNotification(any()) }
   }
 
   @Test

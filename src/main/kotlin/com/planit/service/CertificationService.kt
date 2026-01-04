@@ -4,12 +4,13 @@ import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationResponse
 import com.planit.dto.CertificationUpdateRequest
 import com.planit.entity.Certification
+import com.planit.enums.BadgeType
 import com.planit.exception.*
 import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
-import com.planit.service.badge.CertificationBadgeChecker
+import com.planit.service.badge.BadgeService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -25,7 +26,7 @@ class CertificationService(
   private val participantRepository: ChallengeParticipantRepository,
   private val notificationService: NotificationService,
   private val rewardService: RewardService,
-  private val badgeChecker: CertificationBadgeChecker,
+  private val badgeService: BadgeService,
 ) {
 
   /**
@@ -70,7 +71,7 @@ class CertificationService(
     rewardService.grantCertificationReward(userLoginId)
 
     // 배지 획득 조건 체크
-    badgeChecker.checkBadges(userLoginId)
+    badgeService.checkAndAwardBadges(user, BadgeType.CERTIFICATION_COUNT)
 
     return CertificationResponse.from(savedCertification)
   }

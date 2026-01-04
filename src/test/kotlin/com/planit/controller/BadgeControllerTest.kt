@@ -3,7 +3,7 @@ package com.planit.controller
 import com.ninjasquad.springmockk.MockkBean
 import com.planit.config.JwtAuthenticationFilter
 import com.planit.dto.BadgeResponse
-import com.planit.service.BadgeService
+import com.planit.service.badge.BadgeService
 import io.mockk.every
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

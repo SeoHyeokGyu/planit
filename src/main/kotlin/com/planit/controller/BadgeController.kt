@@ -2,7 +2,7 @@ package com.planit.controller
 
 import com.planit.dto.ApiResponse
 import com.planit.dto.BadgeResponse
-import com.planit.service.BadgeService
+import com.planit.service.badge.BadgeService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
