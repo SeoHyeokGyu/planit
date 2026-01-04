@@ -15,6 +15,6 @@ interface CommentRepository : JpaRepository<Comment, Long> {
     fun countByCertificationIdIn(@Param("certificationIds") certificationIds: List<Long>): List<CertificationCountProjection>
 
     @Modifying
-    @Query("UPDATE Comment c SET c.user = null WHERE c.user.id = :userId")
-    fun nullifyUserByUserId(@Param("userId") userId: Long): Int
+    @Query("UPDATE Comment c SET c.user.id = :targetUserId WHERE c.user.id = :userId")
+    fun reassignUserByUserId(@Param("userId") userId: Long, @Param("targetUserId") targetUserId: Long): Int
 }
