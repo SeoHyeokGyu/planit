@@ -8,7 +8,7 @@ import java.time.LocalDateTime
  * 알림 응답 DTO
  */
 data class NotificationResponse(
-    val id: Long,
+    val id: String,
     val receiverId: Long,
     val receiverLoginId: String,
     val senderId: Long?,
@@ -27,7 +27,7 @@ data class NotificationResponse(
          */
         fun from(notification: Notification): NotificationResponse {
             return NotificationResponse(
-                id = notification.id,
+                id = notification.id.toString(),
                 receiverId = notification.receiver.id!!,
                 receiverLoginId = notification.receiver.loginId,
                 senderId = notification.sender?.id,

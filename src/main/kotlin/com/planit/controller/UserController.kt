@@ -88,6 +88,6 @@ class UserController(val userService: UserService) {
       @Valid @RequestBody request: UserDeleteRequest
   ): ResponseEntity<ApiResponse<Unit>> {
     userService.deleteUser(userDetails.username, request)
-    return ResponseEntity.ok(ApiResponse.success(message = "회원 탈퇴가 완료되었습니다."))
+    return ResponseEntity.ok(ApiResponse.success())
   }
 }

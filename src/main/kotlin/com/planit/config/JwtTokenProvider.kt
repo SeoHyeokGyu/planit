@@ -1,24 +1,19 @@
 package com.planit.config
 
 import com.planit.service.CustomUserDetailsService
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.MalformedJwtException
-import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
-import java.util.*
-import javax.crypto.SecretKey
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
-import org.springframework.web.client.HttpClientErrorException
+import java.util.*
+import javax.crypto.SecretKey
 
 @Component
 class JwtTokenProvider(

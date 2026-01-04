@@ -199,7 +199,7 @@ class ChallengeService(
 
             notificationService.sendNotification(
                 NotificationResponse(
-                    id = -1L,
+                    id = java.util.UUID.randomUUID().toString(),
                     receiverId = challengeCreator.id!!,
                     receiverLoginId = challenge.createdId,
                     senderId = user.id,
@@ -248,7 +248,7 @@ class ChallengeService(
 
             notificationService.sendNotification(
                 NotificationResponse(
-                    id = -1L,
+                    id = java.util.UUID.randomUUID().toString(),
                     receiverId = challengeCreator.id!!,
                     receiverLoginId = challenge.createdId,
                     senderId = user.id,

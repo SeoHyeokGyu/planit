@@ -18,6 +18,8 @@ http/
 │   └── point.http             # 포인트/경험치/레벨 시스템
 ├── follow/
 │   └── follow.http            # 팔로우/팔로워 시스템
+├── badge/
+│   └── badge.http             # 배지 관련
 ├── notification/
 │   └── notification.http      # 알림 조회/관리
 ├── http-client.env.json       # 환경 변수 설정
@@ -101,6 +103,11 @@ http/
 - **팔로워 목록**: `GET /api/follows/{loginId}/followers`
 - **팔로우 수**: `GET /api/follows/{loginId}/following-count`
 - **팔로워 수**: `GET /api/follows/{loginId}/follower-count`
+
+### badge/badge.http
+- **전체 배지 조회**: `GET /api/badges`
+- **내 배지 조회**: `GET /api/badges/my`
+- **타인 배지 조회**: `GET /api/badges/user/{loginId}`
 
 ### notification/notification.http
 - **알림 목록**: `GET /api/notifications`

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import React from "react";
 import { useRouter } from "next/navigation";
+import BadgesSection from "@/components/profile/BadgesSection";
 import CertificationsSection from "@/components/profile/CertificationsSection";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import FollowButton from "@/components/follow/FollowButton";
@@ -110,8 +111,9 @@ export default function OtherUserProfilePage({
       {/* 메인 콘텐츠 */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* 왼쪽: 인증 기록 */}
-          <div className="lg:col-span-2">
+          {/* 왼쪽: 인증 기록 및 배지 */}
+          <div className="lg:col-span-2 space-y-12">
+            <BadgesSection userLoginId={user.loginId} />
             <CertificationsSection userLoginId={user.loginId} />
           </div>
 

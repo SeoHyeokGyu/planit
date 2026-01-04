@@ -11,6 +11,8 @@ import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
+import com.planit.enums.BadgeType
+import com.planit.service.badge.BadgeService
 import com.planit.util.setPrivateProperty
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -18,24 +20,22 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
 import io.mockk.verify
-import java.time.LocalDateTime
-import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDateTime
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 @DisplayName("CertificationService 테스트")
 class CertificationServiceTest {
-
   @MockK private lateinit var certificationRepository: CertificationRepository
-
   @MockK private lateinit var userRepository: UserRepository
-
   @MockK private lateinit var challengeRepository: ChallengeRepository
-
   @MockK private lateinit var participantRepository: ChallengeParticipantRepository
-
+  @MockK private lateinit var notificationService: NotificationService
+  @MockK private lateinit var rewardService: RewardService
+  @MockK private lateinit var badgeService: BadgeService
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -48,16 +48,16 @@ class CertificationServiceTest {
     user.setPrivateProperty("id", 1L)
 
     challenge =
-        Challenge(
-            title = "Test Challenge",
-            description = "Test Description",
-            category = "Test",
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusDays(10),
-            difficulty = "Easy",
-            createdId = "creator",
-            certificationCnt = 0
-        )
+      Challenge(
+        title = "Test Challenge",
+        description = "Test Description",
+        category = "Test",
+        startDate = LocalDateTime.now(),
+        endDate = LocalDateTime.now().plusDays(10),
+        difficulty = "Easy",
+        createdId = "creator",
+        certificationCnt = 0,
+      )
     challenge.setPrivateProperty("id", challengeId)
   }
 
@@ -69,25 +69,28 @@ class CertificationServiceTest {
     fun `creates a certification successfully`() {
       // Given
       val request =
-          CertificationCreateRequest(
-              challengeId = challengeId,
-              title = "Test Title",
-              content = "Test Content",
-          )
+        CertificationCreateRequest(
+          challengeId = challengeId,
+          title = "Test Title",
+          content = "Test Content",
+        )
       val certification =
-          Certification(
-              user = user,
-              challenge = challenge,
-              title = request.title,
-              content = request.content,
-          )
+        Certification(
+          user = user,
+          challenge = challenge,
+          title = request.title,
+          content = request.content,
+        )
       certification.setPrivateProperty("id", 1L)
 
       every { userRepository.findByLoginId(user.loginId) } returns user
       every { challengeRepository.findById(request.challengeId) } returns Optional.of(challenge)
       every { certificationRepository.save(any()) } returns certification
       every { challengeRepository.save(any()) } returns challenge
-      every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns Optional.empty()
+      every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns
+        Optional.empty()
+      every { rewardService.grantCertificationReward(any()) } answers {}
+      every { badgeService.checkAndAwardBadges(any(), any()) } answers {}
 
       // When
       val response = certificationService.createCertification(request, user.loginId)
@@ -107,17 +110,17 @@ class CertificationServiceTest {
 
     private lateinit var certification: Certification
     private val updateRequest =
-        CertificationUpdateRequest(title = "Updated Title", content = "Updated Content")
+      CertificationUpdateRequest(title = "Updated Title", content = "Updated Content")
 
     @BeforeEach
     fun setup() {
       certification =
-          Certification(
-              user = user,
-              challenge = challenge,
-              title = "Original Title",
-              content = "Original Content",
-          )
+        Certification(
+          user = user,
+          challenge = challenge,
+          title = "Original Title",
+          content = "Original Content",
+        )
       certification.setPrivateProperty("id", 1L)
     }
 
@@ -176,12 +179,12 @@ class CertificationServiceTest {
     @BeforeEach
     fun setup() {
       certification =
-          Certification(
-              user = user,
-              challenge = challenge,
-              title = "Original Title",
-              content = "Original Content",
-          )
+        Certification(
+          user = user,
+          challenge = challenge,
+          title = "Original Title",
+          content = "Original Content",
+        )
       certification.setPrivateProperty("id", 1L)
     }
 
@@ -193,7 +196,8 @@ class CertificationServiceTest {
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
       justRun { certificationRepository.delete(certification) }
       every { challengeRepository.save(any()) } returns challenge
-      every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns Optional.empty()
+      every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns
+        Optional.empty()
 
       // When
       certificationService.deleteCertification(1L, user.loginId)
@@ -209,7 +213,7 @@ class CertificationServiceTest {
     fun `throws CertificationUpdateForbiddenException when trying to delete another user's certification`() {
       // Given
       val anotherUser =
-          User(loginId = "anotheruser", password = "password", nickname = "anotheruser")
+        User(loginId = "anotheruser", password = "password", nickname = "anotheruser")
       anotherUser.setPrivateProperty("id", 2L)
       certification.setPrivateProperty("user", anotherUser)
       every { certificationRepository.findById(1L) } returns Optional.of(certification)

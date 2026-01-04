@@ -54,11 +54,19 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
     fun countByUser_LoginId(userLoginId: String): Long
 
     /**
-     * 특정 사용자의 모든 인증의 user를 NULL로 설정합니다 (회원 탈퇴 시 익명화).
-     * @param userId 사용자 ID
+     * 특정 사용자의 모든 인증의 작성자를 다른 사용자(예: 탈퇴용 유저)로 변경합니다.
+     * @param userId 원본 사용자 ID
+     * @param targetUserId 변경될 사용자 ID
      * @return 업데이트된 레코드 수
      */
     @Modifying
-    @Query("UPDATE Certification c SET c.user = null WHERE c.user.id = :userId")
-    fun nullifyUserByUserId(@Param("userId") userId: Long): Int
+    @Query("UPDATE Certification c SET c.user.id = :targetUserId WHERE c.user.id = :userId")
+    fun reassignUserByUserId(@Param("userId") userId: Long, @Param("targetUserId") targetUserId: Long): Int
+
+    /**
+     * 특정 사용자(ID)가 작성한 전체 인증 개수를 조회합니다.
+     * @param userId 사용자 ID
+     * @return 인증 개수
+     */
+    fun countByUserId(userId: Long): Long
 }

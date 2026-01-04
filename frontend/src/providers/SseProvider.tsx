@@ -10,18 +10,18 @@ const SSE_ENDPOINT = "/api/subscribe"; // 실제 엔드포인트에 맞게 수�
 
 export default function SseProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const token = useAuthStore((state) => state.token);
   const addNotification = useNotificationStore((state) => state.addNotification);
 
   useEffect(() => {
     // 사용자가 로그인하지 않은 경우 아무 작업도 하지 않음
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !token) {
       return;
     }
 
     console.log("SSE: Authenticated. Attempting to connect...");
 
-    const token = useAuthStore.getState().token;
-    const url = token ? `${API_BASE_URL}${SSE_ENDPOINT}?token=${token}` : SSE_ENDPOINT;
+    const url = `${API_BASE_URL}${SSE_ENDPOINT}?token=${token}`;
 
     // EventSource는 'Authorization' 헤더를 직접 지원하지 않습니다.
     // 백엔드에서 쿠키 기반 인증 또는 다른 방식을 통해 SSE 연결을 인증해야 합니다.
@@ -61,7 +61,7 @@ export default function SseProvider({ children }: { children: React.ReactNode })
       console.log("SSE: Closing connection.");
       eventSource.close();
     };
-  }, [isAuthenticated, addNotification]);
+  }, [isAuthenticated, token, addNotification]);
 
   return <>{children}</>;
 }

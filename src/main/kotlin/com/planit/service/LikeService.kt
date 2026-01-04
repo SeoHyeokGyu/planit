@@ -37,7 +37,7 @@ class LikeService(
             if (certification.user.loginId != userLoginId) {
                 notificationService.sendNotification(
                     NotificationResponse(
-                        id = -1L,
+                        id = java.util.UUID.randomUUID().toString(),
                         receiverId = certification.user.id!!,
                         receiverLoginId = certification.user.loginId,
                         senderId = user.id,
