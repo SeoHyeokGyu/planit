@@ -18,6 +18,7 @@ import com.planit.repository.UserExperienceRepository
 import com.planit.repository.UserPointRepository
 import com.planit.repository.UserRepository
 import java.util.NoSuchElementException
+import java.util.UUID
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -132,11 +133,26 @@ class UserService(
     }
     challengeParticipantRepository.deleteByLoginId(loginId)
 
-    // 7. Certification, Comment 익명화 (user = null)
-    certificationRepository.nullifyUserByUserId(userId)
-    commentRepository.nullifyUserByUserId(userId)
+    // 7. Certification, Comment 익명화 (탈퇴 유저로 재할당)
+    val withdrawalUser = getOrCreateWithdrawalUser()
+    certificationRepository.reassignUserByUserId(userId, withdrawalUser.id!!)
+    commentRepository.reassignUserByUserId(userId, withdrawalUser.id!!)
 
     // 8. User 삭제 (하드 삭제)
     userRepository.delete(user)
+  }
+
+  /**
+   * 탈퇴한 사용자의 게시물 및 댓글을 유지하기 위한 전용 '탈퇴한 사용자'를 조회하거나 생성합니다.
+   */
+  private fun getOrCreateWithdrawalUser(): User {
+    return userRepository.findByLoginId("withdrawn_user")
+        ?: userRepository.save(
+            User(
+                loginId = "withdrawn_user",
+                password = passwordEncoder.encode(UUID.randomUUID().toString()),
+                nickname = "탈퇴한 사용자"
+            )
+        )
   }
 }
