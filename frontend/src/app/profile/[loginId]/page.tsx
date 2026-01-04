@@ -113,7 +113,7 @@ export default function OtherUserProfilePage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* 왼쪽: 인증 기록 및 배지 */}
           <div className="lg:col-span-2 space-y-12">
-            <BadgesSection userLoginId={user.loginId} />
+            <BadgesSection userLoginId={user.loginId} isOwnProfile={false} />
             <CertificationsSection userLoginId={user.loginId} />
           </div>
 
