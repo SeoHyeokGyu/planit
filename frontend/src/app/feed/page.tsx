@@ -83,29 +83,41 @@ export default function FeedPage() {
                   <SelectValue placeholder="정렬" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="w-[160px]">
-                <SelectItem value="LATEST" className="cursor-pointer">
+              <SelectContent className="w-[160px] bg-white border-2 border-gray-200 shadow-xl rounded-lg p-1 animate-in fade-in-0 zoom-in-95">
+                <SelectItem
+                  value="LATEST"
+                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                >
                   <div className="flex items-center justify-between w-full">
                     <span>최신순</span>
-                    {sortBy === "LATEST" && <Check className="w-4 h-4 text-blue-600" />}
+                    {sortBy === "LATEST" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
                   </div>
                 </SelectItem>
-                <SelectItem value="LIKES" className="cursor-pointer">
+                <SelectItem
+                  value="LIKES"
+                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                >
                   <div className="flex items-center justify-between w-full">
                     <span>좋아요순</span>
-                    {sortBy === "LIKES" && <Check className="w-4 h-4 text-blue-600" />}
+                    {sortBy === "LIKES" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
                   </div>
                 </SelectItem>
-                <SelectItem value="COMMENTS" className="cursor-pointer">
+                <SelectItem
+                  value="COMMENTS"
+                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                >
                   <div className="flex items-center justify-between w-full">
                     <span>댓글순</span>
-                    {sortBy === "COMMENTS" && <Check className="w-4 h-4 text-blue-600" />}
+                    {sortBy === "COMMENTS" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
                   </div>
                 </SelectItem>
-                <SelectItem value="POPULAR" className="cursor-pointer">
+                <SelectItem
+                  value="POPULAR"
+                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                >
                   <div className="flex items-center justify-between w-full">
                     <span>인기순</span>
-                    {sortBy === "POPULAR" && <Check className="w-4 h-4 text-blue-600" />}
+                    {sortBy === "POPULAR" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
                   </div>
                 </SelectItem>
               </SelectContent>
