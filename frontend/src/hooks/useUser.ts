@@ -4,8 +4,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { userService } from "@/services/userService";
 import { useAuthStore } from "@/stores/authStore";
-import { UserPasswordUpdateRequest, UserUpdateRequest, UserProfile } from "@/types/user";
+import { UserPasswordUpdateRequest, UserUpdateRequest, UserProfile, UserDeleteRequest } from "@/types/user";
 import { ApiResponse } from "@/types/api";
+import { useRouter } from "next/navigation";
 
 // --- Queries ---
 
@@ -73,6 +74,26 @@ export const useUpdatePassword = () => {
     },
     onError: (error) => {
       toast.error(error.message || "비밀번호 변경 실패");
+    },
+  });
+};
+
+/**
+ * 회원 탈퇴 뮤테이션을 위한 커스텀 훅
+ */
+export const useDeleteAccount = () => {
+  const clearToken = useAuthStore((state) => state.clearToken);
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: (data: UserDeleteRequest) => userService.deleteAccount(data),
+    onSuccess: () => {
+      toast.success("회원 탈퇴가 완료되었습니다.");
+      clearToken();
+      router.push("/");
+    },
+    onError: (error) => {
+      toast.error(error.message || "회원 탈퇴 실패");
     },
   });
 };

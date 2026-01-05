@@ -3,14 +3,18 @@
 import { feedService } from "@/services/feedService";
 import { useAuthStore } from "@/stores/authStore";
 import { Page } from "@/types/api";
-import { FeedResponse } from "@/types/feed";
+import { FeedResponse, FeedSortType } from "@/types/feed";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 
-export const useFeed = (page: number = 0, size: number = 10) => {
+export const useFeed = (
+  page: number = 0,
+  size: number = 10,
+  sortBy: FeedSortType = "LATEST"
+) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useQuery({
-    queryKey: ["feed", page, size],
-    queryFn: () => feedService.getFeed(page, size),
+    queryKey: ["feed", page, size, sortBy],
+    queryFn: () => feedService.getFeed(page, size, sortBy),
     enabled: isAuthenticated,
     select: (response): Page<FeedResponse> => ({
       content: response.data || [],
@@ -22,11 +26,11 @@ export const useFeed = (page: number = 0, size: number = 10) => {
   });
 };
 
-export const useFeedInfinite = (size: number = 10) => {
+export const useFeedInfinite = (size: number = 10, sortBy: FeedSortType = "LATEST") => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useInfiniteQuery({
-    queryKey: ["feed", "infinite"],
-    queryFn: ({ pageParam = 0 }) => feedService.getFeed(pageParam, size),
+    queryKey: ["feed", "infinite", sortBy],
+    queryFn: ({ pageParam = 0 }) => feedService.getFeed(pageParam, size, sortBy),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
       const pagination = lastPage.pagination;

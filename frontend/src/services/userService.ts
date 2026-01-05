@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import { ApiResponse } from "@/types/api";
-import { UserProfile, UserPasswordUpdateRequest, UserUpdateRequest, UserDashboardStats } from "@/types/user";
+import { UserProfile, UserPasswordUpdateRequest, UserUpdateRequest, UserDashboardStats, UserDeleteRequest } from "@/types/user";
 
 export const userService = {
   async getProfile(): Promise<ApiResponse<UserProfile>> {
@@ -21,5 +21,9 @@ export const userService = {
 
   async updatePassword(data: UserPasswordUpdateRequest): Promise<ApiResponse<void>> {
     return api.patch("/api/users/me/password", data);
+  },
+
+  async deleteAccount(data: UserDeleteRequest): Promise<ApiResponse<void>> {
+    return api.delete("/api/users/me", data);
   },
 };

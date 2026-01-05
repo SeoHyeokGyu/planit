@@ -1,13 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUpdateProfile, useUpdatePassword } from "@/hooks/useUser";
+import { useUpdateProfile, useUpdatePassword, useDeleteAccount } from "@/hooks/useUser";
 import { UserProfile } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, ShieldCheck } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { User, ShieldCheck, UserX } from "lucide-react";
 
 interface AccountSettingsSectionProps {
   user: UserProfile;
@@ -18,6 +29,7 @@ export default function AccountSettingsSection({ user }: AccountSettingsSectionP
     <div className="space-y-8">
       <NicknameForm user={user} key={user.nickname} />
       <PasswordForm />
+      <DeleteAccountForm />
     </div>
   );
 }
@@ -156,6 +168,92 @@ function PasswordForm() {
             {updatePasswordMutation.isPending ? "변경 중..." : "비밀번호 저장"}
           </Button>
         </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function DeleteAccountForm() {
+  const [password, setPassword] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const deleteAccountMutation = useDeleteAccount();
+
+  const handleDelete = () => {
+    if (!password) {
+      return;
+    }
+    deleteAccountMutation.mutate(
+      { password },
+      {
+        onSuccess: () => {
+          setPassword("");
+          setIsOpen(false);
+        },
+      }
+    );
+  };
+
+  return (
+    <Card className="shadow-lg rounded-xl dark:bg-gray-800/50 border-red-200 dark:border-red-900">
+      <CardHeader className="flex flex-row items-center space-x-3">
+        <div className="w-10 h-10 bg-gradient-to-r from-red-600 to-red-800 rounded-lg flex items-center justify-center text-white">
+          <UserX className="w-6 h-6" />
+        </div>
+        <div>
+          <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">회원 탈퇴</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">
+            계정을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.
+          </CardDescription>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="w-full font-semibold">
+              회원 탈퇴
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>정말로 탈퇴하시겠습니까?</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-4">
+                <p>
+                  계정을 삭제하면 모든 데이터가 영구적으로 삭제되며, 복구할 수 없습니다.
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="deletePassword" className="font-semibold text-gray-900">
+                    비밀번호 확인
+                  </Label>
+                  <Input
+                    id="deletePassword"
+                    type="password"
+                    placeholder="비밀번호를 입력하세요"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={deleteAccountMutation.isPending}
+                  />
+                </div>
+                {deleteAccountMutation.isError && (
+                  <p className="text-sm font-medium text-red-500">
+                    {deleteAccountMutation.error.message}
+                  </p>
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteAccountMutation.isPending}>
+                취소
+              </AlertDialogCancel>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={!password || deleteAccountMutation.isPending}
+              >
+                {deleteAccountMutation.isPending ? "탈퇴 처리 중..." : "탈퇴하기"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );

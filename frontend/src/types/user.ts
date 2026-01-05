@@ -15,6 +15,10 @@ export interface UserPasswordUpdateRequest {
   newPassword: string;
 }
 
+export interface UserDeleteRequest {
+  password: string;
+}
+
 export interface UserDashboardStats {
   challengeCount: number;
   certificationCount: number;

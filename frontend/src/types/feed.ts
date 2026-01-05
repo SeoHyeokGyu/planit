@@ -1,3 +1,5 @@
+export type FeedSortType = "LATEST" | "LIKES" | "COMMENTS" | "POPULAR";
+
 export interface FeedResponse {
   id: number;
   title: string;

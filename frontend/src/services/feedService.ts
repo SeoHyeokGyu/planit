@@ -1,15 +1,16 @@
 // frontend/src/services/feedService.ts
 import { api } from "@/lib/api";
 import { ApiResponse, Page } from "@/types/api";
-import { FeedResponse } from "@/types/feed";
+import { FeedResponse, FeedSortType } from "@/types/feed";
 
 export const feedService = {
   // 팔로우하는 사람들의 최근 인증 피드 조회
   getFeed: async (
     page: number = 0,
-    size: number = 10
+    size: number = 10,
+    sortBy: FeedSortType = "LATEST"
   ): Promise<ApiResponse<FeedResponse[]>> => {
-    return api.get(`/api/feed?page=${page}&size=${size}`);
+    return api.get(`/api/feed?page=${page}&size=${size}&sortBy=${sortBy}`);
   },
 
   // 피드 새로고침 (SSE 활용 시)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
@@ -15,19 +15,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { FeedResponse } from "@/types/feed";
+import { FeedResponse, FeedSortType } from "@/types/feed";
 import { useInView } from "react-intersection-observer";
 
 export default function FeedPage() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const { ref, inView } = useInView();
+  const [sortBy, setSortBy] = useState<FeedSortType>("LATEST");
 
   const {
     data,
@@ -35,7 +43,7 @@ export default function FeedPage() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useFeedInfinite(10);
+  } = useFeedInfinite(10, sortBy);
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -54,13 +62,26 @@ export default function FeedPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
-              <Zap className="w-6 h-6" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                피드
+              </h1>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              피드
-            </h1>
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as FeedSortType)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="정렬" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="LATEST">최신순</SelectItem>
+                <SelectItem value="LIKES">좋아요순</SelectItem>
+                <SelectItem value="COMMENTS">댓글순</SelectItem>
+                <SelectItem value="POPULAR">인기순</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <p className="text-gray-600 text-sm font-medium ml-13">
             팔로우하는 사람들의 최근 활동을 확인하세요
