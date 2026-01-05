@@ -83,41 +83,41 @@ export default function FeedPage() {
                   <SelectValue placeholder="정렬" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="w-[160px] bg-white border-2 border-gray-200 shadow-xl rounded-lg p-1 animate-in fade-in-0 zoom-in-95">
+              <SelectContent className="w-[160px] bg-white border-2 border-gray-300 shadow-xl rounded-lg p-1 animate-in fade-in-0 zoom-in-95">
                 <SelectItem
                   value="LATEST"
-                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>최신순</span>
-                    {sortBy === "LATEST" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
+                    {sortBy === "LATEST" && <Check className="w-4 h-4 ml-2" />}
                   </div>
                 </SelectItem>
                 <SelectItem
                   value="LIKES"
-                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>좋아요순</span>
-                    {sortBy === "LIKES" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
+                    {sortBy === "LIKES" && <Check className="w-4 h-4 ml-2" />}
                   </div>
                 </SelectItem>
                 <SelectItem
                   value="COMMENTS"
-                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>댓글순</span>
-                    {sortBy === "COMMENTS" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
+                    {sortBy === "COMMENTS" && <Check className="w-4 h-4 ml-2" />}
                   </div>
                 </SelectItem>
                 <SelectItem
                   value="POPULAR"
-                  className="cursor-pointer rounded-md hover:bg-blue-50 focus:bg-blue-50 transition-colors duration-150 data-[state=checked]:bg-blue-100 data-[state=checked]:text-blue-900 font-medium"
+                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>인기순</span>
-                    {sortBy === "POPULAR" && <Check className="w-4 h-4 text-blue-600 ml-2" />}
+                    {sortBy === "POPULAR" && <Check className="w-4 h-4 ml-2" />}
                   </div>
                 </SelectItem>
               </SelectContent>
