@@ -81,7 +81,12 @@ export const api = {
     });
   },
 
-  delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    return this.fetch<T>(endpoint, { ...options, method: "DELETE" });
+  delete<T>(endpoint: string, data?: unknown, options?: RequestInit): Promise<T> {
+    const isFormData = data instanceof FormData;
+    return this.fetch<T>(endpoint, {
+      ...options,
+      method: "DELETE",
+      body: data ? (isFormData ? (data as FormData) : JSON.stringify(data)) : undefined,
+    });
   },
 };
