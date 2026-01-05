@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send, ArrowUpDown, Check } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/lib/utils";
@@ -62,30 +62,55 @@ export default function FeedPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white shadow-lg">
                 <Zap className="w-6 h-6" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                피드
-              </h1>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  피드
+                </h1>
+                <p className="text-gray-600 text-sm font-medium mt-1">
+                  팔로우하는 사람들의 최근 활동
+                </p>
+              </div>
             </div>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as FeedSortType)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="정렬" />
+              <SelectTrigger className="w-[160px] h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-blue-600" />
+                  <SelectValue placeholder="정렬" />
+                </div>
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="LATEST">최신순</SelectItem>
-                <SelectItem value="LIKES">좋아요순</SelectItem>
-                <SelectItem value="COMMENTS">댓글순</SelectItem>
-                <SelectItem value="POPULAR">인기순</SelectItem>
+              <SelectContent className="w-[160px]">
+                <SelectItem value="LATEST" className="cursor-pointer">
+                  <div className="flex items-center justify-between w-full">
+                    <span>최신순</span>
+                    {sortBy === "LATEST" && <Check className="w-4 h-4 text-blue-600" />}
+                  </div>
+                </SelectItem>
+                <SelectItem value="LIKES" className="cursor-pointer">
+                  <div className="flex items-center justify-between w-full">
+                    <span>좋아요순</span>
+                    {sortBy === "LIKES" && <Check className="w-4 h-4 text-blue-600" />}
+                  </div>
+                </SelectItem>
+                <SelectItem value="COMMENTS" className="cursor-pointer">
+                  <div className="flex items-center justify-between w-full">
+                    <span>댓글순</span>
+                    {sortBy === "COMMENTS" && <Check className="w-4 h-4 text-blue-600" />}
+                  </div>
+                </SelectItem>
+                <SelectItem value="POPULAR" className="cursor-pointer">
+                  <div className="flex items-center justify-between w-full">
+                    <span>인기순</span>
+                    {sortBy === "POPULAR" && <Check className="w-4 h-4 text-blue-600" />}
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <p className="text-gray-600 text-sm font-medium ml-13">
-            팔로우하는 사람들의 최근 활동을 확인하세요
-          </p>
         </div>
 
         {/* Feed List */}
