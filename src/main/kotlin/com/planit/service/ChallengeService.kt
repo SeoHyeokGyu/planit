@@ -176,7 +176,7 @@ class ChallengeService(
                     if (user != null) {
                         notificationService.sendNotification(
                             NotificationResponse(
-                                id = -1L,
+                                id = java.util.UUID.randomUUID().toString(),
                                 receiverId = user.id!!,
                                 receiverLoginId = user.loginId,
                                 senderId = null,
