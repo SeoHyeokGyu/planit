@@ -56,6 +56,11 @@ export default function CreateChallengePage() {
         }
 
         // 날짜 유효성 검증
+        if (!formData.startDate || !formData.endDate) {
+            toast.error("시작일과 종료일을 선택해주세요.");
+            return;
+        }
+
         const start = new Date(formData.startDate);
         const end = new Date(formData.endDate);
 
@@ -64,14 +69,14 @@ export default function CreateChallengePage() {
             return;
         }
 
-        // 날짜를 LocalDateTime 형식으로 변환 (YYYY-MM-DDTHH:mm:ss)
+        // LocalDateTime 형식으로 시작일은 00:00:00, 종료일은 23:59:59로 설정
         const startDateTime = `${formData.startDate}T00:00:00`;
         const endDateTime = `${formData.endDate}T23:59:59`;
 
         const requestData = {
             ...formData,
-            startDate: startDateTime,
-            endDate: endDateTime,
+            startDate: startDateTime,  // "2024-12-30T00:00:00"
+            endDate: endDateTime,      // "2024-12-31T23:59:59"
         };
 
         createMutation.mutate(requestData, {
@@ -225,6 +230,9 @@ export default function CreateChallengePage() {
                                     <Calendar className="w-4 h-4 text-blue-600" />
                                     챌린지 기간 *
                                 </Label>
+                                <p className="text-xs text-gray-600 font-medium mb-2">
+                                    시작일은 00:00부터, 종료일은 23:59까지 자동 설정됩니다.
+                                </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="startDate" className="text-sm text-gray-800 font-bold">
@@ -263,7 +271,7 @@ export default function CreateChallengePage() {
                             <Alert className="border-blue-200 bg-blue-50">
                                 <Info className="h-4 w-4 text-blue-600" />
                                 <AlertDescription className="text-sm text-blue-900 font-semibold">
-                                    시작일은 00:00:00부터, 종료일은 23:59:59까지 자동 설정됩니다.
+                                    선택한 날짜의 시작일부터 종료일까지 챌린지가 진행됩니다.
                                 </AlertDescription>
                             </Alert>
 

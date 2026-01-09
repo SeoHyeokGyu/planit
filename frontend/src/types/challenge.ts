@@ -22,6 +22,9 @@ export interface ChallengeResponse {
     viewCnt: number;
     participantCnt: number;
     certificationCnt: number;
+    isActive: boolean;      // 진행 중 여부
+    isUpcoming: boolean;    // 시작 전 여부
+    isEnded: boolean;       // 종료 여부
     createdAt?: string;
     updatedAt?: string;
 }
@@ -38,6 +41,9 @@ export interface ChallengeListResponse {
     viewCnt: number;
     participantCnt: number;
     certificationCnt: number;
+    isActive: boolean;      // 진행 중 여부
+    isUpcoming: boolean;    // 시작 전 여부
+    isEnded: boolean;       // 종료 여부
 }
 
 // 챌린지 검색 요청
