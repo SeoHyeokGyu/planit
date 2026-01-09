@@ -57,4 +57,7 @@ interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, S
     @Modifying
     @Query("DELETE FROM ChallengeParticipant p WHERE p.id = :challengeId")
     fun deleteAllByChallengeId(@Param("challengeId") challengeId: String): Int
+
+    // 특정 사용자의 모든 챌린지 참여 정보 삭제
+    fun deleteByLoginId(loginId: String): Int
 }
