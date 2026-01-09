@@ -75,15 +75,16 @@ export const useCreateChallenge = () => {
     });
 };
 
-export const useUpdateChallenge = () => {
+export const useUpdateChallenge = (challengeId: string) => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: ChallengeRequest }) =>
-            challengeService.updateChallenge(id, data),
-        onSuccess: (data, variables) => {
+        mutationFn: (data: ChallengeRequest) =>
+            challengeService.updateChallenge(challengeId, data),
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["challenges"] });
-            queryClient.invalidateQueries({ queryKey: ["challenge", variables.id] });
-            toast.success("챌린지가 수정되었습니다.");
+            queryClient.invalidateQueries({ queryKey: ["challenge", challengeId] });
+            queryClient.invalidateQueries({ queryKey: ["myChallenges"] });
+            // 토스트는 컴포넌트에서 처리 (자동 저장이므로)
         },
         onError: (error) => {
             toast.error(error.message || "챌린지 수정 실패");

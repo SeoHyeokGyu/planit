@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useChallenge, useJoinChallenge, useWithdrawChallenge, useMyChallenges } from "@/hooks/useChallenge";
+import { useUserProfile } from "@/hooks/useUser";
 import { challengeService } from "@/services/challengeService";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,8 @@ import {
     Clock,
     User,
     TrendingUp,
-    Trophy
+    Trophy,
+    Edit
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
@@ -104,6 +106,33 @@ export default function ChallengeDetailPage() {
     const withdrawMutation = useWithdrawChallenge();
 
     const isParticipating = myChallenges?.some((c) => c.id === challengeId);
+
+    // 현재 로그인한 사용자 정보 가져오기 (loginId 없이 호출하면 자신의 프로필)
+    const { data: currentUser } = useUserProfile();
+    const currentUserLoginId = currentUser?.loginId;
+
+    // 생성자 확인 (createdId는 loginId)
+    const isCreator = challenge && currentUserLoginId &&
+        challenge.createdId === currentUserLoginId;
+
+    // 챌린지 상태 확인 (백엔드에서 제공 + 프론트엔드에서도 체크)
+    const isEnded = challenge?.isEnded || (challenge && new Date(challenge.endDate) < new Date());
+
+    // 디버깅 로그
+    console.log('Challenge isEnded check:', {
+        challengeId,
+        backendIsEnded: challenge?.isEnded,
+        frontendIsEnded: challenge && new Date(challenge.endDate) < new Date(),
+        finalIsEnded: isEnded,
+        endDate: challenge?.endDate
+    });
+
+    console.log('Challenge Status:', {
+        challengeId,
+        isEnded,
+        endDate: challenge?.endDate,
+        now: new Date().toISOString()
+    });
 
     const handleJoin = () => {
         joinMutation.mutate(challengeId, {
@@ -214,15 +243,28 @@ export default function ChallengeDetailPage() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Back Button */}
-                <Button
-                    variant="ghost"
-                    onClick={() => router.push("/challenge")}
-                    className="mb-6 hover:bg-blue-50 text-gray-900 font-semibold"
-                >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    목록으로
-                </Button>
+                {/* Back Button and Edit Button */}
+                <div className="flex items-center justify-between mb-6">
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.push("/challenge")}
+                        className="hover:bg-blue-50 text-gray-900 font-semibold"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        목록으로
+                    </Button>
+
+                    {/* 수정 버튼 - 생성자이고 종료되지 않은 경우만 표시 */}
+                    {isCreator && !isEnded && (
+                        <Button
+                            onClick={() => router.push(`/challenge/${challengeId}/edit`)}
+                            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold"
+                        >
+                            <Edit className="w-4 h-4 mr-2" />
+                            수정하기
+                        </Button>
+                    )}
+                </div>
 
                 {/* Header */}
                 <div className="mb-8">
@@ -335,34 +377,42 @@ export default function ChallengeDetailPage() {
                         </div>
                     </CardContent>
 
-                    <CardFooter className="border-t bg-gray-50 flex gap-3">
-                        {!isParticipating ? (
-                            <Button
-                                onClick={handleJoin}
-                                disabled={joinMutation.isPending}
-                                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 font-bold"
-                            >
-                                {joinMutation.isPending ? "참여 중..." : "챌린지 참여하기"}
-                            </Button>
-                        ) : (
-                            <>
+                    {isEnded ? (
+                        <CardFooter className="border-t bg-gray-100">
+                            <div className="w-full text-center py-4">
+                                <p className="text-gray-600 font-semibold">이 챌린지는 종료되었습니다.</p>
+                            </div>
+                        </CardFooter>
+                    ) : (
+                        <CardFooter className="border-t bg-gray-50 flex gap-3">
+                            {!isParticipating ? (
                                 <Button
-                                    onClick={() => router.push(`/certification/create?challengeId=${challengeId}`)}
-                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12 font-bold"
+                                    onClick={handleJoin}
+                                    disabled={joinMutation.isPending}
+                                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 font-bold"
                                 >
-                                    인증하기
+                                    {joinMutation.isPending ? "참여 중..." : "챌린지 참여하기"}
                                 </Button>
-                                <Button
-                                    onClick={() => setIsWithdrawDialogOpen(true)}
-                                    disabled={withdrawMutation.isPending}
-                                    variant="outline"
-                                    className="flex-1 border-2 border-red-400 text-red-700 hover:bg-red-50 h-12 font-bold"
-                                >
-                                    {withdrawMutation.isPending ? "포기 중..." : "챌린지 포기"}
-                                </Button>
-                            </>
-                        )}
-                    </CardFooter>
+                            ) : (
+                                <>
+                                    <Button
+                                        onClick={() => router.push(`/certification/create?challengeId=${challengeId}`)}
+                                        className="flex-1 bg-green-600 hover:bg-green-700 text-white h-12 font-bold"
+                                    >
+                                        인증하기
+                                    </Button>
+                                    <Button
+                                        onClick={() => setIsWithdrawDialogOpen(true)}
+                                        disabled={withdrawMutation.isPending}
+                                        variant="outline"
+                                        className="flex-1 border-2 border-red-400 text-red-700 hover:bg-red-50 h-12 font-bold"
+                                    >
+                                        {withdrawMutation.isPending ? "포기 중..." : "챌린지 포기"}
+                                    </Button>
+                                </>
+                            )}
+                        </CardFooter>
+                    )}
                 </Card>
 
                 <AlertDialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
