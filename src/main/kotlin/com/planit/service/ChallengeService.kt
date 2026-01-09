@@ -129,11 +129,6 @@ class ChallengeService(
             throw IllegalArgumentException("챌린지를 수정할 권한이 없습니다")
         }
 
-        // 진행중인 챌린지는 수정 제한
-        if (challenge.isActive()) {
-            throw IllegalStateException("진행중인 챌린지는 수정할 수 없습니다")
-        }
-
         challenge.apply {
             title = request.title
             description = request.description
@@ -149,16 +144,64 @@ class ChallengeService(
 
     /**
      * 챌린지 삭제
+     * - 생성자만 삭제 가능
+     * - 시작 전 챌린지만 삭제 가능
+     * - 참여자들에게 알림 발송
      */
     @Transactional
     fun deleteChallenge(challengeId: String, loginId: String) {
         val challenge = findChallengeById(challengeId)
 
-        // 권한 검증
+        // 1. 권한 검증 (생성자만)
         if (challenge.createdId != loginId) {
             throw IllegalArgumentException("챌린지를 삭제할 권한이 없습니다")
         }
 
+        // 2. 상태 검증 (시작 전만 삭제 가능)
+        if (!challenge.isUpcoming()) {
+            throw IllegalStateException("시작 전 챌린지만 삭제할 수 있습니다")
+        }
+
+        // 3. 참여자 목록 조회 (알림용 - 삭제 전에!)
+        val participants = participantRepository.findByIdAndStatus(
+            challengeId,
+            ParticipantStatusEnum.ACTIVE
+        ).toList()
+
+        // 4. 알림 발송 (챌린지 삭제 전에!)
+        participants.forEach { participant ->
+            try {
+                if (participant.loginId != loginId) { // 생성자 본인 제외
+                    val user = userRepository.findByLoginId(participant.loginId)
+                    if (user != null) {
+                        notificationService.sendNotification(
+                            NotificationResponse(
+                                id = -1L,
+                                receiverId = user.id!!,
+                                receiverLoginId = user.loginId,
+                                senderId = null,
+                                senderLoginId = loginId,
+                                senderNickname = null,
+                                type = NotificationType.CHALLENGE,
+                                message = "참여 중이던 챌린지 '${challenge.title}'가 삭제되었습니다.",
+                                relatedId = challenge.id,
+                                relatedType = "CHALLENGE",
+                                isRead = false,
+                                createdAt = LocalDateTime.now()
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                // 알림 실패해도 삭제는 진행
+                println("Failed to send notification to ${participant.loginId}: ${e.message}")
+            }
+        }
+
+        // 5. 참여자 먼저 삭제 (Foreign Key 제약 해결)
+        participantRepository.deleteAllByChallengeId(challengeId)
+
+        // 6. 챌린지 삭제
         challengeRepository.delete(challenge)
     }
 

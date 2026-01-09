@@ -3,6 +3,7 @@ package com.planit.repository
 import com.planit.entity.ChallengeParticipant
 import com.planit.enums.ParticipantStatusEnum
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -51,4 +52,9 @@ interface ChallengeParticipantRepository : JpaRepository<ChallengeParticipant, S
         WHERE p.id = :id
     """)
     fun sumCertificationCountById(@Param("id") id: String): Long
+
+    // 챌린지 ID로 모든 참여자 삭제 (챌린지 삭제 시 사용)
+    @Modifying
+    @Query("DELETE FROM ChallengeParticipant p WHERE p.id = :challengeId")
+    fun deleteAllByChallengeId(@Param("challengeId") challengeId: String): Int
 }
