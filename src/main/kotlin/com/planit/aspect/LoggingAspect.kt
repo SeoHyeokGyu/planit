@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Pointcut
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -24,6 +25,7 @@ class LoggingAspect {
     private const val UUID_LENGTH = 8
     private const val MDC_UUID_KEY = "requestId"
     private const val MDC_API_KEY = "apiInfo"
+    private const val MDC_USER_KEY = "username"
   }
 
   @Pointcut("execution(* com.planit.controller..*(..))") fun controllerMethods() {}
@@ -39,8 +41,21 @@ class LoggingAspect {
       (RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes)?.request
     val methodInfo = request?.let { "${it.method} ${it.requestURI}" } ?: "UNKNOWN API"
 
-    // API 정보를 MDC에 저장하여 하위 레이어에서도 사용 가능하게 함
+    // SecurityContext에서 사용자 정보 가져오기
+    val authentication = SecurityContextHolder.getContext().authentication
+    val username =
+      if (authentication != null &&
+          authentication.isAuthenticated &&
+          authentication.principal != "anonymousUser"
+      ) {
+        authentication.name
+      } else {
+        "anonymous"
+      }
+
+    // API 정보와 사용자 정보를 MDC에 저장하여 하위 레이어에서도 사용 가능하게 함
     MDC.put(MDC_API_KEY, methodInfo)
+    MDC.put(MDC_USER_KEY, username)
 
     try {
       return executeLogging(layer = "Controller", uuid = uuid, joinPoint = joinPoint)
@@ -69,7 +84,8 @@ class LoggingAspect {
     val fullMethodName = "$className.$methodName"
 
     val apiInfo = MDC.get(MDC_API_KEY) ?: ""
-    val logTag = if (apiInfo.isNotEmpty()) "$uuid|$apiInfo" else uuid
+    val username = MDC.get(MDC_USER_KEY) ?: "unknown"
+    val logTag = if (apiInfo.isNotEmpty()) "$uuid|$username|$apiInfo" else "$uuid|$username"
 
     val argsString = formatArgs(joinPoint.args)
 

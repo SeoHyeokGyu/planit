@@ -22,4 +22,6 @@ export interface UserDeleteRequest {
 export interface UserDashboardStats {
   challengeCount: number;
   certificationCount: number;
+  followerCount: number;
+  followingCount: number;
 }

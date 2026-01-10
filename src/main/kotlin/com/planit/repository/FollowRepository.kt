@@ -70,6 +70,14 @@ interface FollowRepository : JpaRepository<Follow, Long> {
   fun countByFollowing_LoginId(followingLoginId: String): Long
 
   /**
+   * 특정 팔로워 Login ID를 가진 팔로우 관계의 개수를 조회합니다. (해당 유저가 팔로우하는 사람 수)
+   *
+   * @param followerLoginId 팔로우하는 사용자의 Login ID
+   * @return 팔로잉 수
+   */
+  fun countByFollower_LoginId(followerLoginId: String): Long
+
+  /**
    * 특정 팔로워 ID를 가진 사용자가 팔로우하는 모든 사용자의 ID 목록을 조회합니다.
    *
    * @param followerId 팔로우하는 사용자의 ID

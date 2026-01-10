@@ -1,29 +1,15 @@
 package com.planit.service
 
-import com.planit.dto.UserDashboardStats
-import com.planit.dto.UserDeleteRequest
-import com.planit.dto.UserPasswordUpdateRequest
-import com.planit.dto.UserProfileResponse
-import com.planit.dto.UserUpdateRequest
+import com.planit.dto.*
 import com.planit.entity.User
 import com.planit.enums.ParticipantStatusEnum
-import com.planit.repository.CertificationRepository
-import com.planit.repository.ChallengeParticipantRepository
-import com.planit.repository.ChallengeRepository
-import com.planit.repository.CommentRepository
-import com.planit.repository.FollowRepository
-import com.planit.repository.LikeRepository
-import com.planit.repository.NotificationRepository
-import com.planit.repository.UserExperienceRepository
-import com.planit.repository.UserPointRepository
-import com.planit.repository.UserRepository
-import java.util.NoSuchElementException
-import java.util.UUID
+import com.planit.repository.*
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 @Transactional
@@ -72,10 +58,14 @@ class UserService(
   fun getDashboardStats(loginId: String): UserDashboardStats {
     val challengeCount = challengeParticipantRepository.countByLoginIdAndStatus(loginId, ParticipantStatusEnum.ACTIVE)
     val certificationCount = certificationRepository.countByUser_LoginId(loginId)
+    val followerCount = followRepository.countByFollowing_LoginId(loginId)
+    val followingCount = followRepository.countByFollower_LoginId(loginId)
 
     return UserDashboardStats(
         challengeCount = challengeCount,
-        certificationCount = certificationCount
+        certificationCount = certificationCount,
+        followerCount = followerCount,
+        followingCount = followingCount
     )
   }
 
