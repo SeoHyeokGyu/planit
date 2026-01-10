@@ -152,3 +152,229 @@ Authorization: Bearer {{auth_token}}
 %}
 
 ###
+
+### ========================================
+### 통계 API (일별/주별/월별)
+### ========================================
+
+### 11. 포인트 통계 조회 (최근 7일)
+GET http://localhost:8080/api/points/me/statistics?startDate=2026-01-03&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 포인트 통계 (7일) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("기간:", summary.periodStart, "~", summary.periodEnd);
+        console.log("총 포인트 획득:", summary.totalPointsEarned);
+        console.log("일평균 포인트:", summary.averagePointsPerDay.toFixed(2));
+        console.log("총 거래 수:", summary.totalTransactions);
+        console.log("\n일별 데이터:", response.body.data.statistics.length, "일");
+
+        response.body.data.statistics.forEach((stat, idx) => {
+            if (stat.pointsEarned > 0) {
+                console.log(stat.date, ":", stat.pointsEarned, "P (누적:", stat.cumulativePoints, "P, 거래:", stat.transactionCount, ")");
+            }
+        });
+    }
+%}
+
+###
+
+### 12. 경험치 통계 조회 (최근 7일)
+GET http://localhost:8080/api/points/experience/me/statistics?startDate=2026-01-03&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 경험치 통계 (7일) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("기간:", summary.periodStart, "~", summary.periodEnd);
+        console.log("총 경험치 획득:", summary.totalExperienceEarned);
+        console.log("일평균 경험치:", summary.averageExperiencePerDay.toFixed(2));
+        console.log("레벨:", summary.startLevel, "->", summary.endLevel);
+        console.log("레벨업 횟수:", summary.levelUpsCount);
+        console.log("총 거래 수:", summary.totalTransactions);
+        console.log("\n일별 데이터:", response.body.data.statistics.length, "일");
+
+        response.body.data.statistics.forEach((stat, idx) => {
+            if (stat.experienceEarned > 0 || stat.levelUpOccurred) {
+                const levelUp = stat.levelUpOccurred ? " 🎉 레벨업!" : "";
+                console.log(stat.date, ":", stat.experienceEarned, "EXP (누적:", stat.cumulativeExperience, "EXP, Lv.", stat.level, levelUp, ")");
+            }
+        });
+    }
+%}
+
+###
+
+### 13. 포인트 통계 조회 (최근 30일)
+GET http://localhost:8080/api/points/me/statistics?startDate=2025-12-11&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 포인트 통계 (30일) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("총 포인트 획득:", summary.totalPointsEarned);
+        console.log("일평균 포인트:", summary.averagePointsPerDay.toFixed(2));
+        console.log("총 거래 수:", summary.totalTransactions);
+        console.log("데이터 수:", response.body.data.statistics.length, "일");
+    }
+%}
+
+###
+
+### 14. 경험치 통계 조회 (최근 30일)
+GET http://localhost:8080/api/points/experience/me/statistics?startDate=2025-12-11&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 경험치 통계 (30일) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("총 경험치 획득:", summary.totalExperienceEarned);
+        console.log("일평균 경험치:", summary.averageExperiencePerDay.toFixed(2));
+        console.log("레벨 변화:", summary.startLevel, "->", summary.endLevel, "(+", summary.levelUpsCount, ")");
+        console.log("총 거래 수:", summary.totalTransactions);
+        console.log("데이터 수:", response.body.data.statistics.length, "일");
+    }
+%}
+
+###
+
+### 15. 포인트 통계 조회 (최근 90일)
+GET http://localhost:8080/api/points/me/statistics?startDate=2025-10-11&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 포인트 통계 (90일) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("총 포인트 획득:", summary.totalPointsEarned);
+        console.log("일평균 포인트:", summary.averagePointsPerDay.toFixed(2));
+        console.log("총 거래 수:", summary.totalTransactions);
+    }
+%}
+
+###
+
+### 16. 경험치 통계 조회 (최근 90일)
+GET http://localhost:8080/api/points/experience/me/statistics?startDate=2025-10-11&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 경험치 통계 (90일) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("총 경험치 획득:", summary.totalExperienceEarned);
+        console.log("일평균 경험치:", summary.averageExperiencePerDay.toFixed(2));
+        console.log("레벨 변화:", summary.startLevel, "->", summary.endLevel, "(+", summary.levelUpsCount, ")");
+        console.log("총 거래 수:", summary.totalTransactions);
+    }
+%}
+
+###
+
+### ========================================
+### 에러 케이스 테스트
+### ========================================
+
+### 17. [에러] 잘못된 날짜 범위 (시작일 > 종료일)
+GET http://localhost:8080/api/points/me/statistics?startDate=2026-01-09&endDate=2026-01-03
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    if (!response.body.success) {
+        console.log("❌ 예상된 에러:", response.body.error.message);
+    } else {
+        console.log("⚠️  에러가 발생해야 하는데 성공했습니다.");
+    }
+%}
+
+###
+
+### 18. [에러] 기간이 1년 초과
+GET http://localhost:8080/api/points/me/statistics?startDate=2024-01-01&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    if (!response.body.success) {
+        console.log("❌ 예상된 에러:", response.body.error.message);
+    } else {
+        console.log("⚠️  에러가 발생해야 하는데 성공했습니다.");
+    }
+%}
+
+###
+
+### 19. [에러] 잘못된 날짜 형식
+GET http://localhost:8080/api/points/me/statistics?startDate=2026-13-32&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    if (!response.body.success) {
+        console.log("❌ 예상된 에러 (날짜 파싱)");
+    } else {
+        console.log("⚠️  에러가 발생해야 하는데 성공했습니다.");
+    }
+%}
+
+###
+
+### ========================================
+### 특수 케이스 테스트
+### ========================================
+
+### 20. 데이터가 없는 기간 (미래 날짜)
+GET http://localhost:8080/api/points/me/statistics?startDate=2027-01-01&endDate=2027-01-07
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 데이터 없는 기간 (미래) ===");
+    if (response.body.data) {
+        const summary = response.body.data.summary;
+        console.log("총 포인트:", summary.totalPointsEarned);
+        console.log("거래 수:", summary.totalTransactions);
+        console.log("일별 데이터 수:", response.body.data.statistics.length);
+
+        const allZero = response.body.data.statistics.every(s => s.pointsEarned === 0);
+        if (allZero && summary.totalPointsEarned === 0) {
+            console.log("✅ 모든 데이터가 0으로 올바르게 반환됨");
+        } else {
+            console.log("❌ 예상과 다른 데이터");
+        }
+    }
+%}
+
+###
+
+### 21. 하루만 조회
+GET http://localhost:8080/api/points/me/statistics?startDate=2026-01-09&endDate=2026-01-09
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+> {%
+    console.log("=== 하루만 조회 ===");
+    if (response.body.data) {
+        console.log("데이터 수:", response.body.data.statistics.length);
+        console.log("총 포인트:", response.body.data.summary.totalPointsEarned);
+        console.log("일평균:", response.body.data.summary.averagePointsPerDay);
+
+        if (response.body.data.statistics.length === 1) {
+            console.log("✅ 1일 데이터 정상 반환");
+        }
+    }
+%}
+
+###
