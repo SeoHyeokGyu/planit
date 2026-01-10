@@ -71,46 +71,46 @@ function ProfileContent() {
         <div className="flex flex-wrap gap-1 border-b-2 border-gray-200 dark:border-gray-700 mb-8">
           <button
             onClick={() => setActiveTab("certifications")}
-            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
+            className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
               activeTab === "certifications"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "border-blue-600 text-blue-700 bg-blue-100 shadow-sm"
+                : "border-transparent text-gray-700 hover:text-blue-600 hover:bg-gray-100"
             }`}
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-5 h-5" />
             인증
           </button>
           <button
             onClick={() => setActiveTab("followers")}
-            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
+            className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
               activeTab === "followers"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "border-blue-600 text-blue-700 bg-blue-100 shadow-sm"
+                : "border-transparent text-gray-700 hover:text-blue-600 hover:bg-gray-100"
             }`}
           >
-            <User className="w-4 h-4" />
+            <User className="w-5 h-5" />
             팔로워 ({followerCount})
           </button>
           <button
             onClick={() => setActiveTab("followings")}
-            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
+            className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
               activeTab === "followings"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "border-blue-600 text-blue-700 bg-blue-100 shadow-sm"
+                : "border-transparent text-gray-700 hover:text-blue-600 hover:bg-gray-100"
             }`}
           >
-            <Heart className="w-4 h-4" />
+            <Heart className="w-5 h-5" />
             팔로잉 ({followingCount})
           </button>
           <button
             onClick={() => setActiveTab("badges")}
-            className={`flex items-center gap-2 px-4 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
+            className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
               activeTab === "badges"
-                ? "border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-800"
-                : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "border-blue-600 text-blue-700 bg-blue-100 shadow-sm"
+                : "border-transparent text-gray-700 hover:text-blue-600 hover:bg-gray-100"
             }`}
           >
-            <Medal className="w-4 h-4" />
+            <Medal className="w-5 h-5" />
             배지
           </button>
         </div>
