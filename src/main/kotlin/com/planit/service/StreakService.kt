@@ -88,9 +88,9 @@ class StreakService(
 
         return StreakSummaryResponse(
             loginId = loginId,
-            totalCurrentStreak = (statistics["totalCurrentStreak"] as Long).toInt(),
-            maxLongestStreak = (statistics["maxLongestStreak"] as Long).toInt(),
-            activeStreakCount = (statistics["activeStreakCount"] as Long).toInt(),
+            totalCurrentStreak = (statistics["totalCurrentStreak"] as Number).toInt(),
+            maxLongestStreak = (statistics["maxLongestStreak"] as Number).toInt(),
+            activeStreakCount = (statistics["activeStreakCount"] as Number).toInt(),
             streaks = streakResponses
         )
     }
@@ -201,9 +201,9 @@ class StreakService(
         val items = statistics.map { stat ->
             StatisticItem(
                 label = (stat["date"] as LocalDate).toString(),
-                certificationCount = (stat["totalCertifications"] as Long).toInt(),
-                challengeCount = (stat["activeChallenges"] as Long).toInt(),
-                activeDay = (stat["totalCertifications"] as Long) > 0
+                certificationCount = (stat["totalCertifications"] as Number).toInt(),
+                challengeCount = (stat["activeChallenges"] as Number).toInt(),
+                activeDay = (stat["totalCertifications"] as Number).toLong() > 0
             )
         }
 
@@ -246,9 +246,9 @@ class StreakService(
             val month = (stat["month"] as Int)
             StatisticItem(
                 label = "${year}-${month.toString().padStart(2, '0')}",
-                certificationCount = (stat["totalCertifications"] as Long).toInt(),
+                certificationCount = (stat["totalCertifications"] as Number).toInt(),
                 challengeCount = 0, // 월별은 챌린지 수 집계 생략 가능
-                activeDay = (stat["activeDays"] as Long) > 0
+                activeDay = (stat["activeDays"] as Number).toLong() > 0
             )
         }
 
