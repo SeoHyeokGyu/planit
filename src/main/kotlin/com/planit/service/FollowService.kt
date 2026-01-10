@@ -1,9 +1,10 @@
 package com.planit.service
 
-import com.planit.dto.NotificationDto
+import com.planit.dto.NotificationResponse
 import com.planit.dto.UserProfileResponse
 import com.planit.entity.Follow
 import com.planit.enums.BadgeType
+import com.planit.enums.NotificationType
 import com.planit.exception.UserNotFoundException
 import com.planit.repository.FollowRepository
 import com.planit.repository.UserRepository
@@ -65,13 +66,20 @@ class FollowService(
 
     // 알림 전송
     notificationService.sendNotification(
-      followingLoginId,
-      NotificationDto(
+      NotificationResponse(
         id = UUID.randomUUID().toString(),
-        type = "INFO",
+        receiverId = following.id,
+        receiverLoginId = followingLoginId,
+        senderId = follower.id,
+        senderLoginId = followerLoginId,
+        senderNickname = follower.nickname,
+        type = NotificationType.FOLLOW,
         message = "${follower.nickname}님이 회원님을 팔로우하기 시작했습니다.",
+        relatedId = follower.id.toString(),
+        relatedType = "USER",
+        isRead = false,
         createdAt = LocalDateTime.now(),
-      ),
+      )
     )
   }
 
