@@ -18,20 +18,38 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
   const [selectedTab, setSelectedTab] = useState<"overview" | "calendar">("overview");
 
   // 스트릭 요약 조회
-  const { data: streakSummary, isLoading: isLoadingSummary } = useAllStreaks(userLoginId);
+  const { data: streakSummary, isLoading: isLoadingSummary, error: summaryError } = useAllStreaks(userLoginId);
 
   // 활동 캘린더 조회 (최근 30일)
-  const { data: calendar, isLoading: isLoadingCalendar } = useActivityCalendar(
+  const { data: calendar, isLoading: isLoadingCalendar, error: calendarError } = useActivityCalendar(
       userLoginId,
       30
   );
+
+  // 디버깅 로그 추가
+  console.log('[StreaksSection] userLoginId:', userLoginId);
+  console.log('[StreaksSection] streakSummary:', streakSummary);
+  console.log('[StreaksSection] calendar:', calendar);
+  console.log('[StreaksSection] isLoadingSummary:', isLoadingSummary);
+  console.log('[StreaksSection] summaryError:', summaryError);
+  console.log('[StreaksSection] calendarError:', calendarError);
 
   if (isLoadingSummary) {
     return <StreaksSectionSkeleton />;
   }
 
   if (!streakSummary) {
-    return null;
+    return (
+        <div className="p-8 text-center">
+          <p className="text-red-500">스트릭 데이터를 불러올 수 없습니다.</p>
+          <p className="text-sm text-gray-500 mt-2">userLoginId: {userLoginId}</p>
+          {summaryError && (
+              <p className="text-sm text-red-400 mt-2">
+                Error: {summaryError instanceof Error ? summaryError.message : 'Unknown error'}
+              </p>
+          )}
+        </div>
+    );
   }
 
   return (
