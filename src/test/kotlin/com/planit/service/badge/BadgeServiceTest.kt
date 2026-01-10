@@ -202,4 +202,32 @@ class BadgeServiceTest {
     assertEquals(badge.code, result[0].code)
     assertEquals(10L, result[0].currentValue)
   }
+
+  @Test
+  @DisplayName("모든 배지 검사 및 지급")
+  fun `checkAllBadges should check all badge types and return total new badges count`() {
+    // Given
+    every { userRepository.findByLoginId(user.loginId) } returns user
+    // 각 배지 타입별로 findAllByType이 호출될 것임
+    every { badgeRepository.findAllByType(any()) } returns listOf(badge)
+    // 각 타입별 체커
+    val checker = mockk<BadgeConditionChecker>()
+    every { badgeCheckerFactory.getChecker(any()) } returns checker
+    every { checker.check(user, any()) } returns true
+    
+    // 이미 획득했는지 검사 -> false (새로 획득)
+    every { userBadgeRepository.existsByUserIdAndBadgeCode(user.id!!, badge.code) } returns false
+    every { userBadgeRepository.save(any()) } returns UserBadge(user = user, badge = badge)
+    every { notificationService.sendNotification(any()) } returns Unit
+
+    // When
+    val count = badgeService.checkAllBadges(user.loginId)
+
+    // Then
+    // BadgeType 개수만큼 호출됨. BadgeType이 4개라면 4 * 1(배지 1개씩) = 4 리턴
+    // 하지만 BadgeType.entries 개수에 따라 달라짐. 현재 4개.
+    // 각 타입별로 checkAndAwardBadges가 호출되고, 거기서 1개씩 획득한다고 가정.
+    assertEquals(BadgeType.entries.size, count)
+    verify(exactly = BadgeType.entries.size) { userBadgeRepository.save(any()) }
+  }
 }
