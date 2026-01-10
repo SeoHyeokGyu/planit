@@ -79,15 +79,15 @@ export default function BadgesSection({ userLoginId, isOwnProfile }: BadgesSecti
 
         <div className="flex items-center gap-2">
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-            <SelectTrigger className="w-[120px] h-9 bg-white dark:bg-gray-950">
-              <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
+            <SelectTrigger className="w-[120px] h-9 bg-white dark:bg-gray-950 border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+              <ArrowUpDown className="w-4 h-4 mr-2 text-blue-500 opacity-70" />
               <SelectValue placeholder="정렬" />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-950 border shadow-lg z-50">
-              <SelectItem value="acquired">획득순</SelectItem>
-              <SelectItem value="grade">등급순</SelectItem>
-              <SelectItem value="code">종류순</SelectItem>
-              <SelectItem value="name">이름순</SelectItem>
+            <SelectContent className="bg-white dark:bg-gray-950 border border-slate-200 dark:border-slate-800 shadow-xl z-50">
+              <SelectItem value="acquired" className="focus:bg-blue-50 dark:focus:bg-blue-900/20">획득순</SelectItem>
+              <SelectItem value="grade" className="focus:bg-blue-50 dark:focus:bg-blue-900/20">등급순</SelectItem>
+              <SelectItem value="code" className="focus:bg-blue-50 dark:focus:bg-blue-900/20">종류순</SelectItem>
+              <SelectItem value="name" className="focus:bg-blue-50 dark:focus:bg-blue-900/20">이름순</SelectItem>
             </SelectContent>
           </Select>
 
@@ -95,12 +95,12 @@ export default function BadgesSection({ userLoginId, isOwnProfile }: BadgesSecti
             <Button
               variant="outline"
               size="sm"
-              className="h-9 px-3 gap-1.5"
+              className="h-9 px-3 gap-1.5 border-blue-200 bg-blue-50/50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 hover:border-blue-300 dark:bg-blue-900/20 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-all shadow-sm"
               onClick={() => checkBadges(userLoginId)}
               disabled={isChecking}
             >
               <RefreshCcw className={`w-4 h-4 ${isChecking ? "animate-spin" : ""}`} />
-              <span className="hidden sm:inline">확인</span>
+              <span className="hidden sm:inline font-medium">배지 확인</span>
             </Button>
           )}
         </div>

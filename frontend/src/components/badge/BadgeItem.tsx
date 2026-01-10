@@ -57,8 +57,15 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
           </h3>
 
           {isAcquired && badge.acquiredAt ? (
-            <span className="text-[10px] opacity-70 font-medium">
-              {new Date(badge.acquiredAt).toLocaleDateString("ko-KR")}
+            <span className="text-[10px] opacity-70 font-medium whitespace-nowrap">
+              {new Date(badge.acquiredAt).toLocaleString("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })}
             </span>
           ) : (
             <div className="w-full mt-2 px-1">
