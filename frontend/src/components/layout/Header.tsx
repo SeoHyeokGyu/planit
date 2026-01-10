@@ -137,6 +137,15 @@ export default function Header() {
                         <Medal className="w-4 h-4" />
                         내 배지
                       </Link>
+                      {/* 내 스트릭 */}
+                      <Link
+                          href="/profile?tab=streaks"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-medium transition-colors border-b border-gray-100"
+                          onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <Flame className="w-4 h-4" />
+                        내 스트릭
+                      </Link>
 
                       {/* 설정 */}
                       <Link

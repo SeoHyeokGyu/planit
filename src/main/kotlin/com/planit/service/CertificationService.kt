@@ -11,6 +11,7 @@ import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
 import com.planit.service.badge.BadgeService
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -27,7 +28,10 @@ class CertificationService(
   private val notificationService: NotificationService,
   private val rewardService: RewardService,
   private val badgeService: BadgeService,
+  private val streakService: StreakService,
 ) {
+
+  private val logger = LoggerFactory.getLogger(CertificationService::class.java)
 
   /**
    * 새로운 인증을 생성합니다.
@@ -72,6 +76,13 @@ class CertificationService(
 
     // 배지 획득 조건 체크
     badgeService.checkAndAwardBadges(user, BadgeType.CERTIFICATION_COUNT)
+
+    // 스트릭 기록 추가
+    try {
+      streakService.recordCertification(challenge.id, userLoginId)
+    } catch (e: Exception) {
+      logger.error("스트릭 기록 실패 - challengeId: ${challenge.id}, loginId: $userLoginId", e)
+    }
 
     return CertificationResponse.from(savedCertification)
   }
