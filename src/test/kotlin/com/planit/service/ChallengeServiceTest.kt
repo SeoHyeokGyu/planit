@@ -4,6 +4,7 @@ import com.planit.dto.ChallengeRequest
 import com.planit.dto.ChallengeSearchRequest
 import com.planit.entity.Challenge
 import com.planit.entity.ChallengeParticipant
+import com.planit.entity.User
 import com.planit.enums.ParticipantStatusEnum
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
@@ -117,6 +118,7 @@ class ChallengeServiceTest {
     fun `getChallengeById should succeed when challenge exists`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        every { valueOperations.get(any()) } returns "10"
 
         // When
         val result = challengeService.getChallengeById(challengeId)
@@ -124,6 +126,7 @@ class ChallengeServiceTest {
         // Then
         assertNotNull(result)
         assertEquals("30일 운동 챌린지", result.title)
+        assertEquals(10L, result.viewCnt)
         verify(exactly = 1) { challengeRepository.findById(challengeId) }
     }
 
@@ -280,7 +283,21 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 삭제 성공")
     fun `deleteChallenge should succeed with valid permission`() {
         // Given
-        every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
+        val futureChallenge = Challenge(
+            title = "30일 운동 챌린지",
+            description = "매일 30분씩 운동하기",
+            category = "EXERCISE",
+            difficulty = "NORMAL",
+            startDate = now.plusDays(10), // 시작 전
+            endDate = now.plusDays(40),
+            createdId = "user123",
+            viewCnt = 0,
+            participantCnt = 0,
+            certificationCnt = 0
+        )
+        every { challengeRepository.findById(challengeId) } returns Optional.of(futureChallenge)
+        every { participantRepository.findByIdAndStatus(challengeId, ParticipantStatusEnum.ACTIVE) } returns emptyList()
+        every { participantRepository.deleteAllByChallengeId(challengeId) } returns 0
         every { challengeRepository.delete(any()) } just runs
 
         // When
@@ -310,10 +327,12 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 참여 성공")
     fun `joinChallenge should succeed when not already participating`() {
         // Given
+        val user = User(loginId = "user123", password = "password", nickname = "tester")
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
         every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns false
         every { participantRepository.save(any()) } returns participant
         every { challengeRepository.save(any()) } returns challenge
+        every { userRepository.findByLoginId("user123") } returns user
 
         // When
         val result = challengeService.joinChallenge(challengeId, "user123")
@@ -347,10 +366,12 @@ class ChallengeServiceTest {
     @DisplayName("챌린지 탈퇴 성공")
     fun `withdrawChallenge should succeed when actively participating`() {
         // Given
+        val user = User(loginId = "user123", password = "password", nickname = "tester")
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns Optional.of(participant).isPresent
+        every { participantRepository.findByIdAndLoginId(challengeId, "user123") } returns Optional.of(participant)
         every { participantRepository.save(any()) } returns participant
         every { challengeRepository.save(any()) } returns challenge
+        every { userRepository.findByLoginId("user123") } returns user
 
         // When
         challengeService.withdrawChallenge(challengeId, "user123")
@@ -358,7 +379,7 @@ class ChallengeServiceTest {
         // Then
         assertEquals(ParticipantStatusEnum.WITHDRAWN, participant.status)
         assertNotNull(participant.withdrawnAt)
-        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, "user123") }
+        verify(exactly = 1) { participantRepository.findByIdAndLoginId(challengeId, "user123") }
         verify(exactly = 1) { participantRepository.save(any()) }
         verify(exactly = 1) { challengeRepository.save(any()) }
     }
@@ -368,14 +389,14 @@ class ChallengeServiceTest {
     fun `withdrawChallenge should throw NoSuchElementException when not participating`() {
         // Given
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByIdAndLoginId(challengeId, "user123") } returns false
+        every { participantRepository.findByIdAndLoginId(challengeId, "user123") } returns Optional.empty()
 
         // When & Then
         val exception = assertThrows<NoSuchElementException> {
             challengeService.withdrawChallenge(challengeId, "user123")
         }
         assertEquals("참여 정보를 찾을 수 없습니다", exception.message)
-        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, "user123") }
+        verify(exactly = 1) { participantRepository.findByIdAndLoginId(challengeId, "user123") }
         verify(exactly = 0) { participantRepository.save(any()) }
     }
 
@@ -416,7 +437,7 @@ class ChallengeServiceTest {
         // Given
         val participants = listOf(participant)
         every { challengeRepository.findById(challengeId) } returns Optional.of(challenge)
-        every { participantRepository.existsByIdAndLoginId(challengeId, loginId) } returns participants.isEmpty()
+        every { participantRepository.findByChallenge_Id(challengeId) } returns participants
 
         // When
         val result = challengeService.getParticipants(challengeId)
@@ -425,7 +446,7 @@ class ChallengeServiceTest {
         assertNotNull(result)
         assertEquals(1, result.size)
         assertEquals("user123", result[0].loginId)
-        verify(exactly = 1) { participantRepository.existsByIdAndLoginId(challengeId, loginId) }
+        verify(exactly = 1) { participantRepository.findByChallenge_Id(challengeId) }
     }
 
     @Test

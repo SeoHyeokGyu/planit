@@ -163,8 +163,13 @@ class BadgeServiceTest {
   fun `getAllBadges should return all badges with correct isAcquired status when user logged in`() {
     // Given: 특정 배지를 획득한 사용자 상태 설정
     val userBadge = UserBadge(user = user, badge = badge, acquiredAt = LocalDateTime.now())
+    val checker = mockk<BadgeConditionChecker>()
+
     every { badgeRepository.findAll() } returns listOf(badge)
+    every { userRepository.findByLoginId(user.loginId) } returns user
     every { userBadgeRepository.findByUserLoginId(user.loginId) } returns listOf(userBadge)
+    every { badgeCheckerFactory.getChecker(badge.type) } returns checker
+    every { checker.getCurrentValue(user) } returns 10L
 
     // When: 로그인한 사용자로 목록 조회
     val result = badgeService.getAllBadges(user.loginId)
@@ -173,6 +178,7 @@ class BadgeServiceTest {
     assertEquals(1, result.size)
     assertTrue(result[0].isAcquired)
     assertEquals(userBadge.acquiredAt, result[0].acquiredAt)
+    assertEquals(10L, result[0].currentValue)
   }
 
   @Test
@@ -180,7 +186,12 @@ class BadgeServiceTest {
   fun `getMyBadges should return only acquired badges`() {
     // Given: 사용자가 획득한 배지 정보 설정
     val userBadge = UserBadge(user = user, badge = badge, acquiredAt = LocalDateTime.now())
+    val checker = mockk<BadgeConditionChecker>()
+
+    every { userRepository.findByLoginId(user.loginId) } returns user
     every { userBadgeRepository.findByUserLoginId(user.loginId) } returns listOf(userBadge)
+    every { badgeCheckerFactory.getChecker(badge.type) } returns checker
+    every { checker.getCurrentValue(user) } returns 10L
 
     // When: 내 배지 목록 조회
     val result = badgeService.getMyBadges(user.loginId)
@@ -189,5 +200,34 @@ class BadgeServiceTest {
     assertEquals(1, result.size)
     assertTrue(result[0].isAcquired)
     assertEquals(badge.code, result[0].code)
+    assertEquals(10L, result[0].currentValue)
+  }
+
+  @Test
+  @DisplayName("모든 배지 검사 및 지급")
+  fun `checkAllBadges should check all badge types and return total new badges count`() {
+    // Given
+    every { userRepository.findByLoginId(user.loginId) } returns user
+    // 각 배지 타입별로 findAllByType이 호출될 것임
+    every { badgeRepository.findAllByType(any()) } returns listOf(badge)
+    // 각 타입별 체커
+    val checker = mockk<BadgeConditionChecker>()
+    every { badgeCheckerFactory.getChecker(any()) } returns checker
+    every { checker.check(user, any()) } returns true
+    
+    // 이미 획득했는지 검사 -> false (새로 획득)
+    every { userBadgeRepository.existsByUserIdAndBadgeCode(user.id!!, badge.code) } returns false
+    every { userBadgeRepository.save(any()) } returns UserBadge(user = user, badge = badge)
+    every { notificationService.sendNotification(any()) } returns Unit
+
+    // When
+    val count = badgeService.checkAllBadges(user.loginId)
+
+    // Then
+    // BadgeType 개수만큼 호출됨. BadgeType이 4개라면 4 * 1(배지 1개씩) = 4 리턴
+    // 하지만 BadgeType.entries 개수에 따라 달라짐. 현재 4개.
+    // 각 타입별로 checkAndAwardBadges가 호출되고, 거기서 1개씩 획득한다고 가정.
+    assertEquals(BadgeType.entries.size, count)
+    verify(exactly = BadgeType.entries.size) { userBadgeRepository.save(any()) }
   }
 }

@@ -69,4 +69,12 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
      * @return 인증 개수
      */
     fun countByUserId(userId: Long): Long
+
+    /**
+     * 특정 사용자의 인증 날짜 목록을 내림차순으로 조회합니다.
+     * @param userId 사용자 ID
+     * @return 인증 날짜 목록
+     */
+    @Query("SELECT c.createdAt FROM Certification c WHERE c.user.id = :userId ORDER BY c.createdAt DESC")
+    fun findDatesByUserId(@Param("userId") userId: Long): List<LocalDateTime>
 }

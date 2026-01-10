@@ -12,8 +12,7 @@ class SocialBadgeConditionChecker(
 
     override val supportedType = BadgeType.FOLLOWER_COUNT
 
-    override fun check(user: User, requiredValue: Long): Boolean {
-        val followerCount = followRepository.countByFollowing_LoginId(user.loginId)
-        return followerCount >= requiredValue
+    override fun getCurrentValue(user: User): Long {
+        return followRepository.countByFollowing_LoginId(user.loginId)
     }
 }

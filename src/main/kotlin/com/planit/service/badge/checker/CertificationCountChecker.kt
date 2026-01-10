@@ -12,8 +12,7 @@ class CertificationCountChecker(
 
     override val supportedType = BadgeType.CERTIFICATION_COUNT
 
-    override fun check(user: User, requiredValue: Long): Boolean {
-        val count = certificationRepository.countByUserId(user.id!!)
-        return count >= requiredValue
+    override fun getCurrentValue(user: User): Long {
+        return certificationRepository.countByUserId(user.id!!)
     }
 }

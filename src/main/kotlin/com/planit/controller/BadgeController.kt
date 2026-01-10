@@ -8,12 +8,21 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/badges")
 class BadgeController(private val badgeService: BadgeService) {
+
+  @PostMapping("/check-all")
+  fun checkAllBadges(
+    @AuthenticationPrincipal userDetails: UserDetails
+  ): ResponseEntity<ApiResponse<Int>> {
+    val count = badgeService.checkAllBadges(userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(count))
+  }
 
   @GetMapping
   fun getAllBadges(
