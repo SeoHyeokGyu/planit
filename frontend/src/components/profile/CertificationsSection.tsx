@@ -57,7 +57,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
     return (
       <Card className="shadow-lg rounded-xl">
         <CardHeader>
-          <CardTitle className="text-gray-900 dark:text-white">내 인증 목록</CardTitle>
+          <CardTitle className="text-gray-900">내 인증 목록</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-red-500">인증 목록을 불러오는 데 실패했습니다: {(error as Error).message}</p>
@@ -67,18 +67,18 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
   }
 
   return (
-    <Card className="shadow-lg rounded-xl dark:bg-gray-800/50">
+    <Card className="shadow-lg rounded-xl bg-white">
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between pb-4">
         <div className="flex items-center space-x-3 mb-4 sm:mb-0">
           <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white">
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">나의 활동</CardTitle>
-            <CardDescription className="text-gray-600 dark:text-gray-300">나의 모든 챌린지 인증 기록입니다.</CardDescription>
+            <CardTitle className="text-2xl font-bold text-gray-900">나의 활동</CardTitle>
+            <CardDescription className="text-gray-600">나의 모든 챌린지 인증 기록입니다.</CardDescription>
           </div>
         </div>
-        <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+        <div className="flex bg-gray-100 p-1 rounded-lg">
           <Button
             variant={viewMode === "list" ? "default" : "ghost"}
             size="sm"
@@ -117,20 +117,20 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
             
             {selectedDate && (
               <div className="mt-4 border-t pt-4 animate-in fade-in slide-in-from-top-2">
-                <h3 className="text-md font-semibold mb-3 text-gray-800 dark:text-gray-200">
+                <h3 className="text-md font-semibold mb-3 text-gray-800">
                   {selectedDate} 인증 ({selectedDateCertifications.length}개)
                 </h3>
                 {selectedDateCertifications.length === 0 ? (
-                  <p className="text-sm text-center text-gray-700 dark:text-gray-300 py-4">이 날짜에는 인증 기록이 없습니다.</p>
+                  <p className="text-sm text-center text-gray-600 py-4">이 날짜에는 인증 기록이 없습니다.</p>
                 ) : (
                   <div className="grid gap-3">
                     {selectedDateCertifications.map((cert) => (
-                      <Card key={cert.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer rounded-lg"
+                      <Card key={cert.id} className="p-3 hover:bg-blue-50 transition-colors cursor-pointer rounded-lg"
                         onClick={() => router.push(`/certification/${cert.id}`)}>
                         <div className="flex justify-between items-center">
                           <div>
-                            <p className="font-semibold text-md text-gray-900 dark:text-white">{cert.title}</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">{cert.challengeTitle}</p>
+                            <p className="font-semibold text-md text-gray-900">{cert.title}</p>
+                            <p className="text-sm text-gray-600">{cert.challengeTitle}</p>
                           </div>
                           {cert.photoUrl && (
                              <div className="w-12 h-12 relative rounded-md overflow-hidden">
@@ -149,21 +149,21 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
           <>
             {certificationsList.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-700 dark:text-gray-300">아직 작성된 인증이 없습니다.</p>
+                <p className="text-gray-600">아직 작성된 인증이 없습니다.</p>
                 <Button className="mt-4" onClick={() => router.push("/challenge")}>챌린지 시작하기</Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {certificationsList.map((cert) => (
-                  <Card key={cert.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer dark:bg-gray-900"
+                  <Card key={cert.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer bg-white"
                     onClick={() => router.push(`/certification/${cert.id}`)}>
                     {cert.photoUrl && (
                       <div className="mb-3 w-full h-40 relative">
                         <Image src={cert.photoUrl} alt={cert.title} layout="fill" objectFit="cover" className="rounded-md" />
                       </div>
                     )}
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">{cert.title}</CardTitle>
-                    <CardDescription className="text-sm mt-1 text-gray-600 dark:text-gray-300">
+                    <CardTitle className="text-lg font-semibold text-gray-900">{cert.title}</CardTitle>
+                    <CardDescription className="text-sm mt-1 text-gray-600">
                       {cert.challengeTitle} | {new Date(cert.createdAt).toLocaleDateString()}
                     </CardDescription>
                   </Card>

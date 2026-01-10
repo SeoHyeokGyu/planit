@@ -31,8 +31,8 @@ export default function BadgesSection({ userLoginId, isOwnProfile }: BadgesSecti
 
   if (!badges || badges.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-500 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm">
-        <Trophy className="w-12 h-12 mb-4 text-gray-300 dark:text-gray-600" />
+      <div className="flex flex-col items-center justify-center py-16 text-gray-500 bg-white rounded-xl border border-gray-200 shadow-sm">
+        <Trophy className="w-12 h-12 mb-4 text-gray-300" />
         <p className="text-lg font-medium">아직 배지가 없습니다.</p>
         <p className="text-sm">다양한 활동을 통해 배지를 획득해보세요!</p>
       </div>
@@ -47,9 +47,9 @@ export default function BadgesSection({ userLoginId, isOwnProfile }: BadgesSecti
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">획득 현황</h2>
+          <h2 className="text-xl font-bold text-gray-900">획득 현황</h2>
         </div>
-        <span className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full">
+        <span className="text-sm font-medium px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
           {acquiredCount} / {totalCount}
         </span>
       </div>

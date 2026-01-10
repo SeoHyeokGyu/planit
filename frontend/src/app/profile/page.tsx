@@ -63,7 +63,7 @@ function ProfileContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
       <ProfileHeader user={user} isOwnProfile={true} onFollowersClick={() => setActiveTab("followers")} onFollowingsClick={() => setActiveTab("followings")} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -144,14 +144,14 @@ function ProfileContent() {
                 </div>
               ) : (followers?.length ?? 0) > 0 ? (
                 <>
-                  <div className="text-sm text-gray-700 font-medium">
+                  <div className="text-sm text-gray-900 font-medium">
                     총 <span className="font-bold text-blue-600">{followers?.length}</span>명의 팔로워
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {followers?.map((follower) => (
                       <div
                         key={follower.loginId}
-                        className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-lg"
+                        className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-white rounded-lg"
                       >
                         <div className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -159,14 +159,14 @@ function ProfileContent() {
                               className="flex-1 hover:opacity-80 transition-opacity"
                               onClick={() => router.push(`/profile/${follower.loginId}`)}
                             >
-                              <p className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-1">{follower.nickname}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-300">@{follower.loginId}</p>
+                              <p className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{follower.nickname}</p>
+                              <p className="text-sm text-gray-600">@{follower.loginId}</p>
                             </div>
                           </div>
                           <div className="flex gap-2 pt-2">
                             <button
                               onClick={() => router.push(`/profile/${follower.loginId}`)}
-                              className="flex-1 px-3 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400 rounded-lg transition-all border border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                              className="flex-1 px-3 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all border border-gray-300 hover:border-blue-400"
                             >
                               프로필
                             </button>
@@ -185,7 +185,7 @@ function ProfileContent() {
                   </div>
                 </>
               ) : (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-12 text-gray-500">
                   팔로워가 없습니다.
                 </div>
               )}
@@ -207,14 +207,14 @@ function ProfileContent() {
                 </div>
               ) : (followings?.length ?? 0) > 0 ? (
                 <>
-                  <div className="text-sm text-gray-700 font-medium">
+                  <div className="text-sm text-gray-900 font-medium">
                     총 <span className="font-bold text-blue-600">{followings?.length}</span>명을 팔로우 중
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {followings?.map((following) => (
                       <div
                         key={following.loginId}
-                        className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-lg"
+                        className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-400 group bg-white rounded-lg"
                       >
                         <div className="p-4">
                           <div className="flex items-start justify-between mb-3">
@@ -222,14 +222,14 @@ function ProfileContent() {
                               className="flex-1 hover:opacity-80 transition-opacity"
                               onClick={() => router.push(`/profile/${following.loginId}`)}
                             >
-                              <p className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors line-clamp-1">{following.nickname}</p>
-                              <p className="text-sm text-gray-600 dark:text-gray-300">@{following.loginId}</p>
+                              <p className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">{following.nickname}</p>
+                              <p className="text-sm text-gray-600">@{following.loginId}</p>
                             </div>
                           </div>
                           <div className="flex gap-2 pt-2">
                             <button
                               onClick={() => router.push(`/profile/${following.loginId}`)}
-                              className="flex-1 px-3 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400 rounded-lg transition-all border border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                              className="flex-1 px-3 py-2 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all border border-gray-300 hover:border-blue-400"
                             >
                               프로필
                             </button>
@@ -248,7 +248,7 @@ function ProfileContent() {
                   </div>
                 </>
               ) : (
-                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <div className="text-center py-12 text-gray-500">
                   팔로잉이 없습니다.
                 </div>
               )}
@@ -272,9 +272,9 @@ export default function ProfilePage() {
 // --- Skeleton Component for the new layout ---
 function ProfilePageSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900 animate-pulse">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 animate-pulse">
       {/* Header Skeleton */}
-      <header className="bg-white dark:bg-gray-800/50 shadow-sm">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex items-center space-x-6">
             <Skeleton className="h-24 w-24 rounded-full" />
@@ -291,7 +291,7 @@ function ProfilePageSkeleton() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column Skeleton */}
           <div className="lg:col-span-2 space-y-12">
-            <div className="p-6 bg-white dark:bg-gray-800/50 rounded-xl shadow-sm">
+            <div className="p-6 bg-white rounded-xl shadow-sm">
               <Skeleton className="h-8 w-40 mb-6" />
               <div className="flex items-center justify-end mb-4">
                 <Skeleton className="h-9 w-32" />
@@ -302,14 +302,14 @@ function ProfilePageSkeleton() {
 
           {/* Right Column Skeleton */}
           <div className="space-y-8">
-            <div className="p-6 bg-white dark:bg-gray-800/50 rounded-xl shadow-sm">
+            <div className="p-6 bg-white rounded-xl shadow-sm">
                <Skeleton className="h-7 w-32 mb-6" />
                <div className="space-y-4">
                  <Skeleton className="h-10 w-full" />
                  <Skeleton className="h-10 w-full" />
                </div>
             </div>
-            <div className="p-6 bg-white dark:bg-gray-800/50 rounded-xl shadow-sm">
+            <div className="p-6 bg-white rounded-xl shadow-sm">
                <Skeleton className="h-7 w-40 mb-6" />
                <div className="space-y-4">
                  <Skeleton className="h-10 w-full" />
