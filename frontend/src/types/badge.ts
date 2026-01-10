@@ -13,4 +13,6 @@ export interface BadgeResponse {
   grade: BadgeGrade;
   isAcquired: boolean;
   acquiredAt?: string; // ISO Date string
+  requiredValue: number;
+  currentValue: number;
 }

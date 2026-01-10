@@ -12,12 +12,15 @@ data class BadgeResponse(
   val grade: BadgeGrade,
   val isAcquired: Boolean,
   val acquiredAt: LocalDateTime? = null,
+  val requiredValue: Long = 0,
+  val currentValue: Long = 0,
 ) {
   companion object {
     fun from(
       badge: Badge,
       isAcquired: Boolean = false,
       acquiredAt: LocalDateTime? = null,
+      currentValue: Long = 0,
     ): BadgeResponse {
       return BadgeResponse(
         code = badge.code,
@@ -27,6 +30,8 @@ data class BadgeResponse(
         grade = badge.grade,
         isAcquired = isAcquired,
         acquiredAt = acquiredAt,
+        requiredValue = badge.requiredValue,
+        currentValue = currentValue,
       )
     }
   }

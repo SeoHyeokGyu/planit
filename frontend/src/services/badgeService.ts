@@ -26,4 +26,15 @@ export const badgeService = {
     const response = await api.get<ApiResponse<BadgeResponse[]>>(`/api/badges/user/${loginId}`);
     return response.data;
   },
+
+  /**
+   * 모든 배지 획득 조건 재검사 요청
+   * @param loginId 대상 사용자 로그인 ID (현재는 본인만 가능)
+   * @returns 새로 획득한 배지 개수
+   */
+  checkAllBadges: async (loginId: string): Promise<number> => {
+    // 현재 백엔드는 토큰 기반으로 본인만 처리하지만, 인터페이스 통일성을 위해 인자를 받음
+    const response = await api.post<ApiResponse<number>>("/api/badges/check-all");
+    return response.data;
+  },
 };

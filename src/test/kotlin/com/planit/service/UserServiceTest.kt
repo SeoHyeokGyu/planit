@@ -2,7 +2,7 @@ package com.planit.service
 
 import com.planit.dto.UserPasswordUpdateRequest
 import com.planit.entity.User
-import com.planit.repository.UserRepository
+import com.planit.repository.*
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -20,6 +20,16 @@ import org.springframework.security.crypto.password.PasswordEncoder
 class UserServiceTest {
   @MockK private lateinit var userRepository: UserRepository
   @MockK private lateinit var passwordEncoder: PasswordEncoder
+  @MockK private lateinit var certificationRepository: CertificationRepository
+  @MockK private lateinit var challengeParticipantRepository: ChallengeParticipantRepository
+  @MockK private lateinit var likeRepository: LikeRepository
+  @MockK private lateinit var followRepository: FollowRepository
+  @MockK private lateinit var notificationRepository: NotificationRepository
+  @MockK private lateinit var userPointRepository: UserPointRepository
+  @MockK private lateinit var userExperienceRepository: UserExperienceRepository
+  @MockK private lateinit var commentRepository: CommentRepository
+  @MockK private lateinit var challengeRepository: ChallengeRepository
+  
   @InjectMockKs private lateinit var userService: UserService
 
   private lateinit var user: User

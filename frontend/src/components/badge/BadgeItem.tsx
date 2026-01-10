@@ -56,17 +56,51 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
             {badge.name}
           </h3>
 
-          {isAcquired && badge.acquiredAt && (
-            <span className="text-[10px] opacity-70 font-medium">
-              {new Date(badge.acquiredAt).toLocaleDateString("ko-KR")}
+          {isAcquired && badge.acquiredAt ? (
+            <span className="text-[10px] opacity-70 font-medium whitespace-nowrap">
+              {new Date(badge.acquiredAt).toLocaleString("ko-KR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })}
             </span>
+          ) : (
+            <div className="w-full mt-2 px-1">
+              <div className="flex justify-between text-[10px] text-gray-500 dark:text-gray-400 mb-1">
+                <span>진행률</span>
+                <span>
+                  {Math.floor((badge.currentValue / badge.requiredValue) * 100)}%
+                </span>
+              </div>
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 dark:bg-blue-600 transition-all duration-300"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      (badge.currentValue / badge.requiredValue) * 100
+                    )}%`,
+                  }}
+                />
+              </div>
+              <div className="text-[10px] text-center text-gray-400 mt-1">
+                {badge.currentValue} / {badge.requiredValue}
+              </div>
+            </div>
           )}
         </div>
       </TooltipTrigger>
       <TooltipContent className="max-w-[200px] text-center p-3 bg-white dark:bg-gray-950">
         <p className="font-bold mb-1">{badge.name}</p>
         <p className="text-xs text-muted-foreground">{badge.description}</p>
-        {!isAcquired && <p className="text-xs text-red-400 mt-2 font-medium">미획득</p>}
+        {!isAcquired && (
+          <p className="text-xs text-blue-500 mt-2 font-medium">
+            현재: {badge.currentValue} / 목표: {badge.requiredValue}
+          </p>
+        )}
       </TooltipContent>
     </Tooltip>
   );

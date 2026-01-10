@@ -131,4 +131,22 @@ class BadgeControllerTest {
       .andExpect(jsonPath("$.data[0].name").value("Test Badge"))
       .andExpect(jsonPath("$.data[0].isAcquired").value(true))
   }
+
+  @Test
+  @DisplayName("배지 수동 획득 검사 성공")
+  fun `checkAllBadges should return count of newly acquired badges`() {
+    // Given
+    val username = "testuser_check"
+    setAuthentication(username)
+    val newBadgesCount = 3
+
+    every { badgeService.checkAllBadges(username) } returns newBadgesCount
+
+    // When & Then
+    mockMvc
+      .perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/badges/check-all").contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk)
+      .andExpect(jsonPath("$.success").value(true))
+      .andExpect(jsonPath("$.data").value(newBadgesCount))
+  }
 }

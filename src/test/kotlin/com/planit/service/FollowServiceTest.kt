@@ -84,8 +84,8 @@ class FollowServiceTest {
       every { followingCountCache.get(userA.loginId) } returns null
       every { followerCountCache.get(userB.loginId) } returns null
       
-      every { badgeService.checkAndAwardBadges(any(), any()) } returns Unit
-      every { notificationService.sendNotification(any(), any()) } returns Unit
+      every { badgeService.checkAndAwardBadges(any(), any()) } returns 0
+      every { notificationService.sendNotification(any()) } returns Unit
 
       // When
       followService.follow(userA.loginId, userB.loginId)

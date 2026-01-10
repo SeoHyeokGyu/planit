@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/authStore"; // Import useAuthStore
+import { toast } from "sonner"; // Import toast
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -44,6 +45,10 @@ export const api = {
 
     if (!response.ok) {
       const errorMessage = result?.error?.message || result?.message || `HTTP error! status: ${response.status}`;
+      // 서버에서 내려주는 error.message를 toast로 표시
+      // 단, 401(Unauthorized)는 로그아웃 처리와 겹치거나 너무 빈번할 수 있으니 제외하거나 상황에 따라 판단
+      // 여기서는 모든 에러에 대해 사용자에게 알림을 주는 것이 안전
+      toast.error(errorMessage); 
       throw new Error(errorMessage);
     }
 

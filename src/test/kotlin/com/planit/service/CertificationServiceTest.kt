@@ -90,7 +90,7 @@ class CertificationServiceTest {
       every { participantRepository.findByIdAndLoginId(challengeId, user.loginId) } returns
         Optional.empty()
       every { rewardService.grantCertificationReward(any()) } answers {}
-      every { badgeService.checkAndAwardBadges(any(), any()) } answers {}
+      every { badgeService.checkAndAwardBadges(any(), any()) } returns 0
 
       // When
       val response = certificationService.createCertification(request, user.loginId)

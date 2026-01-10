@@ -2,20 +2,15 @@ package com.planit.service.badge.checker
 
 import com.planit.entity.User
 import com.planit.enums.BadgeType
-import com.planit.repository.CertificationRepository
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
-class CertificationStreakChecker(
-    private val certificationRepository: CertificationRepository
-) : BadgeConditionChecker {
+class CertificationStreakChecker() : BadgeConditionChecker {
 
-    override val supportedType = BadgeType.CERTIFICATION_STREAK
+  override val supportedType = BadgeType.CERTIFICATION_STREAK
 
-    override fun check(user: User, requiredValue: Long): Boolean {
-        // TODO: 연속 인증 일수 체크 로직 구현 필요
-        // 현재는 placeholder로 false 반환
-        return false
-    }
+  override fun getCurrentValue(user: User): Long {
+    // TODO: 인증 스트릭 계산 로직 구현 필요
+    return 0
+  }
 }

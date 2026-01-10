@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.planit.config.JwtTokenProvider
 import com.planit.dto.*
+import com.planit.entity.User
 import com.planit.enums.ParticipantStatusEnum
 import com.planit.service.ChallengeService
+import com.planit.util.setPrivateProperty
 import io.mockk.every
 import io.mockk.just
 import io.mockk.runs
@@ -17,6 +19,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.MediaType
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user
 import org.springframework.test.web.servlet.*
 import java.time.LocalDateTime
 import java.util.NoSuchElementException
@@ -39,10 +43,21 @@ class ChallengeControllerTest {
     @MockkBean
     private lateinit var redisTemplate: RedisTemplate<String, Any>
 
+    private val testUser = User(loginId = "user123", password = "password", nickname = "tester").apply {
+        setPrivateProperty("id", 1L)
+    }
+    private val userDetails = CustomUserDetails(testUser)
+
+    private fun setAuthentication() {
+        val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+        org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = authentication
+    }
+
     @Test
     @DisplayName("챌린지 생성 성공")
     fun `createChallenge should return 201 Created on success`() {
         // Given
+        setAuthentication()
         val request = ChallengeRequest(
             title = "30일 운동 챌린지",
             description = "매일 30분씩 운동하기",
@@ -70,8 +85,7 @@ class ChallengeControllerTest {
         every { challengeService.createChallenge(any(), any()) } returns response
 
         // When & Then
-        mockMvc.post("/api/v1/challenges") {
-            header("X-User-Id", "user123")
+        mockMvc.post("/api/challenge") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
@@ -102,11 +116,11 @@ class ChallengeControllerTest {
         every { challengeService.getChallengeById("CHL-12345678") } returns response
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/CHL-12345678")
+        mockMvc.get("/api/challenge/CHL-12345678")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
-                jsonPath("$.data.challengeId") { value("CHL-12345678") }
+                jsonPath("$.data.id") { value("CHL-12345678") }
                 jsonPath("$.data.title") { value("30일 운동 챌린지") }
             }
     }
@@ -119,7 +133,7 @@ class ChallengeControllerTest {
                 NoSuchElementException("챌린지를 찾을 수 없습니다: CHL-99999999")
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/CHL-99999999")
+        mockMvc.get("/api/challenge/CHL-99999999")
             .andExpect {
                 status { isNotFound() }
                 jsonPath("$.success") { value(false) }
@@ -150,7 +164,7 @@ class ChallengeControllerTest {
         every { challengeService.getChallenges(any()) } returns challenges
 
         // When & Then
-        mockMvc.get("/api/v1/challenges") {
+        mockMvc.get("/api/challenge") {
             param("category", "EXERCISE")
         }.andExpect {
             status { isOk() }
@@ -182,7 +196,7 @@ class ChallengeControllerTest {
         every { challengeService.searchChallenges("운동") } returns challenges
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/search") {
+        mockMvc.get("/api/challenge/search") {
             param("keyword", "운동")
         }.andExpect {
             status { isOk() }
@@ -195,6 +209,7 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 수정 성공")
     fun `updateChallenge should return 200 OK on success`() {
         // Given
+        setAuthentication()
         val request = ChallengeRequest(
             title = "수정된 챌린지",
             description = "수정된 설명",
@@ -222,8 +237,7 @@ class ChallengeControllerTest {
         every { challengeService.updateChallenge("CHL-12345678", any(), "user123") } returns response
 
         // When & Then
-        mockMvc.put("/api/v1/challenges/CHL-12345678") {
-            header("X-User-Id", "user123")
+        mockMvc.put("/api/challenge/CHL-12345678") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
@@ -247,12 +261,18 @@ class ChallengeControllerTest {
             endDate = LocalDateTime.of(2024, 1, 31, 23, 59)
         )
 
+        val anotherUser = User(loginId = "user999", password = "password", nickname = "other").apply {
+            setPrivateProperty("id", 2L)
+        }
+        val anotherUserDetails = CustomUserDetails(anotherUser)
+        val authentication = UsernamePasswordAuthenticationToken(anotherUserDetails, null, anotherUserDetails.authorities)
+        org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = authentication
+
         every { challengeService.updateChallenge("CHL-12345678", any(), "user999") } throws
                 IllegalArgumentException("챌린지를 수정할 권한이 없습니다")
 
         // When & Then
-        mockMvc.put("/api/v1/challenges/CHL-12345678") {
-            header("X-User-Id", "user999")
+        mockMvc.put("/api/challenge/CHL-12345678") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
@@ -266,11 +286,11 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 삭제 성공")
     fun `deleteChallenge should return 200 OK on success`() {
         // Given
+        setAuthentication()
         every { challengeService.deleteChallenge("CHL-12345678", "user123") } just runs
 
         // When & Then
-        mockMvc.delete("/api/v1/challenges/CHL-12345678") {
-            header("X-User-Id", "user123")
+        mockMvc.delete("/api/challenge/CHL-12345678") {
         }.andExpect {
             status { isOk() }
             jsonPath("$.success") { value(true) }
@@ -283,6 +303,7 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 참여 성공")
     fun `joinChallenge should return 201 Created on success`() {
         // Given
+        setAuthentication()
         val response = ParticipateResponse(
             challengeId = "CHL-12345678",
             loginId = "user123",
@@ -296,8 +317,7 @@ class ChallengeControllerTest {
         every { challengeService.joinChallenge("CHL-12345678", "user123") } returns response
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/CHL-12345678/join") {
-            header("X-User-Id", "user123")
+        mockMvc.post("/api/challenge/CHL-12345678/join") {
         }.andExpect {
             status { isCreated() }
             jsonPath("$.success") { value(true) }
@@ -310,12 +330,12 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 참여 실패 - 이미 참여중")
     fun `joinChallenge should return 409 Conflict for duplicate participation`() {
         // Given
+        setAuthentication()
         every { challengeService.joinChallenge("CHL-12345678", "user123") } throws
                 IllegalStateException("이미 참여중인 챌린지입니다")
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/CHL-12345678/join") {
-            header("X-User-Id", "user123")
+        mockMvc.post("/api/challenge/CHL-12345678/join") {
         }.andExpect {
             status { isInternalServerError() } // IllegalStateException이 500으로 처리됨
             jsonPath("$.success") { value(false) }
@@ -326,11 +346,11 @@ class ChallengeControllerTest {
     @DisplayName("챌린지 탈퇴 성공")
     fun `withdrawChallenge should return 200 OK on success`() {
         // Given
+        setAuthentication()
         every { challengeService.withdrawChallenge("CHL-12345678", "user123") } just runs
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/CHL-12345678/withdraw") {
-            header("X-User-Id", "user123")
+        mockMvc.post("/api/challenge/CHL-12345678/withdraw") {
         }.andExpect {
             status { isOk() }
             jsonPath("$.success") { value(true) }
@@ -346,7 +366,7 @@ class ChallengeControllerTest {
         every { challengeService.incrementViewCount("CHL-12345678") } just runs
 
         // When & Then
-        mockMvc.post("/api/v1/challenges/CHL-12345678/view")
+        mockMvc.post("/api/challenge/CHL-12345678/view")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
@@ -374,7 +394,7 @@ class ChallengeControllerTest {
         every { challengeService.getParticipants("CHL-12345678") } returns participants
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/CHL-12345678/participants")
+        mockMvc.get("/api/challenge/CHL-12345678/participants")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
@@ -402,7 +422,7 @@ class ChallengeControllerTest {
         every { challengeService.getChallengeStatistics("CHL-12345678") } returns statistics
 
         // When & Then
-        mockMvc.get("/api/v1/challenges/CHL-12345678/statistics")
+        mockMvc.get("/api/challenge/CHL-12345678/statistics")
             .andExpect {
                 status { isOk() }
                 jsonPath("$.success") { value(true) }
