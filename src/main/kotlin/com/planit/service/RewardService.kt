@@ -8,11 +8,10 @@ import com.planit.service.badge.BadgeService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-/** 보상(경험치/포인트) 지급 서비스 각 행동에 대해 경험치와 포인트를 자동으로 지급합니다. */
+/** 보상(포인트) 지급 서비스 각 행동에 대해 포인트를 자동으로 지급합니다. */
 @Service
 @Transactional
 class RewardService(
-  private val userExperienceService: UserExperienceService,
   private val userPointService: UserPointService,
   private val badgeService: BadgeService,
   private val userRepository: UserRepository
@@ -25,13 +24,6 @@ class RewardService(
    * @param rewardType 보상 타입
    */
   fun grantReward(userLoginId: String, rewardType: RewardType) {
-    // 경험치 지급
-    userExperienceService.addExperience(
-      userLoginId = userLoginId,
-      experience = rewardType.experience,
-      reason = rewardType.description,
-    )
-
     // 포인트 지급
     userPointService.addPoint(
       userLoginId = userLoginId,

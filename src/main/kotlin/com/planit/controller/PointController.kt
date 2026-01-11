@@ -1,15 +1,10 @@
 package com.planit.controller
 
 import com.planit.dto.ApiResponse
-import com.planit.dto.ExperienceStatisticsResponse
 import com.planit.dto.PointDeductRequest
 import com.planit.dto.PointStatisticsResponse
-import com.planit.dto.UserExperienceResponse
-import com.planit.dto.UserLevelResponse
 import com.planit.dto.UserPointResponse
 import com.planit.dto.UserPointSummaryResponse
-import com.planit.dto.UserProgressResponse
-import com.planit.service.UserExperienceService
 import com.planit.service.UserPointService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -28,7 +23,6 @@ import java.time.temporal.ChronoUnit
 @RequestMapping("/api/points")
 class PointController(
     private val userPointService: UserPointService,
-    private val userExperienceService: UserExperienceService,
 ) {
 
   @GetMapping("/me")
@@ -45,30 +39,6 @@ class PointController(
   ): ResponseEntity<ApiResponse<Page<UserPointResponse>>> {
     val loginId = authentication.name
     val response = userPointService.getUserPointHistory(loginId, pageable)
-    return ResponseEntity.ok(ApiResponse.success(response))
-  }
-
-  @GetMapping("/experience/me")
-  fun getMyExperience(authentication: Authentication): ResponseEntity<ApiResponse<UserLevelResponse>> {
-    val loginId = authentication.name
-    val response = userExperienceService.getUserLevel(loginId)
-    return ResponseEntity.ok(ApiResponse.success(response))
-  }
-
-  @GetMapping("/experience/me/history")
-  fun getMyExperienceHistory(
-      authentication: Authentication,
-      pageable: Pageable,
-  ): ResponseEntity<ApiResponse<Page<UserExperienceResponse>>> {
-    val loginId = authentication.name
-    val response = userExperienceService.getUserExperienceHistory(loginId, pageable)
-    return ResponseEntity.ok(ApiResponse.success(response))
-  }
-
-  @GetMapping("/me/progress")
-  fun getMyProgress(authentication: Authentication): ResponseEntity<ApiResponse<UserProgressResponse>> {
-    val loginId = authentication.name
-    val response = userExperienceService.getUserProgress(loginId)
     return ResponseEntity.ok(ApiResponse.success(response))
   }
 
@@ -112,38 +82,6 @@ class PointController(
     }
 
     val response = userPointService.getPointStatistics(loginId, start, end)
-    return ResponseEntity.ok(ApiResponse.success(response))
-  }
-
-  /**
-   * 사용자의 경험치 통계를 조회합니다.
-   * @param authentication 인증 정보
-   * @param startDate 시작 날짜 (YYYY-MM-DD)
-   * @param endDate 종료 날짜 (YYYY-MM-DD)
-   * @return 경험치 통계 데이터
-   */
-  @GetMapping("/experience/me/statistics")
-  fun getMyExperienceStatistics(
-      authentication: Authentication,
-      @RequestParam startDate: String,
-      @RequestParam endDate: String,
-  ): ResponseEntity<ApiResponse<ExperienceStatisticsResponse>> {
-    val loginId = authentication.name
-    val start = LocalDate.parse(startDate)
-    val end = LocalDate.parse(endDate)
-
-    // Validate date range
-    if (start.isAfter(end)) {
-      throw IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.")
-    }
-
-    // Limit to 1 year maximum
-    val daysBetween = ChronoUnit.DAYS.between(start, end)
-    if (daysBetween > 365) {
-      throw IllegalArgumentException("조회 기간은 최대 1년까지 가능합니다.")
-    }
-
-    val response = userExperienceService.getExperienceStatistics(loginId, start, end)
     return ResponseEntity.ok(ApiResponse.success(response))
   }
 }

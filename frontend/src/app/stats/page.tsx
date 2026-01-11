@@ -2,12 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { usePointStatistics, useExperienceStatistics } from "@/hooks/usePoint";
+import { usePointStatistics } from "@/hooks/usePoint";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { TrendingUp, Award, Zap, Calendar } from "lucide-react";
+import { Zap, Calendar } from "lucide-react";
 
 export default function StatsPage() {
   const token = useAuthStore((state) => state.isAuthenticated);
@@ -26,13 +25,10 @@ export default function StatsPage() {
   }, [period]);
 
   const { data: pointStats, isLoading: pointLoading } = usePointStatistics(dateRange);
-  const { data: expStats, isLoading: expLoading } = useExperienceStatistics(dateRange);
 
   if (!token) {
     return null;
   }
-
-  const isLoading = pointLoading || expLoading;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,8 +37,8 @@ export default function StatsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">통계</h1>
-              <p className="text-gray-600 mt-1">포인트와 경험치 활동을 확인하세요</p>
+              <h1 className="text-3xl font-bold text-gray-900">포인트 통계</h1>
+              <p className="text-gray-600 mt-1">포인트 활동을 확인하세요</p>
             </div>
             <Select value={period} onValueChange={(v) => setPeriod(v as "7" | "30" | "90")}>
               <SelectTrigger className="w-[180px]">
@@ -58,8 +54,8 @@ export default function StatsPage() {
         </div>
 
         {/* 요약 카드 */}
-        {!isLoading && pointStats && expStats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {!pointLoading && pointStats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600">
@@ -71,38 +67,6 @@ export default function StatsPage() {
                 <div className="text-2xl font-bold">{pointStats.summary.totalPointsEarned.toLocaleString()}</div>
                 <p className="text-xs text-gray-500 mt-1">
                   일평균 {pointStats.summary.averagePointsPerDay.toFixed(1)}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  총 경험치 획득
-                </CardTitle>
-                <TrendingUp className="h-4 w-4 text-blue-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{expStats.summary.totalExperienceEarned.toLocaleString()}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  일평균 {expStats.summary.averageExperiencePerDay.toFixed(1)}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
-                  레벨 변화
-                </CardTitle>
-                <Award className="h-4 w-4 text-purple-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  Lv.{expStats.summary.startLevel} → Lv.{expStats.summary.endLevel}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {expStats.summary.levelUpsCount > 0 ? `레벨업 ${expStats.summary.levelUpsCount}회` : "레벨업 없음"}
                 </p>
               </CardContent>
             </Card>
@@ -124,223 +88,86 @@ export default function StatsPage() {
           </div>
         )}
 
-        {/* 차트 탭 */}
-        <Tabs defaultValue="points" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="points">포인트</TabsTrigger>
-            <TabsTrigger value="experience">경험치</TabsTrigger>
-          </TabsList>
+        {/* 포인트 차트 */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>일별 포인트 획득</CardTitle>
+              <CardDescription>
+                기간: {dateRange.startDate} ~ {dateRange.endDate}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pointLoading ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-gray-500">로딩 중...</p>
+                </div>
+              ) : pointStats ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={pointStats.statistics}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        return `${date.getMonth() + 1}/${date.getDate()}`;
+                      }}
+                    />
+                    <YAxis />
+                    <Tooltip
+                      labelFormatter={(value) => `날짜: ${value}`}
+                      formatter={(value) => [`${value}P`, "획득 포인트"]}
+                    />
+                    <Legend />
+                    <Bar dataKey="pointsEarned" fill="#facc15" name="획득 포인트" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : null}
+            </CardContent>
+          </Card>
 
-          {/* 포인트 차트 */}
-          <TabsContent value="points" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>일별 포인트 획득</CardTitle>
-                <CardDescription>
-                  기간: {dateRange.startDate} ~ {dateRange.endDate}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-gray-500">로딩 중...</p>
-                  </div>
-                ) : pointStats ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={pointStats.statistics}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) => {
-                          const date = new Date(value);
-                          return `${date.getMonth() + 1}/${date.getDate()}`;
-                        }}
-                      />
-                      <YAxis />
-                      <Tooltip
-                        labelFormatter={(value) => `날짜: ${value}`}
-                        formatter={(value) => [`${value}P`, "획득 포인트"]}
-                      />
-                      <Legend />
-                      <Bar dataKey="pointsEarned" fill="#facc15" name="획득 포인트" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : null}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>누적 포인트 추이</CardTitle>
-                <CardDescription>
-                  시간에 따른 누적 포인트 변화
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-gray-500">로딩 중...</p>
-                  </div>
-                ) : pointStats ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={pointStats.statistics}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) => {
-                          const date = new Date(value);
-                          return `${date.getMonth() + 1}/${date.getDate()}`;
-                        }}
-                      />
-                      <YAxis />
-                      <Tooltip
-                        labelFormatter={(value) => `날짜: ${value}`}
-                        formatter={(value) => [`${value}P`, "누적 포인트"]}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="cumulativePoints"
-                        stroke="#facc15"
-                        strokeWidth={2}
-                        name="누적 포인트"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : null}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* 경험치 차트 */}
-          <TabsContent value="experience" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>일별 경험치 획득</CardTitle>
-                <CardDescription>
-                  기간: {dateRange.startDate} ~ {dateRange.endDate}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-gray-500">로딩 중...</p>
-                  </div>
-                ) : expStats ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={expStats.statistics}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) => {
-                          const date = new Date(value);
-                          return `${date.getMonth() + 1}/${date.getDate()}`;
-                        }}
-                      />
-                      <YAxis />
-                      <Tooltip
-                        labelFormatter={(value) => `날짜: ${value}`}
-                        formatter={(value, name) => {
-                          if (name === "experienceEarned") return [`${value} EXP`, "획득 경험치"];
-                          return [value, name];
-                        }}
-                      />
-                      <Legend />
-                      <Bar dataKey="experienceEarned" fill="#3b82f6" name="획득 경험치" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : null}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>레벨 진행도</CardTitle>
-                <CardDescription>
-                  시간에 따른 레벨 변화
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-gray-500">로딩 중...</p>
-                  </div>
-                ) : expStats ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={expStats.statistics}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) => {
-                          const date = new Date(value);
-                          return `${date.getMonth() + 1}/${date.getDate()}`;
-                        }}
-                      />
-                      <YAxis domain={["dataMin - 1", "dataMax + 1"]} />
-                      <Tooltip
-                        labelFormatter={(value) => `날짜: ${value}`}
-                        formatter={(value, name) => {
-                          if (name === "level") return [`Lv.${value}`, "레벨"];
-                          return [value, name];
-                        }}
-                      />
-                      <Legend />
-                      <Line
-                        type="stepAfter"
-                        dataKey="level"
-                        stroke="#a855f7"
-                        strokeWidth={2}
-                        name="레벨"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : null}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>누적 경험치 추이</CardTitle>
-                <CardDescription>
-                  시간에 따른 누적 경험치 변화
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="h-[300px] flex items-center justify-center">
-                    <p className="text-gray-500">로딩 중...</p>
-                  </div>
-                ) : expStats ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={expStats.statistics}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="date"
-                        tickFormatter={(value) => {
-                          const date = new Date(value);
-                          return `${date.getMonth() + 1}/${date.getDate()}`;
-                        }}
-                      />
-                      <YAxis />
-                      <Tooltip
-                        labelFormatter={(value) => `날짜: ${value}`}
-                        formatter={(value) => [`${value} EXP`, "누적 경험치"]}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="cumulativeExperience"
-                        stroke="#3b82f6"
-                        strokeWidth={2}
-                        name="누적 경험치"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : null}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          <Card>
+            <CardHeader>
+              <CardTitle>누적 포인트 추이</CardTitle>
+              <CardDescription>
+                시간에 따른 누적 포인트 변화
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {pointLoading ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <p className="text-gray-500">로딩 중...</p>
+                </div>
+              ) : pointStats ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={pointStats.statistics}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(value) => {
+                        const date = new Date(value);
+                        return `${date.getMonth() + 1}/${date.getDate()}`;
+                      }}
+                    />
+                    <YAxis />
+                    <Tooltip
+                      labelFormatter={(value) => `날짜: ${value}`}
+                      formatter={(value) => [`${value}P`, "누적 포인트"]}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="cumulativePoints"
+                      stroke="#facc15"
+                      strokeWidth={2}
+                      name="누적 포인트"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

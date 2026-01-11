@@ -27,14 +27,6 @@ class User(
   var totalPoint: Long = 0
     protected set
 
-  @Column(nullable = false)
-  var totalExperience: Long = 0
-    protected set
-
-  @Column(nullable = false)
-  var level: Int = 1
-    protected set
-
   fun changePassword(password: String) {
     this.password = password
   }
@@ -49,14 +41,5 @@ class User(
 
   fun subtractPoint(point: Long) {
     this.totalPoint = maxOf(0, this.totalPoint - point)
-  }
-
-  fun addExperience(experience: Long) {
-    this.totalExperience += experience
-    updateLevel()
-  }
-
-  private fun updateLevel() {
-    this.level = (this.totalExperience / 100).toInt() + 1
   }
 }
