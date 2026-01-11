@@ -73,20 +73,30 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
           </div>
 
           {/* 탭 선택 */}
-          <div className="flex bg-gray-100 p-1 rounded-lg">
+          <div className="flex gap-2">
             <Button
-                variant={selectedTab === "overview" ? "default" : "ghost"}
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedTab("overview")}
-                className="h-8 px-3"
+                className={cn(
+                  "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+                  selectedTab === "overview"
+                    ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                )}
             >
               개요
             </Button>
             <Button
-                variant={selectedTab === "calendar" ? "default" : "ghost"}
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedTab("calendar")}
-                className="h-8 px-3"
+                className={cn(
+                  "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+                  selectedTab === "calendar"
+                    ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                )}
             >
               활동 잔디
             </Button>

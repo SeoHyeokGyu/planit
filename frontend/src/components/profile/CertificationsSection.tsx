@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CertificationCalendar } from "@/components/CertificationCalendar";
 import { LayoutList, Calendar as CalendarIcon, Activity } from "lucide-react";
 import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { cn } from "@/lib/utils";
 
 interface CertificationsSectionProps {
   userLoginId: string;
@@ -79,20 +80,30 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
             <CardDescription className="text-gray-600">나의 모든 챌린지 인증 기록입니다.</CardDescription>
           </div>
         </div>
-        <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex gap-2">
           <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
+            variant="outline"
             size="sm"
             onClick={() => setViewMode("list")}
-            className="h-8 px-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className={cn(
+              "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+              viewMode === "list"
+                ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+            )}
           >
             <LayoutList className="h-4 w-4 mr-2" /> 리스트
           </Button>
           <Button
-            variant={viewMode === "calendar" ? "default" : "ghost"}
+            variant="outline"
             size="sm"
             onClick={() => setViewMode("calendar")}
-            className="h-8 px-3 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            className={cn(
+              "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+              viewMode === "calendar"
+                ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+            )}
           >
             <CalendarIcon className="h-4 w-4 mr-2" /> 캘린더
           </Button>
