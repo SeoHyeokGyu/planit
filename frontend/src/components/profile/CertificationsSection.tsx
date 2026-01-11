@@ -86,10 +86,10 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
             size="sm"
             onClick={() => setViewMode("list")}
             className={cn(
-              "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+              pageHeaderStyles.tabButton.base,
               viewMode === "list"
-                ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                ? pageHeaderStyles.tabButton.active
+                : pageHeaderStyles.tabButton.inactive
             )}
           >
             <LayoutList className="h-4 w-4 mr-2" /> 리스트
@@ -99,10 +99,10 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
             size="sm"
             onClick={() => setViewMode("calendar")}
             className={cn(
-              "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+              pageHeaderStyles.tabButton.base,
               viewMode === "calendar"
-                ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                ? pageHeaderStyles.tabButton.active
+                : pageHeaderStyles.tabButton.inactive
             )}
           >
             <CalendarIcon className="h-4 w-4 mr-2" /> 캘린더

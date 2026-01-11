@@ -81,7 +81,7 @@ export default function FeedPage() {
               </div>
             </div>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as FeedSortType)}>
-              <SelectTrigger className="w-[160px] h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700">
+              <SelectTrigger className={`w-[160px] ${pageHeaderStyles.standardButton}`}>
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="w-4 h-4 text-blue-600" />
                   <SelectValue placeholder="정렬" />

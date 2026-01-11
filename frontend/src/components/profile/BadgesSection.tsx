@@ -62,8 +62,7 @@ export default function BadgesSection({userLoginId, isOwnProfile}: BadgesSection
 
           <div className="flex items-center gap-2">
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-              <SelectTrigger
-                  className="w-[120px] h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700">
+              <SelectTrigger className={`w-[120px] ${pageHeaderStyles.standardButton}`}>
                 <ArrowUpDown className="w-4 h-4 mr-2 text-blue-600"/>
                 <SelectValue placeholder="정렬"/>
               </SelectTrigger>
@@ -79,7 +78,7 @@ export default function BadgesSection({userLoginId, isOwnProfile}: BadgesSection
                 <Button
                     variant="outline"
                     size="sm"
-                    className="h-11 px-4 gap-2 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700"
+                    className={`px-4 gap-2 ${pageHeaderStyles.standardButton}`}
                     onClick={() => checkBadges(userLoginId)}
                     disabled={isChecking}
                 >

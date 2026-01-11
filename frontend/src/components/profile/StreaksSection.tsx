@@ -79,10 +79,10 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
                 size="sm"
                 onClick={() => setSelectedTab("overview")}
                 className={cn(
-                  "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+                  pageHeaderStyles.tabButton.base,
                   selectedTab === "overview"
-                    ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                    ? pageHeaderStyles.tabButton.active
+                    : pageHeaderStyles.tabButton.inactive
                 )}
             >
               개요
@@ -92,10 +92,10 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
                 size="sm"
                 onClick={() => setSelectedTab("calendar")}
                 className={cn(
-                  "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+                  pageHeaderStyles.tabButton.base,
                   selectedTab === "calendar"
-                    ? "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                    ? pageHeaderStyles.tabButton.active
+                    : pageHeaderStyles.tabButton.inactive
                 )}
             >
               활동 잔디
