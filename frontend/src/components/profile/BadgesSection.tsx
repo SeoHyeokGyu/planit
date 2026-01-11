@@ -62,15 +62,15 @@ export default function BadgesSection({userLoginId, isOwnProfile}: BadgesSection
           <div className="flex items-center gap-2">
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
               <SelectTrigger
-                  className="w-[120px] h-9 bg-white border-slate-200 hover:border-blue-400 transition-colors">
-                <ArrowUpDown className="w-4 h-4 mr-2 text-blue-500 opacity-70"/>
+                  className="w-[120px] h-9 bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors shadow-sm font-medium text-gray-700">
+                <ArrowUpDown className="w-4 h-4 mr-2 text-blue-600"/>
                 <SelectValue placeholder="정렬"/>
               </SelectTrigger>
-              <SelectContent className="bg-white border border-slate-200 shadow-xl z-50">
-                <SelectItem value="acquired" className="focus:bg-blue-50">획득순</SelectItem>
-                <SelectItem value="grade" className="focus:bg-blue-50">등급순</SelectItem>
-                <SelectItem value="code" className="focus:bg-blue-50">종류순</SelectItem>
-                <SelectItem value="name" className="focus:bg-blue-50">이름순</SelectItem>
+              <SelectContent className="bg-white border-2 border-gray-300 shadow-xl z-50">
+                <SelectItem value="acquired" className="focus:bg-blue-50 cursor-pointer">획득순</SelectItem>
+                <SelectItem value="grade" className="focus:bg-blue-50 cursor-pointer">등급순</SelectItem>
+                <SelectItem value="code" className="focus:bg-blue-50 cursor-pointer">종류순</SelectItem>
+                <SelectItem value="name" className="focus:bg-blue-50 cursor-pointer">이름순</SelectItem>
               </SelectContent>
             </Select>
 
