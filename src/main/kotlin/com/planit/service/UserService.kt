@@ -22,7 +22,6 @@ class UserService(
     private val followRepository: FollowRepository,
     private val notificationRepository: NotificationRepository,
     private val userPointRepository: UserPointRepository,
-    private val userExperienceRepository: UserExperienceRepository,
     private val commentRepository: CommentRepository,
     private val challengeRepository: ChallengeRepository
 ) {
@@ -105,9 +104,8 @@ class UserService(
     notificationRepository.deleteByReceiver_Id(userId)
     notificationRepository.nullifySenderBySenderId(userId)
 
-    // 5. UserPoint, UserExperience 삭제
+    // 5. UserPoint 삭제
     userPointRepository.deleteByUser_Id(userId)
-    userExperienceRepository.deleteByUser_Id(userId)
 
     // 6. ChallengeParticipant 삭제 + 챌린지 통계 업데이트
     val participants = challengeParticipantRepository.findByLoginId(loginId)
