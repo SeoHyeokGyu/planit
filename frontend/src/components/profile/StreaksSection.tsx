@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { Flame, TrendingUp, Award, Calendar, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -40,123 +41,119 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
 
   if (!streakSummary) {
     return (
-        <div className="p-8 text-center">
-          <p className="text-red-500">스트릭 데이터를 불러올 수 없습니다.</p>
-          <p className="text-sm text-gray-500 mt-2">userLoginId: {userLoginId}</p>
-          {summaryError && (
-              <p className="text-sm text-red-400 mt-2">
-                Error: {summaryError instanceof Error ? summaryError.message : 'Unknown error'}
-              </p>
-          )}
-        </div>
+        <Card className="shadow-lg rounded-xl bg-white">
+          <CardHeader>
+            <CardTitle className="text-gray-900">스트릭</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-500">스트릭 데이터를 불러올 수 없습니다.</p>
+            {summaryError && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {summaryError instanceof Error ? summaryError.message : 'Unknown error'}
+                </p>
+            )}
+          </CardContent>
+        </Card>
     );
   }
 
   return (
-      <div className="space-y-6">
-        {/* 헤더 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white shadow-lg">
+      <Card className="shadow-lg rounded-xl bg-white">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between pb-4">
+          <div className="flex items-center space-x-3 mb-4 sm:mb-0">
+            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white">
               <Flame className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                스트릭 현황
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                연속 달성 기록을 확인하세요
-              </p>
+              <CardTitle className="text-2xl font-bold text-gray-900">스트릭 현황</CardTitle>
+              <CardDescription className="text-gray-600">연속 달성 기록을 확인하세요</CardDescription>
             </div>
           </div>
 
           {/* 탭 선택 */}
-          <div className="flex gap-2">
-            <button
+          <div className="flex bg-gray-100 p-1 rounded-lg">
+            <Button
+                variant={selectedTab === "overview" ? "default" : "ghost"}
+                size="sm"
                 onClick={() => setSelectedTab("overview")}
-                className={cn(
-                    "px-4 py-2 rounded-lg font-medium transition-all",
-                    selectedTab === "overview"
-                        ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400"
-                )}
+                className="h-8 px-3"
             >
               개요
-            </button>
-            <button
+            </Button>
+            <Button
+                variant={selectedTab === "calendar" ? "default" : "ghost"}
+                size="sm"
                 onClick={() => setSelectedTab("calendar")}
-                className={cn(
-                    "px-4 py-2 rounded-lg font-medium transition-all",
-                    selectedTab === "calendar"
-                        ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400"
-                )}
+                className="h-8 px-3"
             >
               활동 잔디
-            </button>
+            </Button>
           </div>
-        </div>
+        </CardHeader>
 
-        {/* 전체 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-2 border-orange-100 dark:border-orange-900">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <Flame className="w-4 h-4 text-orange-500" />
-                현재 스트릭
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
-                {streakSummary.totalCurrentStreak}
-                <span className="text-lg text-gray-500 ml-1">일</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {streakSummary.activeStreakCount}개 챌린지 활동 중
-              </p>
-            </CardContent>
-          </Card>
+        <CardContent className="space-y-6">
 
-          <Card className="border-2 border-purple-100 dark:border-purple-900">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <Award className="w-4 h-4 text-purple-500" />
-                최장 기록
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {streakSummary.maxLongestStreak}
-                <span className="text-lg text-gray-500 ml-1">일</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">역대 최고 연속 달성</p>
-            </CardContent>
-          </Card>
+          {/* 전체 통계 카드 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-2 border-orange-100 dark:border-orange-900">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-orange-500" />
+                  현재 스트릭
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                  {streakSummary.totalCurrentStreak}
+                  <span className="text-lg text-gray-500 ml-1">일</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {streakSummary.activeStreakCount}개 챌린지 활동 중
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="border-2 border-blue-100 dark:border-blue-900">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-500" />
-                활동 일수
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {calendar?.activeDays || 0}
-                <span className="text-lg text-gray-500 ml-1">일</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">최근 30일 중 활동</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="border-2 border-purple-100 dark:border-purple-900">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-purple-500" />
+                  최장 기록
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  {streakSummary.maxLongestStreak}
+                  <span className="text-lg text-gray-500 ml-1">일</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">역대 최고 연속 달성</p>
+              </CardContent>
+            </Card>
 
-        {/* 탭 컨텐츠 */}
-        {selectedTab === "overview" ? (
-            <StreakOverview streaks={streakSummary.streaks} />
-        ) : (
-            <ActivityCalendarView calendar={calendar} isLoading={isLoadingCalendar} />
-        )}
-      </div>
+            <Card className="border-2 border-blue-100 dark:border-blue-900">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-blue-500" />
+                  활동 일수
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {calendar?.activeDays || 0}
+                  <span className="text-lg text-gray-500 ml-1">일</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">최근 30일 중 활동</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 탭 컨텐츠 */}
+          {selectedTab === "overview" ? (
+              <StreakOverview streaks={streakSummary.streaks} />
+          ) : (
+              <ActivityCalendarView calendar={calendar} isLoading={isLoadingCalendar} />
+          )}
+        </CardContent>
+      </Card>
   );
 }
 
@@ -343,38 +340,41 @@ function ActivityCalendarView({
 // 스켈레톤
 function StreaksSectionSkeleton() {
   return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <Skeleton className="w-10 h-10 rounded-lg" />
-          <div className="flex-1">
-            <Skeleton className="h-6 w-32 mb-2" />
-            <Skeleton className="h-4 w-48" />
+      <Card className="shadow-lg rounded-xl bg-white">
+        <CardHeader>
+          <div className="flex items-center space-x-3">
+            <Skeleton className="w-10 h-10 rounded-lg" />
+            <div className="flex-1">
+              <Skeleton className="h-6 w-32 mb-2" />
+              <Skeleton className="h-4 w-48" />
+            </div>
           </div>
-        </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-4 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-10 w-20 mb-2" />
+                    <Skeleton className="h-3 w-32" />
+                  </CardContent>
+                </Card>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-              <Card key={i}>
-                <CardHeader className="pb-3">
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-10 w-20 mb-2" />
-                  <Skeleton className="h-3 w-32" />
-                </CardContent>
-              </Card>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-              <Card key={i}>
-                <CardContent className="py-4">
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-              </Card>
-          ))}
-        </div>
-      </div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="py-4">
+                    <Skeleton className="h-20 w-full" />
+                  </CardContent>
+                </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
   );
 }
