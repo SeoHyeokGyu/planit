@@ -30,6 +30,8 @@ import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tansta
 import { toast } from "sonner";
 import { FeedResponse, FeedSortType } from "@/types/feed";
 import { useInView } from "react-intersection-observer";
+import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function FeedPage() {
   const router = useRouter();
@@ -61,19 +63,21 @@ export default function FeedPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white shadow-lg">
-                <Zap className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  피드
-                </h1>
-                <p className="text-gray-600 text-sm font-medium mt-1">
-                  팔로우하는 사람들의 최근 활동
-                </p>
+        <div className={pageHeaderStyles.container}>
+          <div className={pageHeaderStyles.wrapper}>
+            <div className={pageHeaderStyles.titleSection}>
+              <div className={pageHeaderStyles.titleWrapper}>
+                <div className={`${pageHeaderStyles.iconBase} ${iconGradients.feed}`}>
+                  <Zap className="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 className={pageHeaderStyles.title}>
+                    피드
+                  </h1>
+                  <p className={`${pageHeaderStyles.description} text-sm mt-1`}>
+                    팔로우하는 사람들의 최근 활동
+                  </p>
+                </div>
               </div>
             </div>
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as FeedSortType)}>
@@ -159,23 +163,14 @@ export default function FeedPage() {
             </div>
           </>
         ) : (
-          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border-2 border-dashed border-gray-200">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
-              <MessageCircle className="w-8 h-8 text-gray-300" />
-            </div>
-            <p className="text-gray-700 text-lg font-semibold">
-              아직 피드가 없습니다
-            </p>
-            <p className="text-gray-500 text-sm mt-2 mb-6">
-              팔로우하는 사람의 인증 활동이 여기에 표시됩니다
-            </p>
-            <Button
-              onClick={() => router.push("/profile")}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              사람 팔로우하기
-            </Button>
-          </div>
+          <EmptyState
+            icon={MessageCircle}
+            title="아직 피드가 없습니다"
+            description="팔로우하는 사람의 인증 활동이 여기에 표시됩니다"
+            actionLabel="사람 팔로우하기"
+            onAction={() => router.push("/profile")}
+            variant="bordered"
+          />
         )}
       </div>
     </div>
