@@ -222,12 +222,12 @@
 - [ ] 관리자 권한 검증 (ADMIN 역할)
 - [ ] 관리자 활동 로그 저장
 
-### 19. 에러 처리 (Error Handling)
-- [ ] 전역 예외 처리 (@RestControllerAdvice)
-- [ ] 커스텀 예외 클래스 정의
-- [ ] HTTP 상태 코드 매핑 (4xx, 5xx)
-- [ ] 에러 응답 표준화 (code, message, timestamp)
-- [ ] 에러 로깅 (Sentry, Logback)
+### 19. 에러 처리 (Error Handling) - 완료
+- [x] 전역 예외 처리 (@RestControllerAdvice)
+- [x] 커스텀 예외 클래스 정의
+- [x] HTTP 상태 코드 매핑 (4xx, 5xx)
+- [x] 에러 응답 표준화 (code, message, timestamp)
+- [x] 에러 로깅 (Logback)
 
 ### 20. Redis 캐싱 전략 (Redis Caching Strategy)
 - [x] Redis 연결 설정 (Lettuce)
@@ -262,16 +262,18 @@
 - [ ] 커넥션 풀 최적화 (HikariCP)
 - [ ] 트랜잭션 범위 최소화
 
-### 23. 배치 작업/스케줄링 (Batch Jobs & Scheduling)
+### 23. 배치 작업/스케줄링 (Batch Jobs & Scheduling) - 부분 완료
 - [ ] Spring Batch 설정
-- [ ] 스케줄러 설정 (@Scheduled)
-- [ ] 배치 작업 목록:
-  - 스트릭 검증 (매일 자정)
-  - 랭킹 갱신 (1시간마다)
-  - 통계 집계 (매일 새벽 2시)
-  - 만료 알림 삭제 (매주 일요일)
-  - 챌린지 종료 처리 (매시간)
-  - 주간 리포트 이메일 발송 (매주 월요일)
+- [x] 스케줄러 설정 (@Scheduled)
+- [x] 배치 작업 목록:
+  - [x] 스트릭 검증 (매일 자정) - StreakScheduler
+  - [x] 스트릭 리마인더 (매일 저녁 8시) - StreakScheduler
+  - [ ] 랭킹 갱신 (1시간마다)
+  - [ ] 통계 집계 (매일 새벽 2시)
+  - [ ] 만료 알림 삭제 (매주 일요일)
+  - [x] 챌린지 종료 처리 - ChallengeReminderScheduler
+  - [x] 조회수 동기화 (1시간마다) - ViewCountScheduler
+  - [ ] 주간 리포트 이메일 발송 (매주 월요일)
 - [ ] 배치 실행 이력 저장
 - [ ] 배치 실패 알림 (Slack, Discord)
 - [ ] 배치 작업 모니터링 (실행 시간, 성공/실패)
