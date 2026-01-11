@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { CertificationCalendar } from "@/components/CertificationCalendar";
 import { LayoutList, Calendar as CalendarIcon, Activity } from "lucide-react";
+import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
 
 interface CertificationsSectionProps {
   userLoginId: string;
@@ -70,7 +71,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
     <Card className="shadow-lg rounded-xl bg-white">
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between pb-4">
         <div className="flex items-center space-x-3 mb-4 sm:mb-0">
-          <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white">
+          <div className={`${pageHeaderStyles.iconBase} ${iconGradients.certification}`}>
             <Activity className="w-6 h-6" />
           </div>
           <div>

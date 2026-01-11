@@ -32,4 +32,5 @@ export const iconGradients = {
   profile: "bg-gradient-to-r from-blue-600 to-purple-600",
   badge: "bg-gradient-to-r from-yellow-500 to-amber-500",
   streak: "bg-gradient-to-r from-orange-500 to-red-500",
+  certification: "bg-gradient-to-r from-green-400 to-blue-500",
 } as const;

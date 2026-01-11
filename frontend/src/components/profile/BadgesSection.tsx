@@ -63,15 +63,15 @@ export default function BadgesSection({userLoginId, isOwnProfile}: BadgesSection
           <div className="flex items-center gap-2">
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
               <SelectTrigger
-                  className="w-[120px] h-9 bg-white border-2 border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-colors shadow-sm font-medium text-gray-700">
+                  className="w-[120px] h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700">
                 <ArrowUpDown className="w-4 h-4 mr-2 text-blue-600"/>
                 <SelectValue placeholder="정렬"/>
               </SelectTrigger>
-              <SelectContent className="bg-white border-2 border-gray-300 shadow-xl z-50">
-                <SelectItem value="acquired" className="focus:bg-blue-50 cursor-pointer">획득순</SelectItem>
-                <SelectItem value="grade" className="focus:bg-blue-50 cursor-pointer">등급순</SelectItem>
-                <SelectItem value="code" className="focus:bg-blue-50 cursor-pointer">종류순</SelectItem>
-                <SelectItem value="name" className="focus:bg-blue-50 cursor-pointer">이름순</SelectItem>
+              <SelectContent className="bg-white border-2 border-gray-200 shadow-xl z-50">
+                <SelectItem value="acquired" className="focus:bg-blue-50 cursor-pointer hover:bg-blue-50 transition-colors">획득순</SelectItem>
+                <SelectItem value="grade" className="focus:bg-blue-50 cursor-pointer hover:bg-blue-50 transition-colors">등급순</SelectItem>
+                <SelectItem value="code" className="focus:bg-blue-50 cursor-pointer hover:bg-blue-50 transition-colors">종류순</SelectItem>
+                <SelectItem value="name" className="focus:bg-blue-50 cursor-pointer hover:bg-blue-50 transition-colors">이름순</SelectItem>
               </SelectContent>
             </Select>
 
@@ -79,12 +79,12 @@ export default function BadgesSection({userLoginId, isOwnProfile}: BadgesSection
                 <Button
                     variant="outline"
                     size="sm"
-                    className="h-9 px-3 gap-1.5"
+                    className="h-11 px-4 gap-2 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700"
                     onClick={() => checkBadges(userLoginId)}
                     disabled={isChecking}
                 >
                   <RefreshCcw className={`w-4 h-4 ${isChecking ? "animate-spin" : ""}`}/>
-                  <span className="hidden sm:inline font-medium">배지 확인</span>
+                  <span className="hidden sm:inline">배지 확인</span>
                 </Button>
             )}
           </div>
