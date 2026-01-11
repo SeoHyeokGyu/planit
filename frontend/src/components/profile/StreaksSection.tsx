@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useAllStreaks, useActivityCalendar } from "@/hooks/useStreak";
 import type { StreakResponse, DailyActivityResponse, ActivityCalendarResponse } from "@/types/streak";
+import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface StreaksSectionProps {
   userLoginId: string;
@@ -61,7 +63,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
       <Card className="shadow-lg rounded-xl bg-white">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between pb-4">
           <div className="flex items-center space-x-3 mb-4 sm:mb-0">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white">
+            <div className={`${pageHeaderStyles.iconBase} ${iconGradients.streak}`}>
               <Flame className="w-6 h-6" />
             </div>
             <div>
@@ -161,13 +163,11 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
 function StreakOverview({ streaks }: { streaks: StreakResponse[] }) {
   if (streaks.length === 0) {
     return (
-        <Card className="border-2 border-dashed border-gray-200">
-          <CardContent className="py-12 text-center">
-            <Flame className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">활성화된 스트릭이 없습니다</p>
-            <p className="text-sm text-gray-400 mt-1">챌린지에 참여하고 인증을 시작하세요!</p>
-          </CardContent>
-        </Card>
+      <EmptyState
+        icon={Flame}
+        title="활성화된 스트릭이 없습니다"
+        description="챌린지에 참여하고 인증을 시작하세요!"
+      />
     );
   }
 

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
 
 interface BadgesSectionProps {
   userLoginId: string;
@@ -48,7 +49,7 @@ export default function BadgesSection({userLoginId, isOwnProfile}: BadgesSection
       <Card className="shadow-lg rounded-xl bg-white">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between pb-4">
           <div className="flex items-center space-x-3 mb-4 sm:mb-0">
-            <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center text-white">
+            <div className={`${pageHeaderStyles.iconBase} ${iconGradients.badge}`}>
               <Medal className="w-6 h-6"/>
             </div>
             <div>
