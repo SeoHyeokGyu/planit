@@ -111,6 +111,7 @@ export default function FeedItem({
               alt={certification.title}
               fill
               className="object-contain hover:brightness-95 transition-all duration-300"
+              sizes="(max-width: 768px) 100vw, 600px"
             />
           </div>
         )}

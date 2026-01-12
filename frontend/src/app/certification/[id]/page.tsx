@@ -260,9 +260,9 @@ export default function CertificationDetailPage() {
                             <Image 
                                 src={data.photoUrl} 
                                 alt="Certification Photo" 
-                                layout="fill" 
-                                objectFit="contain" 
-                                className="hover:scale-105 transition-transform duration-500"
+                                fill
+                                className="object-contain hover:scale-105 transition-transform duration-500"
+                                sizes="(max-width: 768px) 100vw, 800px"
                             />
                         </div>
                     )
