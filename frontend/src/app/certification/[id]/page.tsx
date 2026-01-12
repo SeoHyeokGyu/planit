@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useCertification, useDeleteCertification, useUpdateCertification } from "@/hooks/useCertification";
+import { useCertification, useDeleteCertification, useUpdateCertification, useUploadCertificationPhoto } from "@/hooks/useCertification";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/useUser";
-import { ArrowLeft, CheckCircle, Calendar, User, FileText, Edit2, Trash2, Save, X } from "lucide-react";
+import { ArrowLeft, CheckCircle, Calendar, User, FileText, Edit2, Trash2, Save, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -32,30 +32,61 @@ export default function CertificationDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
+  const [editedFile, setEditedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const { data, isLoading, error } = useCertification(certificationId);
+  const { data, isLoading, error, refetch } = useCertification(certificationId);
 
   const updateMutation = useUpdateCertification();
   const deleteMutation = useDeleteCertification();
+  const uploadPhotoMutation = useUploadCertificationPhoto();
 
   const handleEditClick = () => {
     if (data) {
       setEditedTitle(data.title);
       setEditedContent(data.content);
+      setEditedFile(null);
+      setPreviewUrl(data.photoUrl || null);
       setIsEditing(true);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
     }
   };
 
   const handleUpdate = async () => {
     try {
+      // 1. 텍스트 정보 업데이트
       await updateMutation.mutateAsync({
         id: certificationId,
         data: { title: editedTitle, content: editedContent }
       });
+
+      // 2. 사진이 변경되었다면 업로드 수행
+      if (editedFile) {
+        const uploadResponse = await uploadPhotoMutation.mutateAsync({
+          id: certificationId,
+          file: editedFile
+        });
+        
+        if (!uploadResponse.success) {
+          toast.error("사진 업로드에 실패했습니다.");
+        }
+      }
+
+      toast.success("인증이 성공적으로 수정되었습니다!");
       setIsEditing(false);
+      refetch(); // 데이터 갱신
     } catch (err) {
       console.error("인증 업데이트 실패:", err);
+      // 토스트는 api.ts에서 전역적으로 처리됨
     }
   };
 
@@ -114,6 +145,7 @@ export default function CertificationDetailPage() {
   }
 
   const isAuthor = user?.nickname === data.authorNickname;
+  const isUpdating = updateMutation.isPending || uploadPhotoMutation.isPending;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
@@ -188,16 +220,52 @@ export default function CertificationDetailPage() {
             </CardHeader>
 
             <CardContent className="p-6 space-y-6">
-                {data.photoUrl && (
-                    <div className="relative w-full h-[400px] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
-                        <Image 
-                            src={data.photoUrl} 
-                            alt="Certification Photo" 
-                            layout="fill" 
-                            objectFit="contain" 
-                            className="hover:scale-105 transition-transform duration-500"
-                        />
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center w-full">
+                        <label htmlFor="photo-upload" className="flex flex-col items-center justify-center w-full h-64 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors relative overflow-hidden">
+                            {previewUrl ? (
+                                <Image 
+                                    src={previewUrl} 
+                                    alt="Preview" 
+                                    layout="fill" 
+                                    objectFit="contain" 
+                                    className="opacity-50 hover:opacity-100 transition-opacity"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Camera className="w-10 h-10 mb-3 text-blue-500" />
+                                    <p className="mb-2 text-sm text-blue-700 font-semibold">클릭하여 사진 수정</p>
+                                </div>
+                            )}
+                            <input 
+                                id="photo-upload" 
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={handleFileChange}
+                            />
+                            {previewUrl && (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30 text-white font-bold">
+                                    <Camera className="w-8 h-8 mb-2" />
+                                    <span className="ml-2">사진 변경하기</span>
+                                </div>
+                            )}
+                        </label>
                     </div>
+                  </div>
+                ) : (
+                    data.photoUrl && (
+                        <div className="relative w-full h-[400px] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
+                            <Image 
+                                src={data.photoUrl} 
+                                alt="Certification Photo" 
+                                layout="fill" 
+                                objectFit="contain" 
+                                className="hover:scale-105 transition-transform duration-500"
+                            />
+                        </div>
+                    )
                 )}
                 
                 <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
@@ -227,7 +295,7 @@ export default function CertificationDetailPage() {
                             <Button 
                                 variant="outline" 
                                 onClick={() => setIsEditing(false)} 
-                                disabled={updateMutation.isPending}
+                                disabled={isUpdating}
                                 className="border-gray-300 hover:bg-gray-100"
                             >
                                 <X className="w-4 h-4 mr-2" />
@@ -235,10 +303,10 @@ export default function CertificationDetailPage() {
                             </Button>
                             <Button 
                                 onClick={handleUpdate} 
-                                disabled={updateMutation.isPending}
+                                disabled={isUpdating}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
-                                {updateMutation.isPending ? (
+                                {isUpdating ? (
                                     <span className="animate-spin mr-2">⏳</span>
                                 ) : (
                                     <Save className="w-4 h-4 mr-2" />

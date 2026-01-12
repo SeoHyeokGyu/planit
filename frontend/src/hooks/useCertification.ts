@@ -79,9 +79,6 @@ export const useCreateCertification = () => {
       queryClient.invalidateQueries({ queryKey: ["challenge", variables.challengeId] });
       toast.success("인증글이 작성되었습니다.");
     },
-    onError: (error) => {
-      toast.error(error.message || "인증글 작성에 실패했습니다.");
-    },
   });
 };
 
@@ -95,9 +92,6 @@ export const useUploadCertificationPhoto = () => {
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
       toast.success("사진이 업로드되었습니다.");
     },
-    onError: (error) => {
-      toast.error(error.message || "사진 업로드에 실패했습니다.");
-    },
   });
 };
 
@@ -110,9 +104,6 @@ export const useUpdateCertification = () => {
       queryClient.invalidateQueries({ queryKey: ["certification", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
       toast.success("인증글이 수정되었습니다.");
-    },
-    onError: (error) => {
-      toast.error(error.message || "인증글 수정에 실패했습니다.");
     },
   });
 };
@@ -128,9 +119,6 @@ export const useDeleteCertification = () => {
         queryClient.invalidateQueries({ queryKey: ["challenge", variables.challengeId] });
       }
       toast.success("인증글이 삭제되었습니다.");
-    },
-    onError: (error) => {
-      toast.error(error.message || "인증글 삭제에 실패했습니다.");
     },
   });
 };
