@@ -105,13 +105,12 @@ export default function FeedItem({
       <div onClick={onClick} className="cursor-pointer">
         {/* 사진 */}
         {certification.photoUrl && (
-          <div className="relative h-80 w-full bg-gray-100">
+          <div className="relative h-[450px] w-full bg-gray-50 flex items-center justify-center border-y border-gray-50">
             <Image
               src={certification.photoUrl}
               alt={certification.title}
-              layout="fill"
-              objectFit="cover"
-              className="hover:brightness-95 transition-all duration-300"
+              fill
+              className="object-contain hover:brightness-95 transition-all duration-300"
             />
           </div>
         )}
