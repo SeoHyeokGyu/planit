@@ -112,7 +112,7 @@ class CertificationService(
    */
   @Transactional(readOnly = true)
   fun getCertificationsByUser(userLoginId: String, pageable: Pageable): Page<Certification> {
-    return certificationRepository.findByUser_LoginId(userLoginId, pageable)
+    return certificationRepository.findByUser_LoginIdOrderByCreatedAtDesc(userLoginId, pageable)
   }
 
   /**

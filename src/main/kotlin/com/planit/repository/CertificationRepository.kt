@@ -14,12 +14,12 @@ import java.time.LocalDateTime
  */
 interface CertificationRepository : JpaRepository<Certification, Long> {
     /**
-     * 특정 사용자의 로그인 ID를 통해 인증 목록을 페이징하여 조회합니다.
+     * 특정 사용자의 로그인 ID를 통해 인증 목록을 최신순(생성일 내림차순)으로 페이징하여 조회합니다.
      * @param userLoginId 사용자 로그인 ID
      * @param pageable 페이징 정보
      * @return 페이징된 인증 목록
      */
-    fun findByUser_LoginId(userLoginId: String, pageable: Pageable): Page<Certification>
+    fun findByUser_LoginIdOrderByCreatedAtDesc(userLoginId: String, pageable: Pageable): Page<Certification>
 
     /**
      * 특정 챌린지 ID를 통해 인증 목록을 페이징하여 조회합니다.
