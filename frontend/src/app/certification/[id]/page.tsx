@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export default function CertificationDetailPage() {
   const router = useRouter();
@@ -225,12 +226,12 @@ export default function CertificationDetailPage() {
                     <div className="flex items-center justify-center w-full">
                         <label htmlFor="photo-upload" className="flex flex-col items-center justify-center w-full h-64 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors relative overflow-hidden">
                             {previewUrl ? (
-                                <Image 
+                                <FallbackImage 
                                     src={previewUrl} 
                                     alt="Preview" 
-                                    layout="fill" 
-                                    objectFit="contain" 
-                                    className="opacity-50 hover:opacity-100 transition-opacity"
+                                    fill
+                                    className="object-contain opacity-50 hover:opacity-100 transition-opacity"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             ) : (
                                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -257,7 +258,7 @@ export default function CertificationDetailPage() {
                 ) : (
                     data.photoUrl && (
                         <div className="relative w-full h-[400px] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
-                            <Image 
+                            <FallbackImage 
                                 src={data.photoUrl} 
                                 alt="Certification Photo" 
                                 fill

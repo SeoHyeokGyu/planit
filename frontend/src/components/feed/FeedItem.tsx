@@ -12,6 +12,7 @@ import { formatTimeAgo } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FeedResponse } from "@/types/feed";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export default function FeedItem({
   certification,
@@ -106,7 +107,7 @@ export default function FeedItem({
         {/* 사진 */}
         {certification.photoUrl && (
           <div className="relative h-[450px] w-full bg-gray-50 flex items-center justify-center border-y border-gray-50">
-            <Image
+            <FallbackImage
               src={certification.photoUrl}
               alt={certification.title}
               fill
