@@ -45,6 +45,9 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Change ownership
 RUN chown spring:spring app.jar
 
+# Create uploads directory and set permissions
+RUN mkdir -p uploads && chown spring:spring uploads
+
 # Switch to non-root user
 USER spring:spring
 

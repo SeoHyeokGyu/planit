@@ -38,6 +38,10 @@ spring:
     resources:
       add-mappings: true
 
+file:
+  upload-dir: /app/uploads
+  upload-url-path: /images
+
 server:
   port: ${PORT:8080}  # Render가 자동으로 PORT 환경 변수 설정
   tomcat:
