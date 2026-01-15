@@ -1,6 +1,7 @@
 package com.planit.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import java.time.LocalDateTime
 import org.springframework.data.domain.Page
 
 /**
@@ -23,8 +24,13 @@ data class ApiResponse<T>(
    *
    * @param code 머신이 읽을 수 있는 에러 코드
    * @param message 사람이 읽을 수 있는 에러 메시지
+   * @param timestamp 에러 발생 시각
    */
-  data class ApiError(val code: String, val message: String)
+  data class ApiError(
+      val code: String,
+      val message: String,
+      val timestamp: LocalDateTime = LocalDateTime.now()
+  )
 
   companion object {
     /**

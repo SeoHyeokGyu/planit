@@ -11,6 +11,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
+// Custom exception imports
+import com.planit.exception.UserNotFoundException
+import com.planit.exception.ChallengeNotFoundException
+import com.planit.exception.CertificationNotFoundException
+import com.planit.exception.CertificationUpdateForbiddenException
+import com.planit.exception.CertificationUpdatePeriodExpiredException
+import com.planit.exception.NotificationNotFoundException
+import com.planit.exception.NotificationAccessForbiddenException
+
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
@@ -64,6 +73,62 @@ class GlobalExceptionHandler {
     log.warn("인증 실패: {}", ex.message)
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
         .body(ApiResponse.error("INVALID_CREDENTIALS", "아이디 또는 비밀번호가 올바르지 않습니다."))
+  }
+
+  /** 404 Not Found - 사용자를 찾을 수 없음 */
+  @ExceptionHandler(UserNotFoundException::class)
+  fun handleUserNotFoundException(ex: UserNotFoundException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("사용자를 찾을 수 없음: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.error("USER_NOT_FOUND", ex.message ?: "사용자를 찾을 수 없습니다"))
+  }
+
+  /** 404 Not Found - 챌린지를 찾을 수 없음 */
+  @ExceptionHandler(ChallengeNotFoundException::class)
+  fun handleChallengeNotFoundException(ex: ChallengeNotFoundException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("챌린지를 찾을 수 없음: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.error("CHALLENGE_NOT_FOUND", ex.message ?: "챌린지를 찾을 수 없습니다"))
+  }
+
+  /** 404 Not Found - 인증을 찾을 수 없음 */
+  @ExceptionHandler(CertificationNotFoundException::class)
+  fun handleCertificationNotFoundException(ex: CertificationNotFoundException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("인증을 찾을 수 없음: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.error("CERTIFICATION_NOT_FOUND", ex.message ?: "인증을 찾을 수 없습니다"))
+  }
+
+  /** 403 Forbidden - 인증 수정/삭제 권한 없음 */
+  @ExceptionHandler(CertificationUpdateForbiddenException::class)
+  fun handleCertificationUpdateForbiddenException(ex: CertificationUpdateForbiddenException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("인증 권한 없음: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(ApiResponse.error("CERTIFICATION_FORBIDDEN", ex.message ?: "이 인증을 수정할 권한이 없습니다"))
+  }
+
+  /** 400 Bad Request - 인증 수정 기한 만료 */
+  @ExceptionHandler(CertificationUpdatePeriodExpiredException::class)
+  fun handleCertificationUpdatePeriodExpiredException(ex: CertificationUpdatePeriodExpiredException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("인증 수정 기한 만료: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.error("CERTIFICATION_UPDATE_EXPIRED", ex.message ?: "인증은 생성 후 24시간 이내에만 수정할 수 있습니다"))
+  }
+
+  /** 404 Not Found - 알림을 찾을 수 없음 */
+  @ExceptionHandler(NotificationNotFoundException::class)
+  fun handleNotificationNotFoundException(ex: NotificationNotFoundException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("알림을 찾을 수 없음: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.error("NOTIFICATION_NOT_FOUND", ex.message ?: "알림을 찾을 수 없습니다"))
+  }
+
+  /** 403 Forbidden - 알림 접근 권한 없음 */
+  @ExceptionHandler(NotificationAccessForbiddenException::class)
+  fun handleNotificationAccessForbiddenException(ex: NotificationAccessForbiddenException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("알림 접근 권한 없음: {}", ex.message)
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(ApiResponse.error("NOTIFICATION_FORBIDDEN", ex.message ?: "이 알림에 접근할 권한이 없습니다"))
   }
 
   /** 500 Internal Server Error - 처리되지 않은 모든 예외 서버 내부 로직에서 발생하는 예외를 처리합니다. */
