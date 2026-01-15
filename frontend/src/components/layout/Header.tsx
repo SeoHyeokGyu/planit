@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUser";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
-import { Users, LogOut, User, LayoutDashboard, Trophy, Zap, Settings, Flame, Medal, BarChart3 } from "lucide-react";
+import { Users, LogOut, User, LayoutDashboard, Trophy, Zap, Settings, Flame, Medal, BarChart3, Crown } from "lucide-react";
 import { useState } from "react";
 
 export default function Header() {
@@ -46,6 +46,13 @@ export default function Header() {
               >
                 <Zap className="w-4 h-4" />
                 피드
+              </Link>
+              <Link
+                href="/ranking"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 font-medium transition-all"
+              >
+                <Crown className="w-4 h-4" />
+                랭킹
               </Link>
               <Link
                 href="/users"
@@ -126,6 +133,16 @@ export default function Header() {
                       >
                         <BarChart3 className="w-4 h-4" />
                         내 통계
+                      </Link>
+
+                      {/* 랭킹 */}
+                      <Link
+                        href="/ranking"
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-yellow-50 text-gray-700 hover:text-yellow-600 font-medium transition-colors border-b border-gray-100"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <Crown className="w-4 h-4" />
+                        랭킹
                       </Link>
 
                       {/* 내 배지 */}
