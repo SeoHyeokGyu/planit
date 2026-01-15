@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional
 class RewardService(
   private val userPointService: UserPointService,
   private val badgeService: BadgeService,
-  private val userRepository: UserRepository
+  private val userRepository: UserRepository,
+  private val rankingService: RankingService
 ) {
 
   /**
@@ -30,6 +31,9 @@ class RewardService(
       points = rewardType.points,
       reason = rewardType.description,
     )
+
+    // 랭킹 업데이트 (Redis ZSET)
+    rankingService.incrementScore(userLoginId, rewardType.points)
 
     // 배지 체크
     val user = userRepository.findByLoginId(userLoginId) ?: throw UserNotFoundException()
