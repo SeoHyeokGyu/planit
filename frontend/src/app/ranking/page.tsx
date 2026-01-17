@@ -2,12 +2,12 @@
 
 import RankingBoard from "@/components/ranking/RankingBoard";
 import RankingSseProvider from "@/providers/RankingSseProvider";
-import { pageHeaderStyles } from "@/styles/pageHeader";
+import { pageHeaderStyles, layoutStyles } from "@/styles/common";
 
 export default function RankingPage() {
   return (
     <RankingSseProvider enabled={true}>
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <div className={layoutStyles.containerMd}>
         {/* 페이지 헤더 */}
         <div className={pageHeaderStyles.container}>
           <h1 className={pageHeaderStyles.title}>랭킹</h1>

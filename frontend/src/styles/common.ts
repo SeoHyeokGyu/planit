@@ -15,6 +15,32 @@ export const headerStyles = {
   description: "text-gray-600 font-medium ml-[3.25rem]",
 };
 
+export const pageHeaderStyles = {
+  container: "mb-8",
+  wrapper: "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4",
+  titleSection: "flex-1",
+  titleWrapper: "flex items-center gap-3 mb-3",
+  iconBase: "w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg",
+  title: "text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent",
+  description: "text-gray-600 font-medium",
+  actionButton: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all group font-semibold",
+  standardButton: "h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700",
+  tabButton: {
+    base: "h-9 px-4 bg-white border-2 transition-all duration-200 shadow-sm font-medium",
+    inactive: "border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-400",
+    active: "border-blue-500 bg-blue-50 text-blue-700 hover:bg-blue-100",
+  },
+};
+
+export const iconGradients = {
+  feed: "bg-gradient-to-r from-blue-500 to-purple-500",
+  challenge: "bg-gradient-to-r from-amber-500 to-orange-500",
+  profile: "bg-gradient-to-r from-blue-600 to-purple-600",
+  badge: "bg-gradient-to-r from-yellow-500 to-amber-500",
+  streak: "bg-gradient-to-r from-orange-500 to-red-500",
+  certification: "bg-gradient-to-r from-green-400 to-blue-500",
+};
+
 // Cards
 export const cardStyles = {
   base: "border-2 shadow-xl bg-white overflow-hidden rounded-xl",
@@ -42,15 +68,18 @@ export const inputStyles = {
 // Navigation
 export const navStyles = {
   link: "flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all",
-  activeLink: "bg-blue-50 text-blue-600", // Optional: for active state
+  activeLink: "bg-blue-50 text-blue-600",
+  mobileLink: "flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-colors",
 };
 
 // Dropdowns
 export const dropdownStyles = {
   wrapper:
     "absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden",
-  item: "flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100 last:border-0 cursor-pointer w-full text-left",
+  item: "flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors w-full text-left",
+  itemBordered: "border-b border-gray-100 last:border-0",
   header: "px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50",
+  sectionHeader: "px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-50",
 };
 
 // Calendar
@@ -66,10 +95,11 @@ export const calendarStyles = {
 export const componentStyles = {
   sectionTitle: "text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2",
   avatar: {
-    base: "rounded-full flex items-center justify-center text-white font-bold shadow-md",
+    base: "bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold shadow-md transition-shadow",
     small: "w-9 h-9 text-sm", // Header
     medium: "w-10 h-10 text-sm", // Feed
-    large: "w-24 h-24 sm:w-28 sm:h-28 text-3xl", // Profile
+    large: "w-12 h-12 text-lg", // Mobile menu/Profile small
+    xlarge: "w-24 h-24 sm:w-28 sm:h-28 text-3xl", // Profile page
   },
 };
 

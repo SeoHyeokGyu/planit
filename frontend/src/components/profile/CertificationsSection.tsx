@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { CertificationCalendar } from "@/components/CertificationCalendar";
 import { LayoutList, Calendar as CalendarIcon, Activity } from "lucide-react";
-import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { pageHeaderStyles, iconGradients } from "@/styles/common";
 import { cn } from "@/lib/utils";
 
 interface CertificationsSectionProps {

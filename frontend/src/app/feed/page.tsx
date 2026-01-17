@@ -23,7 +23,7 @@ import {
   Repeat2,
   Share,
   Calendar,
-  Zap,
+  Activity,
   Send,
   ArrowUpDown,
   Check,
@@ -35,7 +35,7 @@ import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tansta
 import { toast } from "sonner";
 import { FeedResponse, FeedSortType } from "@/types/feed";
 import { useInView } from "react-intersection-observer";
-import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { layoutStyles, pageHeaderStyles, iconGradients } from "@/styles/common";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default function FeedPage() {
@@ -62,15 +62,15 @@ export default function FeedPage() {
   const feedItems = data?.pages.flatMap((page) => page.data || []) || [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className={layoutStyles.pageRoot}>
+      <div className={layoutStyles.containerMd}>
         {/* Header */}
         <div className={pageHeaderStyles.container}>
           <div className={pageHeaderStyles.wrapper}>
             <div className={pageHeaderStyles.titleSection}>
               <div className={pageHeaderStyles.titleWrapper}>
                 <div className={`${pageHeaderStyles.iconBase} ${iconGradients.feed}`}>
-                  <Zap className="w-6 h-6" />
+                  <Activity className="w-6 h-6" />
                 </div>
                 <div>
                   <h1 className={pageHeaderStyles.title}>피드</h1>
@@ -79,52 +79,6 @@ export default function FeedPage() {
                   </p>
                 </div>
               </div>
-            </div>
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as FeedSortType)}>
-              <SelectTrigger className={`w-[160px] ${pageHeaderStyles.standardButton}`}>
-                <div className="flex items-center gap-2">
-                  <ArrowUpDown className="w-4 h-4 text-blue-600" />
-                  <SelectValue placeholder="정렬" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="w-[160px] bg-white border-2 border-gray-300 shadow-xl rounded-lg p-1 animate-in fade-in-0 zoom-in-95">
-                <SelectItem
-                  value="LATEST"
-                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span>최신순</span>
-                    {sortBy === "LATEST" && <Check className="w-4 h-4 ml-2" />}
-                  </div>
-                </SelectItem>
-                <SelectItem
-                  value="LIKES"
-                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span>좋아요순</span>
-                    {sortBy === "LIKES" && <Check className="w-4 h-4 ml-2" />}
-                  </div>
-                </SelectItem>
-                <SelectItem
-                  value="COMMENTS"
-                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span>댓글순</span>
-                    {sortBy === "COMMENTS" && <Check className="w-4 h-4 ml-2" />}
-                  </div>
-                </SelectItem>
-                <SelectItem
-                  value="POPULAR"
-                  className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span>인기순</span>
-                    {sortBy === "POPULAR" && <Check className="w-4 h-4 ml-2" />}
-                  </div>
-                </SelectItem>
-              </SelectContent>
             </Select>
           </div>
         </div>

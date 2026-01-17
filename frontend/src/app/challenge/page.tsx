@@ -24,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check } from "lucide-react";
 import { ChallengeListResponse, ChallengeSortType } from "@/types/challenge";
-import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { pageHeaderStyles, iconGradients, layoutStyles } from "@/styles/common";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default function ChallengesPage() {
@@ -139,8 +139,8 @@ export default function ChallengesPage() {
   };
 
   return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className={layoutStyles.pageRoot}>
+        <div className={layoutStyles.containerXl}>
           {/* Header */}
           <div className={pageHeaderStyles.container}>
             <div className={pageHeaderStyles.wrapper}>

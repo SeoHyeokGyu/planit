@@ -5,6 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import DashboardRecentFeed from "@/components/dashboard/DashboardRecentFeed";
 import { useEffect, useRef } from "react";
+import { layoutStyles } from "@/styles/common";
 
 export default function DashboardPage() {
   const renderCount = useRef(0);
@@ -22,8 +23,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 py-8">
+    <div className={layoutStyles.pageRoot}>
+      <main className={layoutStyles.containerXl}>
         <DashboardHeader />
         <DashboardStats />
         <DashboardRecentFeed />
