@@ -5,6 +5,7 @@ import { useLogout } from "@/hooks/useAuth";
 import { useFollowStats } from "@/hooks/useFollow";
 import { Button } from "@/components/ui/button";
 import { User, Calendar, LogOut, Heart } from "lucide-react";
+import { componentStyles } from "@/styles/common";
 
 interface ProfileHeaderProps {
   user: UserProfile;
