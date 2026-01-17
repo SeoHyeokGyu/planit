@@ -13,6 +13,7 @@ import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
 import com.planit.enums.BadgeType
 import com.planit.service.badge.BadgeService
+import com.planit.service.storage.FileStorageService
 import com.planit.util.setPrivateProperty
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -36,6 +37,8 @@ class CertificationServiceTest {
   @MockK private lateinit var notificationService: NotificationService
   @MockK private lateinit var rewardService: RewardService
   @MockK private lateinit var badgeService: BadgeService
+  @MockK private lateinit var streakService: StreakService
+  @MockK private lateinit var fileStorageService: FileStorageService
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -91,6 +94,7 @@ class CertificationServiceTest {
         Optional.empty()
       every { rewardService.grantCertificationReward(any()) } answers {}
       every { badgeService.checkAndAwardBadges(any(), any()) } returns 0
+      justRun { streakService.recordCertification(any(), any()) }
 
       // When
       val response = certificationService.createCertification(request, user.loginId)
@@ -101,6 +105,7 @@ class CertificationServiceTest {
       assertThat(challenge.certificationCnt).isEqualTo(1L)
       verify(exactly = 1) { certificationRepository.save(any()) }
       verify(exactly = 1) { challengeRepository.save(any()) }
+      verify(exactly = 1) { streakService.recordCertification(challengeId, user.loginId) }
     }
   }
 
@@ -222,6 +227,60 @@ class CertificationServiceTest {
       assertThrows<CertificationUpdateForbiddenException> {
         certificationService.deleteCertification(1L, user.loginId)
       }
+    }
+  }
+
+  @Nested
+  @DisplayName("deleteCertificationPhoto 메서드는")
+  inner class DescribeDeleteCertificationPhoto {
+    private lateinit var certification: Certification
+
+    @BeforeEach
+    fun setup() {
+      certification =
+        Certification(
+          user = user,
+          challenge = challenge,
+          title = "Title",
+          content = "Content",
+          photoUrl = "/images/photo.jpg"
+        )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("인증 사진을 성공적으로 삭제하고 파일 삭제를 요청한다")
+    fun `deletes certification photo and requests file deletion`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { certificationRepository.save(any()) } answers { firstArg() }
+      justRun { fileStorageService.deleteFile(any()) }
+
+      // When
+      val response = certificationService.deleteCertificationPhoto(1L, user.loginId)
+
+      // Then
+      assertThat(response.photoUrl).isNull()
+      verify(exactly = 1) { fileStorageService.deleteFile("/images/photo.jpg") }
+      verify(exactly = 1) { certificationRepository.save(any()) }
+    }
+
+    @Test
+    @DisplayName("다른 사람이 사진 삭제를 시도하면 Forbidden 예외를 던진다")
+    fun `throws exception when unauthorized user tries to delete photo`() {
+      // Given
+      val otherUser = User("other", "pw", "other")
+      certification.setPrivateProperty("user", otherUser)
+      
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+
+      // When & Then
+      assertThrows<CertificationUpdateForbiddenException> {
+        certificationService.deleteCertificationPhoto(1L, user.loginId)
+      }
+      
+      // 파일 삭제가 호출되지 않아야 함
+      verify(exactly = 0) { fileStorageService.deleteFile(any()) }
     }
   }
 }
