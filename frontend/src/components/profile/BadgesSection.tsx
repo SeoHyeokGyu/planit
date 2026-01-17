@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { pageHeaderStyles, iconGradients } from "@/styles/common";
 
 interface BadgesSectionProps {
   userLoginId: string;

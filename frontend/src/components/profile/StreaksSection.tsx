@@ -13,7 +13,7 @@ import type {
   DailyActivityResponse,
   ActivityCalendarResponse,
 } from "@/types/streak";
-import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
+import { pageHeaderStyles, iconGradients } from "@/styles/common";
 import { EmptyState } from "@/components/ui/empty-state";
 
 interface StreaksSectionProps {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useUserProfile } from "@/hooks/useUser";
+import { headerStyles, themeStyles } from "@/styles/common";
 
 export default function DashboardHeader() {
   const { data: userProfile, isLoading } = useUserProfile();
@@ -15,11 +16,11 @@ export default function DashboardHeader() {
   }
 
   return (
-    <div className="mb-8">
-      <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+    <div className={headerStyles.wrapper}>
+      <h1 className={`${headerStyles.title} ${themeStyles.primary.text} mb-2`}>
         안녕하세요, {userProfile?.nickname || "사용자"}님!
       </h1>
-      <p className="text-gray-500">오늘도 화이팅! 🚀</p>
+      <p className="text-gray-500 font-medium">오늘도 화이팅! 🚀</p>
     </div>
   );
 }
