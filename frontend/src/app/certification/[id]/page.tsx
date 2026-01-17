@@ -95,13 +95,7 @@ export default function CertificationDetailPage() {
 
   const handleUpdate = async () => {
     try {
-      // 1. 텍스트 정보 업데이트
-      await updateMutation.mutateAsync({
-        id: certificationId,
-        data: { title: editedTitle, content: editedContent }
-      });
-
-      // 2. 사진이 변경되었다면 업로드 수행
+      // 1. 사진이 변경되었다면 먼저 업로드 수행
       if (editedFile) {
         const uploadResponse = await uploadPhotoMutation.mutateAsync({
           id: certificationId,
@@ -109,9 +103,16 @@ export default function CertificationDetailPage() {
         });
         
         if (!uploadResponse.success) {
-          toast.error("사진 업로드에 실패했습니다.");
+          toast.error(uploadResponse.message || "사진 업로드에 실패했습니다.");
+          return; // 사진 업로드 실패 시 텍스트 수정 중단
         }
       }
+
+      // 2. 텍스트 정보 업데이트
+      await updateMutation.mutateAsync({
+        id: certificationId,
+        data: { title: editedTitle, content: editedContent }
+      });
 
       toast.success("인증이 성공적으로 수정되었습니다!");
       setIsEditing(false);
