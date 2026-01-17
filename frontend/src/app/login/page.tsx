@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/stores/authStore';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
 import { LoginForm } from "@/components/auth/LoginForm";
 import Link from "next/link";
-import { Sparkles, TrendingUp, Heart, Award } from 'lucide-react';
+import { Sparkles, TrendingUp, Heart, Award } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,29 +13,29 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/dashboard');
+      router.replace("/dashboard");
     }
   }, [isAuthenticated, router]);
   const benefits = [
     {
       icon: Sparkles,
-      title: 'AI 챌린지 추천',
-      description: '5가지 알고리즘으로 맞춤형 챌린지 제시',
+      title: "AI 챌린지 추천",
+      description: "5가지 알고리즘으로 맞춤형 챌린지 제시",
     },
     {
       icon: TrendingUp,
-      title: '실시간 피드',
-      description: '다른 사람들의 성취를 즉시 확인',
+      title: "실시간 피드",
+      description: "다른 사람들의 성취를 즉시 확인",
     },
     {
       icon: Heart,
-      title: 'AI 동기부여',
-      description: '개인화된 격려 메시지 제공',
+      title: "AI 동기부여",
+      description: "개인화된 격려 메시지 제공",
     },
     {
       icon: Award,
-      title: '게임화 시스템',
-      description: '포인트, 배지, 스트릭 시스템',
+      title: "게임화 시스템",
+      description: "포인트, 배지, 스트릭 시스템",
     },
   ];
 

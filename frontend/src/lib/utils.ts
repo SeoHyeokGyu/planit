@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatTimeAgo(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
@@ -18,6 +18,6 @@ export function formatTimeAgo(date: Date | string): string {
   return d.toLocaleDateString("ko-KR", {
     year: "numeric",
     month: "long",
-    day: "numeric"
+    day: "numeric",
   });
 }

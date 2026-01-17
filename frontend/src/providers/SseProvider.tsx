@@ -44,8 +44,8 @@ export default function SseProvider({ children }: { children: React.ReactNode })
 
     // 기본 'message' 이벤트 리스너 (서버가 이벤트 이름을 지정하지 않을 경우)
     eventSource.onmessage = (event) => {
-        console.log("SSE: Received default 'message' event", event.data);
-        // 필요에 따라 이 데이터도 처리할 수 있습니다.
+      console.log("SSE: Received default 'message' event", event.data);
+      // 필요에 따라 이 데이터도 처리할 수 있습니다.
     };
 
     eventSource.onerror = (error) => {

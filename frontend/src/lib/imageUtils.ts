@@ -20,9 +20,7 @@ interface ValidationResult {
 export const validateImage = (file: File): ValidationResult => {
   // 1. 확장자 검사
   const fileName = file.name.toLowerCase();
-  const isValidExtension = ALLOWED_IMAGE_EXTENSIONS.some((ext) =>
-    fileName.endsWith(`.${ext}`)
-  );
+  const isValidExtension = ALLOWED_IMAGE_EXTENSIONS.some((ext) => fileName.endsWith(`.${ext}`));
 
   if (!isValidExtension) {
     return {
@@ -40,9 +38,9 @@ export const validateImage = (file: File): ValidationResult => {
   const ABSOLUTE_MAX_SIZE = 30 * 1024 * 1024; // 30MB
   if (file.size > ABSOLUTE_MAX_SIZE) {
     return {
-        isValid: false,
-        message: "파일 크기가 너무 큽니다. 30MB 이하의 이미지만 업로드 가능합니다."
-    }
+      isValid: false,
+      message: "파일 크기가 너무 큽니다. 30MB 이하의 이미지만 업로드 가능합니다.",
+    };
   }
 
   return { isValid: true };
@@ -69,7 +67,7 @@ export const compressImage = async (file: File): Promise<File> => {
   try {
     const compressedFile = await imageCompression(file, options);
     // console.log(`이미지 압축 성공: ${file.size / 1024 / 1024}MB -> ${compressedFile.size / 1024 / 1024}MB`);
-    
+
     // 압축된 Blob(File)의 이름이 'blob' 등으로 변경될 수 있으므로 원본 이름으로 다시 래핑
     return new File([compressedFile], file.name, {
       type: compressedFile.type,

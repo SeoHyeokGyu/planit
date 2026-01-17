@@ -16,14 +16,17 @@ export const pageHeaderStyles = {
   iconBase: "w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg",
 
   // Title and description
-  title: "text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent",
+  title:
+    "text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent",
   description: "text-gray-600 font-medium",
 
   // Action button (gradient style for primary actions)
-  actionButton: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all group font-semibold",
+  actionButton:
+    "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all group font-semibold",
 
   // Standard action buttons and controls (dropdowns, tabs, etc.)
-  standardButton: "h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700",
+  standardButton:
+    "h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700",
 
   // Tab button styles
   tabButton: {

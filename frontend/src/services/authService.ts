@@ -1,10 +1,5 @@
 import { api } from "@/lib/api";
-import {
-  SignUpRequest,
-  LoginRequest,
-  LoginResponse,
-  ApiResponse,
-} from "@/types/auth";
+import { SignUpRequest, LoginRequest, LoginResponse, ApiResponse } from "@/types/auth";
 
 export const authService = {
   async signUp(data: SignUpRequest): Promise<ApiResponse<void>> {

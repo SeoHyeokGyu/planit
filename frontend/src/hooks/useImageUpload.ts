@@ -21,7 +21,7 @@ export const useImageUpload = (initialPreviewUrl: string | null = null): UseImag
   // 초기 URL 변경 시 반영 (ex: 데이터 로딩 후)
   useEffect(() => {
     if (initialPreviewUrl) {
-        setPreviewUrlState(initialPreviewUrl);
+      setPreviewUrlState(initialPreviewUrl);
     }
   }, [initialPreviewUrl]);
 
@@ -33,39 +33,42 @@ export const useImageUpload = (initialPreviewUrl: string | null = null): UseImag
     setPreviewUrlState(url);
   }, []);
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    setError(null);
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = e.target.files?.[0];
+      setError(null);
 
-    if (!selectedFile) {
-      // 파일 선택 취소 시 기존 상태 유지? 혹은 초기화?
-      // 보통 취소하면 아무 일도 안 일어나거나 초기화. 여기서는 초기화하지 않음.
-      return;
-    }
-
-    setIsCompressing(true);
-    const { file: processedFile, error: processError } = await handleImageProcess(selectedFile);
-    setIsCompressing(false);
-
-    if (processError) {
-      setError(processError);
-      e.target.value = ""; // 입력 초기화
-      return;
-    }
-
-    if (processedFile) {
-      setFileState(processedFile);
-      // 기존 미리보기 URL 해제 (메모리 누수 방지)
-      if (previewUrl && !previewUrl.startsWith("http")) {
-          URL.revokeObjectURL(previewUrl);
+      if (!selectedFile) {
+        // 파일 선택 취소 시 기존 상태 유지? 혹은 초기화?
+        // 보통 취소하면 아무 일도 안 일어나거나 초기화. 여기서는 초기화하지 않음.
+        return;
       }
-      const newUrl = URL.createObjectURL(processedFile);
-      setPreviewUrlState(newUrl);
-    }
-    
-    // 같은 파일 다시 선택 가능하게 초기화
-    e.target.value = "";
-  }, [previewUrl]);
+
+      setIsCompressing(true);
+      const { file: processedFile, error: processError } = await handleImageProcess(selectedFile);
+      setIsCompressing(false);
+
+      if (processError) {
+        setError(processError);
+        e.target.value = ""; // 입력 초기화
+        return;
+      }
+
+      if (processedFile) {
+        setFileState(processedFile);
+        // 기존 미리보기 URL 해제 (메모리 누수 방지)
+        if (previewUrl && !previewUrl.startsWith("http")) {
+          URL.revokeObjectURL(previewUrl);
+        }
+        const newUrl = URL.createObjectURL(processedFile);
+        setPreviewUrlState(newUrl);
+      }
+
+      // 같은 파일 다시 선택 가능하게 초기화
+      e.target.value = "";
+    },
+    [previewUrl]
+  );
 
   const reset = useCallback(() => {
     setFileState(null);

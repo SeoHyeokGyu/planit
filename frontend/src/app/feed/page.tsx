@@ -5,13 +5,7 @@ import { useRouter } from "next/navigation";
 import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
 import FeedItem from "@/components/feed/FeedItem";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Heart, MessageCircle, Repeat2, Share, Calendar, Zap, Send, ArrowUpDown, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  Heart,
+  MessageCircle,
+  Repeat2,
+  Share,
+  Calendar,
+  Zap,
+  Send,
+  ArrowUpDown,
+  Check,
+} from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { formatTimeAgo } from "@/lib/utils";
@@ -39,13 +44,10 @@ export default function FeedPage() {
   const { ref, inView } = useInView();
   const [sortBy, setSortBy] = useState<FeedSortType>("LATEST");
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-  } = useFeedInfinite(10, sortBy);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useFeedInfinite(
+    10,
+    sortBy
+  );
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -71,9 +73,7 @@ export default function FeedPage() {
                   <Zap className="w-6 h-6" />
                 </div>
                 <div>
-                  <h1 className={pageHeaderStyles.title}>
-                    피드
-                  </h1>
+                  <h1 className={pageHeaderStyles.title}>피드</h1>
                   <p className={`${pageHeaderStyles.description} text-sm mt-1`}>
                     팔로우하는 사람들의 최근 활동
                   </p>

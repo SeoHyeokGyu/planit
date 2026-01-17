@@ -8,11 +8,7 @@ import { FollowStats, FollowUser } from "@/types/follow";
 /**
  * 특정 사용자의 팔로워 목록 조회
  */
-export const useFollowers = (
-  userLoginId: string,
-  page: number = 0,
-  size: number = 10
-) => {
+export const useFollowers = (userLoginId: string, page: number = 0, size: number = 10) => {
   return useQuery({
     queryKey: ["followers", userLoginId, page, size],
     queryFn: () => followService.getFollowers(userLoginId, page, size),
@@ -24,11 +20,7 @@ export const useFollowers = (
 /**
  * 특정 사용자의 팔로잉 목록 조회
  */
-export const useFollowings = (
-  userLoginId: string,
-  page: number = 0,
-  size: number = 10
-) => {
+export const useFollowings = (userLoginId: string, page: number = 0, size: number = 10) => {
   return useQuery({
     queryKey: ["followings", userLoginId, page, size],
     queryFn: () => followService.getFollowings(userLoginId, page, size),
@@ -91,8 +83,7 @@ export const useUnfollow = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (targetLoginId: string) =>
-      followService.unfollow(targetLoginId),
+    mutationFn: (targetLoginId: string) => followService.unfollow(targetLoginId),
     onSuccess: (data, targetLoginId) => {
       // 팔로우 관련 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ["followings"] });

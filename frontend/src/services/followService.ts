@@ -38,15 +38,11 @@ export const followService = {
    * 특정 사용자의 팔로워 수 조회
    */
   getFollowerCount: (userLoginId: string) =>
-    api.get<ApiResponse<number>>(
-      `/api/follows/${userLoginId}/follower-count`
-    ),
+    api.get<ApiResponse<number>>(`/api/follows/${userLoginId}/follower-count`),
 
   /**
    * 특정 사용자의 팔로잉 수 조회
    */
   getFollowingCount: (userLoginId: string) =>
-    api.get<ApiResponse<number>>(
-      `/api/follows/${userLoginId}/following-count`
-    ),
+    api.get<ApiResponse<number>>(`/api/follows/${userLoginId}/following-count`),
 };

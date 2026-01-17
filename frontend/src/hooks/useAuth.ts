@@ -22,19 +22,13 @@ export const useLogin = () => {
         const token = response.data.accessToken;
         // JWT 토큰에서 userId 추출 (payload의 sub 또는 userId 필드)
         try {
-          const payload = JSON.parse(
-            atob(token.split(".")[1])
-          );
-          
+          const payload = JSON.parse(atob(token.split(".")[1]));
+
           // JWT 페이로드에서 정보 추출 (프로젝트의 토큰 구조에 맞게 조정)
           const userId = payload.userId;
           const loginId = payload.sub; // 보통 sub에 loginId(username)가 들어있음
-          
-          setToken(
-            token, 
-            userId ? parseInt(userId) : undefined,
-            loginId
-          );
+
+          setToken(token, userId ? parseInt(userId) : undefined, loginId);
         } catch (e) {
           console.warn("Failed to parse token payload:", e);
           setToken(token);

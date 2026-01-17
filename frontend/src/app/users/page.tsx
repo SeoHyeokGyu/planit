@@ -84,9 +84,7 @@ export default function UsersPage() {
               사용자 찾기
             </h1>
           </div>
-          <p className="text-gray-700 font-medium">
-            관심 있는 사용자를 검색하고 팔로우하세요
-          </p>
+          <p className="text-gray-700 font-medium">관심 있는 사용자를 검색하고 팔로우하세요</p>
         </div>
 
         {/* 검색 입력 */}
@@ -126,12 +124,8 @@ export default function UsersPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
               <Search className="w-8 h-8 text-red-400" />
             </div>
-            <p className="text-gray-700 text-lg font-semibold">
-              검색에 실패했습니다.
-            </p>
-            <p className="text-gray-500 text-sm mt-2">
-              다시 시도해주세요.
-            </p>
+            <p className="text-gray-700 text-lg font-semibold">검색에 실패했습니다.</p>
+            <p className="text-gray-500 text-sm mt-2">다시 시도해주세요.</p>
           </div>
         )}
 
@@ -140,12 +134,8 @@ export default function UsersPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
               <Search className="w-8 h-8 text-gray-400" />
             </div>
-            <p className="text-gray-700 text-lg font-semibold">
-              검색 결과가 없습니다.
-            </p>
-            <p className="text-gray-500 text-sm mt-2">
-              다른 검색 조건을 시도해보세요.
-            </p>
+            <p className="text-gray-700 text-lg font-semibold">검색 결과가 없습니다.</p>
+            <p className="text-gray-500 text-sm mt-2">다른 검색 조건을 시도해보세요.</p>
           </div>
         )}
 
@@ -191,7 +181,9 @@ export default function UsersPage() {
                           targetLoginId={user.loginId}
                           variant="default"
                           size="default"
-                          initialIsFollowing={followings?.some(f => f.loginId === user.loginId) ?? false}
+                          initialIsFollowing={
+                            followings?.some((f) => f.loginId === user.loginId) ?? false
+                          }
                         />
                       </div>
                     </div>
@@ -207,9 +199,7 @@ export default function UsersPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
               <Search className="w-8 h-8 text-blue-400" />
             </div>
-            <p className="text-gray-700 text-lg font-semibold">
-              사용자를 검색하세요.
-            </p>
+            <p className="text-gray-700 text-lg font-semibold">사용자를 검색하세요.</p>
             <p className="text-gray-500 text-sm mt-2">
               위에 사용자 이름 또는 아이디를 입력하여 검색해주세요.
             </p>

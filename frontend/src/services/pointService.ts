@@ -1,9 +1,6 @@
 import { api } from "@/lib/api";
 import { ApiResponse } from "@/types/api";
-import {
-  PointStatisticsResponse,
-  StatisticsDateRange,
-} from "@/types/point";
+import { PointStatisticsResponse, StatisticsDateRange } from "@/types/point";
 
 export const pointService = {
   async getPointStatistics(

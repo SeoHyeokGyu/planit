@@ -18,10 +18,10 @@ export const useCertification = (id: number) => {
 };
 
 export const useCertificationsByUser = (
-    userLoginId: string,
-    page: number = 0,
-    size: number = 10,
-    options?: { enabled: boolean }
+  userLoginId: string,
+  page: number = 0,
+  size: number = 10,
+  options?: { enabled: boolean }
 ) => {
   return useQuery({
     queryKey: ["certifications", "user", userLoginId, page, size],
@@ -34,11 +34,15 @@ export const useCertificationsByUser = (
       number: data.pagination?.pageNumber || 0,
       size: data.pagination?.pageSize || 10,
     }),
-    ...options
+    ...options,
   });
 };
 
-export const useCertificationsByChallenge = (challengeId: string, page: number = 0, size: number = 10) => {
+export const useCertificationsByChallenge = (
+  challengeId: string,
+  page: number = 0,
+  size: number = 10
+) => {
   return useQuery({
     queryKey: ["certifications", "challenge", challengeId, page, size],
     queryFn: () => certificationService.getCertificationsByChallenge(challengeId, page, size),
@@ -64,7 +68,7 @@ export const useCertificationsByDateRange = (
     queryFn: () => certificationService.getCertificationsByDateRange(userLoginId, from, to),
     enabled: !!userLoginId && !!from && !!to,
     select: (data) => data.data,
-    ...options
+    ...options,
   });
 };
 
@@ -73,7 +77,8 @@ export const useCertificationsByDateRange = (
 export const useCreateCertification = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CertificationCreateRequest) => certificationService.createCertification(data),
+    mutationFn: (data: CertificationCreateRequest) =>
+      certificationService.createCertification(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["certifications"] });
       queryClient.invalidateQueries({ queryKey: ["challenge", variables.challengeId] });
