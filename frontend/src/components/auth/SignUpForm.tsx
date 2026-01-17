@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSignUp } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { inputStyles, themeStyles } from "@/styles/common";
 
 export function SignUpForm() {
   const [loginId, setLoginId] = useState("");
@@ -47,7 +48,7 @@ export function SignUpForm() {
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
             disabled={signUpMutation.isPending}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className={inputStyles.auth}
           />
         </div>
 
@@ -64,7 +65,7 @@ export function SignUpForm() {
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             disabled={signUpMutation.isPending}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className={inputStyles.auth}
           />
         </div>
 
@@ -81,7 +82,7 @@ export function SignUpForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={signUpMutation.isPending}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className={inputStyles.auth}
           />
         </div>
 
@@ -98,7 +99,7 @@ export function SignUpForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={signUpMutation.isPending}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className={inputStyles.auth}
           />
         </div>
 
@@ -115,7 +116,7 @@ export function SignUpForm() {
         <Button
           type="submit"
           disabled={signUpMutation.isPending}
-          className="w-full py-3 mt-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md"
+          className={`w-full py-3 mt-2 ${themeStyles.primary.btn} text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md`}
         >
           {signUpMutation.isPending ? "가입 처리 중..." : "회원가입"}
         </Button>

@@ -1,22 +1,14 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/stores/authStore';
-import { useLogout } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import {
-  Users,
-  TrendingUp,
-  Sparkles,
-  Award,
-  Search,
-  Heart,
-  ArrowRight,
-} from 'lucide-react';
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { useLogout } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Users, TrendingUp, Sparkles, Award, Search, Heart, ArrowRight } from "lucide-react";
 
 export default function Home() {
-  const [baseUrl, setBaseUrl] = useState('');
+  const [baseUrl, setBaseUrl] = useState("");
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useLogout();
 
@@ -32,33 +24,33 @@ export default function Home() {
   const features = [
     {
       icon: Sparkles,
-      title: 'AI 챌린지 추천',
-      description: '5가지 알고리즘으로 당신에게 딱 맞는 챌린지를 추천',
+      title: "AI 챌린지 추천",
+      description: "5가지 알고리즘으로 당신에게 딱 맞는 챌린지를 추천",
     },
     {
       icon: TrendingUp,
-      title: '실시간 피드',
-      description: 'SSE 기반으로 다른 사람들의 인증을 실시간으로 확인',
+      title: "실시간 피드",
+      description: "SSE 기반으로 다른 사람들의 인증을 실시간으로 확인",
     },
     {
       icon: Heart,
-      title: 'AI 동기부여 코치',
-      description: '개인화된 격려 메시지로 지속적인 동기 부여',
+      title: "AI 동기부여 코치",
+      description: "개인화된 격려 메시지로 지속적인 동기 부여",
     },
     {
       icon: Award,
-      title: '게임화 시스템',
-      description: '포인트, 레벨, 배지, 스트릭으로 성취감 극대화',
+      title: "게임화 시스템",
+      description: "포인트, 레벨, 배지, 스트릭으로 성취감 극대화",
     },
     {
       icon: Users,
-      title: '소셜 커뮤니티',
-      description: '같은 목표를 가진 사람들과 함께 성장',
+      title: "소셜 커뮤니티",
+      description: "같은 목표를 가진 사람들과 함께 성장",
     },
     {
       icon: Search,
-      title: 'AI 인증 분석',
-      description: 'Google Cloud Vision으로 인증 사진 자동 검증',
+      title: "AI 인증 분석",
+      description: "Google Cloud Vision으로 인증 사진 자동 검증",
     },
   ];
 
@@ -90,7 +82,10 @@ export default function Home() {
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard">
-                    <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold">
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold"
+                    >
                       대시보드로 가기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -107,7 +102,10 @@ export default function Home() {
               ) : (
                 <>
                   <Link href="/signup">
-                    <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold">
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold"
+                    >
                       무료로 시작하기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
@@ -167,9 +165,7 @@ export default function Home() {
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-600 transition-colors">
                     <Icon className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {feature.title}
-                  </h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
                   <p className="text-gray-600">{feature.description}</p>
                 </div>
               );
@@ -220,7 +216,10 @@ export default function Home() {
           </p>
           {!isAuthenticated && (
             <Link href="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold px-8 py-3">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all group font-semibold px-8 py-3"
+              >
                 무료로 시작하기
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -233,9 +232,7 @@ export default function Home() {
       <footer className="bg-gray-900 text-gray-400 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-sm">
-              © 2025 Planit. All rights reserved.
-            </p>
+            <p className="text-sm">© 2025 Planit. All rights reserved.</p>
             {baseUrl && (
               <p className="text-xs mt-2">
                 Server: <code className="text-gray-500">{baseUrl}</code>

@@ -22,21 +22,17 @@ export function FallbackImage({ alt, fallbackText, ...props }: FallbackImageProp
 
   if (error) {
     return (
-      <div 
+      <div
         className={`flex flex-col items-center justify-center bg-gray-100 text-gray-400 w-full h-full ${props.className}`}
         style={{ ...props.style }} // fill 속성 등을 위한 스타일 유지
       >
         <ImageOff className="w-10 h-10 mb-2 opacity-50" />
-        <span className="text-xs font-medium text-gray-500">{fallbackText || "이미지를 불러올 수 없습니다"}</span>
+        <span className="text-xs font-medium text-gray-500">
+          {fallbackText || "이미지를 불러올 수 없습니다"}
+        </span>
       </div>
     );
   }
 
-  return (
-    <Image
-      {...props}
-      alt={alt}
-      onError={() => setError(true)}
-    />
-  );
+  return <Image {...props} alt={alt} onError={() => setError(true)} />;
 }

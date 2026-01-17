@@ -97,10 +97,8 @@ export function useBadgeSort(badges: BadgeResponse[] | undefined) {
           }
           // 3. 미획득인 경우 진행률 높은 순
           if (!a.isAcquired && !b.isAcquired) {
-            const aProgress =
-              a.requiredValue > 0 ? a.currentValue / a.requiredValue : 0;
-            const bProgress =
-              b.requiredValue > 0 ? b.currentValue / b.requiredValue : 0;
+            const aProgress = a.requiredValue > 0 ? a.currentValue / a.requiredValue : 0;
+            const bProgress = b.requiredValue > 0 ? b.currentValue / b.requiredValue : 0;
             return bProgress - aProgress;
           }
           return 0;

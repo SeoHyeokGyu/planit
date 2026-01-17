@@ -23,8 +23,7 @@ export default function AuthWatcher() {
 
     // 인증이 필요 없는 공개 경로
     const publicPaths = ["/login", "/signup", "/"];
-    const isPublicPath =
-      publicPaths.includes(pathname) || pathname.startsWith("/api-test");
+    const isPublicPath = publicPaths.includes(pathname) || pathname.startsWith("/api-test");
 
     // 인증이 안 된 상태로 보호된 경로에 있으면 로그인 페이지로 보냄
     if (!isAuthenticated && !isPublicPath) {

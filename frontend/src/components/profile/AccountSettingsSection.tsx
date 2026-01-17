@@ -52,14 +52,18 @@ function NicknameForm({ user }: { user: UserProfile }) {
           </div>
           <div>
             <CardTitle className="text-lg font-bold text-gray-900">닉네임 변경</CardTitle>
-            <CardDescription className="text-gray-600 text-sm">새로운 닉네임을 설정합니다</CardDescription>
+            <CardDescription className="text-gray-600 text-sm">
+              새로운 닉네임을 설정합니다
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nickname" className="font-semibold text-gray-800">새 닉네임</Label>
+            <Label htmlFor="nickname" className="font-semibold text-gray-800">
+              새 닉네임
+            </Label>
             <Input
               id="nickname"
               value={nickname}
@@ -69,10 +73,14 @@ function NicknameForm({ user }: { user: UserProfile }) {
             />
           </div>
           {updateProfileMutation.isSuccess && (
-            <p className="text-sm font-medium text-green-600">닉네임이 성공적으로 변경되었습니다.</p>
+            <p className="text-sm font-medium text-green-600">
+              닉네임이 성공적으로 변경되었습니다.
+            </p>
           )}
           {updateProfileMutation.isError && (
-            <p className="text-sm font-medium text-red-500">{updateProfileMutation.error.message}</p>
+            <p className="text-sm font-medium text-red-500">
+              {updateProfileMutation.error.message}
+            </p>
           )}
           <Button
             type="submit"
@@ -126,14 +134,18 @@ function PasswordForm() {
           </div>
           <div>
             <CardTitle className="text-lg font-bold text-gray-900">비밀번호 변경</CardTitle>
-            <CardDescription className="text-gray-600 text-sm">새로운 비밀번호를 설정합니다</CardDescription>
+            <CardDescription className="text-gray-600 text-sm">
+              새로운 비밀번호를 설정합니다
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword" className="font-semibold text-gray-800">현재 비밀번호</Label>
+            <Label htmlFor="currentPassword" className="font-semibold text-gray-800">
+              현재 비밀번호
+            </Label>
             <Input
               id="currentPassword"
               type="password"
@@ -144,7 +156,9 @@ function PasswordForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="newPassword" className="font-semibold text-gray-800">새 비밀번호</Label>
+            <Label htmlFor="newPassword" className="font-semibold text-gray-800">
+              새 비밀번호
+            </Label>
             <Input
               id="newPassword"
               type="password"
@@ -155,7 +169,9 @@ function PasswordForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="font-semibold text-gray-800">새 비밀번호 확인</Label>
+            <Label htmlFor="confirmPassword" className="font-semibold text-gray-800">
+              새 비밀번호 확인
+            </Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -166,11 +182,15 @@ function PasswordForm() {
             />
           </div>
           {updatePasswordMutation.isSuccess && (
-            <p className="text-sm font-medium text-green-600">비밀번호가 성공적으로 변경되었습니다.</p>
+            <p className="text-sm font-medium text-green-600">
+              비밀번호가 성공적으로 변경되었습니다.
+            </p>
           )}
           {passwordError && <p className="text-sm font-medium text-red-500">{passwordError}</p>}
           {updatePasswordMutation.isError && (
-            <p className="text-sm font-medium text-red-500">{updatePasswordMutation.error.message}</p>
+            <p className="text-sm font-medium text-red-500">
+              {updatePasswordMutation.error.message}
+            </p>
           )}
           <Button
             type="submit"

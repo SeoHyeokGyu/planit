@@ -14,10 +14,7 @@ export const certificationService = {
     return api.post("/api/certifications", data);
   },
 
-  uploadPhoto: async (
-    id: number,
-    file: File
-  ): Promise<ApiResponse<CertificationResponse>> => {
+  uploadPhoto: async (id: number, file: File): Promise<ApiResponse<CertificationResponse>> => {
     const formData = new FormData();
     formData.append("file", file);
     return api.post(`/api/certifications/${id}/photo`, formData);
@@ -52,9 +49,7 @@ export const certificationService = {
     from: string,
     to: string
   ): Promise<ApiResponse<CertificationResponse[]>> => {
-    return api.get(
-      `/api/certifications/user/${userLoginId}/date-range?from=${from}&to=${to}`
-    );
+    return api.get(`/api/certifications/user/${userLoginId}/date-range?from=${from}&to=${to}`);
   },
 
   updateCertification: async (

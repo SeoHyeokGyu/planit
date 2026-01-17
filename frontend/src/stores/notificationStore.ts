@@ -12,7 +12,7 @@ export interface Notification {
 
 interface NotificationState {
   notifications: Notification[];
-  addNotification: (notification: Omit<Notification, 'read' | 'clientTimestamp'>) => void;
+  addNotification: (notification: Omit<Notification, "read" | "clientTimestamp">) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   unreadCount: number;
@@ -23,7 +23,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   unreadCount: 0,
   addNotification: (notification) => {
     console.info("noti 수신함.", notification);
-    
+
     // 토스트 알림 표시
     switch (notification.type) {
       case "SUCCESS":
@@ -51,10 +51,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
   markAsRead: (id: string) => {
     set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-      unreadCount: get().notifications.filter(n => !n.read).length,
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+      unreadCount: get().notifications.filter((n) => !n.read).length,
     }));
   },
   markAllAsRead: () => {

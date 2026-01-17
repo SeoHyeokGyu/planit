@@ -1,72 +1,67 @@
 import { api } from "@/lib/api";
 import {
-    ChallengeRequest,
-    ChallengeResponse,
-    ChallengeListResponse,
-    ChallengeSearchRequest,
-    ParticipateResponse,
-    ChallengeStatisticsResponse,
+  ChallengeRequest,
+  ChallengeResponse,
+  ChallengeListResponse,
+  ChallengeSearchRequest,
+  ParticipateResponse,
+  ChallengeStatisticsResponse,
 } from "@/types/challenge";
 import { ApiResponse } from "@/types/api";
 
 export const challengeService = {
-    // 목록 조회
-    getChallenges: (params?: ChallengeSearchRequest) => {
-        const searchParams = new URLSearchParams();
-        if (params?.category) searchParams.append("category", params.category);
-        if (params?.difficulty) searchParams.append("difficulty", params.difficulty);
-        if (params?.page) searchParams.append("page", String(params.page));
-        if (params?.size) searchParams.append("size", String(params.size));
+  // 목록 조회
+  getChallenges: (params?: ChallengeSearchRequest) => {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.append("category", params.category);
+    if (params?.difficulty) searchParams.append("difficulty", params.difficulty);
+    if (params?.page) searchParams.append("page", String(params.page));
+    if (params?.size) searchParams.append("size", String(params.size));
 
-        const query = searchParams.toString();
-        return api.get<ApiResponse<ChallengeListResponse[]>>(
-            `/api/challenge${query ? `?${query}` : ""}`
-        );
-    },
+    const query = searchParams.toString();
+    return api.get<ApiResponse<ChallengeListResponse[]>>(
+      `/api/challenge${query ? `?${query}` : ""}`
+    );
+  },
 
-    // 검색
-    searchChallenges: (keyword: string) =>
-        api.get<ApiResponse<ChallengeListResponse[]>>(
-            `/api/challenge/search?keyword=${encodeURIComponent(keyword)}`
-        ),
+  // 검색
+  searchChallenges: (keyword: string) =>
+    api.get<ApiResponse<ChallengeListResponse[]>>(
+      `/api/challenge/search?keyword=${encodeURIComponent(keyword)}`
+    ),
 
-    // 내가 참여중인 챌린지
-    getMyChallenges: () =>
-        api.get<ApiResponse<ChallengeListResponse[]>>("/api/challenge/my"),
+  // 내가 참여중인 챌린지
+  getMyChallenges: () => api.get<ApiResponse<ChallengeListResponse[]>>("/api/challenge/my"),
 
-    // 상세 조회
-    getChallenge: (id: string) =>
-        api.get<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`),
+  // 상세 조회
+  getChallenge: (id: string) => api.get<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`),
 
-    // 생성
-    createChallenge: (data: ChallengeRequest) =>
-        api.post<ApiResponse<ChallengeResponse>>("/api/challenge", data),
+  // 생성
+  createChallenge: (data: ChallengeRequest) =>
+    api.post<ApiResponse<ChallengeResponse>>("/api/challenge", data),
 
-    // 수정
-    updateChallenge: (id: string, data: ChallengeRequest) =>
-        api.put<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`, data),
+  // 수정
+  updateChallenge: (id: string, data: ChallengeRequest) =>
+    api.put<ApiResponse<ChallengeResponse>>(`/api/challenge/${id}`, data),
 
-    // 삭제
-    deleteChallenge: (id: string) =>
-        api.delete<ApiResponse<void>>(`/api/challenge/${id}`),
+  // 삭제
+  deleteChallenge: (id: string) => api.delete<ApiResponse<void>>(`/api/challenge/${id}`),
 
-    // 참여
-    joinChallenge: (id: string) =>
-        api.post<ApiResponse<ParticipateResponse>>(`/api/challenge/${id}/join`),
+  // 참여
+  joinChallenge: (id: string) =>
+    api.post<ApiResponse<ParticipateResponse>>(`/api/challenge/${id}/join`),
 
-    // 포기
-    withdrawChallenge: (id: string) =>
-        api.post<ApiResponse<void>>(`/api/challenge/${id}/withdraw`),
+  // 포기
+  withdrawChallenge: (id: string) => api.post<ApiResponse<void>>(`/api/challenge/${id}/withdraw`),
 
-    // 조회수 증가
-    incrementViewCount: (id: string) =>
-        api.post<ApiResponse<void>>(`/api/challenge/${id}/view`),
+  // 조회수 증가
+  incrementViewCount: (id: string) => api.post<ApiResponse<void>>(`/api/challenge/${id}/view`),
 
-    // 참여자 목록
-    getParticipants: (id: string) =>
-        api.get<ApiResponse<ParticipateResponse[]>>(`/api/challenge/${id}/participants`),
+  // 참여자 목록
+  getParticipants: (id: string) =>
+    api.get<ApiResponse<ParticipateResponse[]>>(`/api/challenge/${id}/participants`),
 
-    // 통계
-    getStatistics: (id: string) =>
-        api.get<ApiResponse<ChallengeStatisticsResponse>>(`/api/challenge/${id}/statistics`),
+  // 통계
+  getStatistics: (id: string) =>
+    api.get<ApiResponse<ChallengeStatisticsResponse>>(`/api/challenge/${id}/statistics`),
 };

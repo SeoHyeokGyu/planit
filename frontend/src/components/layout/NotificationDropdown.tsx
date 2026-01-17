@@ -6,6 +6,7 @@ import { Bell, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { dropdownStyles } from "@/styles/common";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,8 +55,12 @@ export default function NotificationDropdown() {
       </button>
 
       {isOpen && (
-        <Card className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[500px] overflow-hidden flex flex-col shadow-2xl z-[100] bg-white border border-gray-200 animate-in fade-in zoom-in-95 duration-200">
-          <div className="p-4 border-b flex items-center justify-between bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
+        <Card
+          className={`${dropdownStyles.wrapper} w-80 sm:w-96 max-h-[500px] flex flex-col animate-in fade-in zoom-in-95 duration-200`}
+        >
+          <div
+            className={`${dropdownStyles.header} flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm bg-white/80`}
+          >
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-sm text-gray-900">알림</h3>
               {unreadCount > 0 && (

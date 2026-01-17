@@ -3,13 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useUserProfile } from "@/hooks/useUser";
 import { useCertificationsByUser } from "@/hooks/useCertification";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Calendar, FileText, Search, CheckCircle } from "lucide-react";
@@ -40,9 +34,7 @@ export default function MyCertificationsPage() {
               나의 인증 목록
             </h1>
           </div>
-          <p className="text-gray-600 font-medium ml-13">
-            내가 작성한 챌린지 인증 글 목록입니다
-          </p>
+          <p className="text-gray-600 font-medium ml-13">내가 작성한 챌린지 인증 글 목록입니다</p>
         </div>
 
         {/* Certification List */}
@@ -50,9 +42,11 @@ export default function MyCertificationsPage() {
           <CertificationListSkeleton />
         ) : certifications?.content && certifications?.content?.length > 0 ? (
           <>
-             <div className="mb-4 text-sm text-gray-700 font-medium">
-                  총 <span className="font-bold text-blue-600">{certifications?.totalElements || 0}</span>개의 인증글
-             </div>
+            <div className="mb-4 text-sm text-gray-700 font-medium">
+              총{" "}
+              <span className="font-bold text-blue-600">{certifications?.totalElements || 0}</span>
+              개의 인증글
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {certifications.content.map((cert: any) => (
                 <CertificationCard
@@ -68,9 +62,7 @@ export default function MyCertificationsPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
               <Search className="w-8 h-8 text-gray-300" />
             </div>
-            <p className="text-gray-700 text-lg font-semibold">
-              작성한 인증글이 없습니다.
-            </p>
+            <p className="text-gray-700 text-lg font-semibold">작성한 인증글이 없습니다.</p>
             <p className="text-gray-500 text-sm mt-2 mb-6">
               챌린지에 참여하고 첫 인증을 남겨보세요!
             </p>
@@ -114,9 +106,12 @@ function CertificationCard({
           </div>
         )}
         <div className="absolute top-2 right-2">
-            <Badge variant="secondary" className="bg-white/90 text-blue-800 backdrop-blur-sm shadow-sm font-semibold">
-                {certification.challengeTitle}
-            </Badge>
+          <Badge
+            variant="secondary"
+            className="bg-white/90 text-blue-800 backdrop-blur-sm shadow-sm font-semibold"
+          >
+            {certification.challengeTitle}
+          </Badge>
         </div>
       </div>
       <CardHeader className="pb-2">

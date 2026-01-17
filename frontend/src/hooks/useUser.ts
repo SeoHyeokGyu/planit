@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { userService } from "@/services/userService";
 import { useAuthStore } from "@/stores/authStore";
-import { UserPasswordUpdateRequest, UserUpdateRequest, UserProfile, UserDeleteRequest } from "@/types/user";
+import {
+  UserPasswordUpdateRequest,
+  UserUpdateRequest,
+  UserProfile,
+  UserDeleteRequest,
+} from "@/types/user";
 import { ApiResponse } from "@/types/api";
 import { useRouter } from "next/navigation";
 
@@ -19,10 +24,7 @@ export const useUserProfile = (loginId?: string) => {
 
   return useQuery({
     queryKey: loginId ? ["userProfile", loginId] : ["userProfile"],
-    queryFn: () =>
-      loginId
-        ? userService.getProfileByLoginId(loginId)
-        : userService.getProfile(),
+    queryFn: () => (loginId ? userService.getProfileByLoginId(loginId) : userService.getProfile()),
     enabled: loginId ? true : isAuthenticated,
     staleTime: 1000 * 60 * 5,
     select: (data) => data.data,
@@ -42,7 +44,6 @@ export const useDashboardStats = () => {
     select: (data) => data.data,
   });
 };
-
 
 // --- Mutations ---
 

@@ -6,11 +6,7 @@ import { Page } from "@/types/api";
 import { FeedResponse, FeedSortType } from "@/types/feed";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 
-export const useFeed = (
-  page: number = 0,
-  size: number = 10,
-  sortBy: FeedSortType = "LATEST"
-) => {
+export const useFeed = (page: number = 0, size: number = 10, sortBy: FeedSortType = "LATEST") => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useQuery({
     queryKey: ["feed", page, size, sortBy],
@@ -35,7 +31,9 @@ export const useFeedInfinite = (size: number = 10, sortBy: FeedSortType = "LATES
     getNextPageParam: (lastPage) => {
       const pagination = lastPage.pagination;
       if (!pagination) return undefined;
-      return pagination.pageNumber < pagination.totalPages - 1 ? pagination.pageNumber + 1 : undefined;
+      return pagination.pageNumber < pagination.totalPages - 1
+        ? pagination.pageNumber + 1
+        : undefined;
     },
     enabled: isAuthenticated,
   });
