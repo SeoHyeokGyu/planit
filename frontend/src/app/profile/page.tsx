@@ -5,12 +5,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useUserProfile } from "@/hooks/useUser";
 import { useFollowStats, useFollowers, useFollowings } from "@/hooks/useFollow";
+import { useUserBadges } from "@/hooks/useBadge";
+import { useAllStreaks } from "@/hooks/useStreak";
+import { useCertificationsByUser } from "@/hooks/useCertification";
+import { useMyRankings } from "@/hooks/useRanking";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import CertificationsSection from "@/components/profile/CertificationsSection";
-import StreaksSection from "@/components/profile/StreaksSection"; // ← 추가
+import StreaksSection from "@/components/profile/StreaksSection";
 import FollowButton from "@/components/follow/FollowButton";
-import { User, ShieldCheck, Activity, Users, Heart, FileText, Medal, Flame } from "lucide-react"; // ← Flame 추가
+import { User, Heart, FileText, Medal, Flame } from "lucide-react";
 import BadgesSection from "@/components/profile/BadgesSection";
 
 function ProfileContent() {
@@ -45,6 +49,18 @@ function ProfileContent() {
     isError: isErrorFollowings,
   } = useFollowings(user?.loginId || "", followingsPage, 20);
 
+  // Stats 데이터 조회
+  const { data: badges } = useUserBadges(user?.loginId || "");
+  const { data: streakSummary } = useAllStreaks(user?.loginId || "");
+  const { data: certifications } = useCertificationsByUser(user?.loginId || "", 0, 1);
+  const { data: myRankings } = useMyRankings();
+
+  // Stats 계산
+  const acquiredBadgesCount = badges?.filter((b) => b.isAcquired).length || 0;
+  const currentStreak = streakSummary?.totalCurrentStreak || 0;
+  const totalCertifications = certifications?.totalElements || 0;
+  const weeklyRank = myRankings?.weekly?.rank || null;
+
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
       router.replace("/login");
@@ -65,7 +81,25 @@ function ProfileContent() {
 
   return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
-        <ProfileHeader user={user} isOwnProfile={true} onFollowersClick={() => setActiveTab("followers")} onFollowingsClick={() => setActiveTab("followings")} />
+        <ProfileHeader
+          user={user}
+          isOwnProfile={true}
+          onFollowersClick={() => setActiveTab("followers")}
+          onFollowingsClick={() => setActiveTab("followings")}
+          stats={{
+            currentStreak,
+            acquiredBadges: acquiredBadgesCount,
+            totalCertifications,
+            weeklyRank,
+          }}
+          onStatClick={(stat) => {
+            if (stat === "ranking") {
+              router.push("/ranking");
+            } else {
+              setActiveTab(stat);
+            }
+          }}
+        />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* 탭 목록 - 개선된 가시성 */}

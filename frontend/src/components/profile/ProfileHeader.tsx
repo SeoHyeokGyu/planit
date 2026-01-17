@@ -4,14 +4,23 @@ import { UserProfile } from "@/types/user";
 import { useLogout } from "@/hooks/useAuth";
 import { useFollowStats } from "@/hooks/useFollow";
 import { Button } from "@/components/ui/button";
-import { User, Calendar, LogOut, Heart } from "lucide-react";
+import { User, Calendar, LogOut, Heart, Flame, Medal, FileText, Crown } from "lucide-react";
 import { componentStyles } from "@/styles/common";
+
+interface ProfileStats {
+  currentStreak: number;
+  acquiredBadges: number;
+  totalCertifications: number;
+  weeklyRank: number | null;
+}
 
 interface ProfileHeaderProps {
   user: UserProfile;
   isOwnProfile?: boolean;
   onFollowersClick?: () => void;
   onFollowingsClick?: () => void;
+  stats?: ProfileStats;
+  onStatClick?: (stat: "streaks" | "badges" | "certifications" | "ranking") => void;
 }
 
 export default function ProfileHeader({
@@ -19,6 +28,8 @@ export default function ProfileHeader({
   isOwnProfile = false,
   onFollowersClick,
   onFollowingsClick,
+  stats,
+  onStatClick,
 }: ProfileHeaderProps) {
   const logout = useLogout();
   const { followerCount, followingCount, isLoading } = useFollowStats(
@@ -101,6 +112,65 @@ export default function ProfileHeader({
               </div>
             )}
           </div>
+
+          {/* Compact Stats Row */}
+          {stats && (
+            <div className="mt-8 pt-6 border-t border-white/20">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <button
+                  onClick={() => onStatClick?.("streaks")}
+                  className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg px-4 py-3 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-orange-500/80 rounded-lg flex items-center justify-center">
+                    <Flame className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xl font-bold">{stats.currentStreak}일</p>
+                    <p className="text-xs text-blue-200">스트릭</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => onStatClick?.("badges")}
+                  className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg px-4 py-3 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-purple-500/80 rounded-lg flex items-center justify-center">
+                    <Medal className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xl font-bold">{stats.acquiredBadges}개</p>
+                    <p className="text-xs text-blue-200">배지</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => onStatClick?.("certifications")}
+                  className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg px-4 py-3 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-blue-500/80 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xl font-bold">{stats.totalCertifications}개</p>
+                    <p className="text-xs text-blue-200">인증</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => onStatClick?.("ranking")}
+                  className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-lg px-4 py-3 transition-colors"
+                >
+                  <div className="w-10 h-10 bg-yellow-500/80 rounded-lg flex items-center justify-center">
+                    <Crown className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xl font-bold">{stats.weeklyRank ? `${stats.weeklyRank}위` : "-"}</p>
+                    <p className="text-xs text-blue-200">주간 랭킹</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
     </>
