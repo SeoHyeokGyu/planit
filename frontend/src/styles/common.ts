@@ -75,7 +75,6 @@ export const navStyles = {
 // Navigation Links Configuration
 export const navigationLinks = [
   { href: "/dashboard", label: "대시보드", icon: "LayoutDashboard" },
-  { href: "/goals", label: "목표", icon: "Target" },
   { href: "/challenge", label: "챌린지", icon: "Trophy" },
   { href: "/feed", label: "피드", icon: "Activity" },
   { href: "/ranking", label: "랭킹", icon: "Crown", variant: "yellow" as const },

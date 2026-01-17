@@ -5,14 +5,13 @@ import { useLogout } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUser";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
-import { Users, LogOut, LayoutDashboard, Trophy, Activity, Settings, Flame, Medal, BarChart3, Crown, Target, Menu, X } from "lucide-react";
+import { Users, LogOut, LayoutDashboard, Trophy, Activity, Settings, Flame, Medal, BarChart3, Crown, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { navStyles, dropdownStyles, componentStyles, navigationLinks, activityLinks, accountLinks } from "@/styles/common";
 
 // Icon mapping helper
 const iconMap = {
   LayoutDashboard,
-  Target,
   Trophy,
   Activity,
   Crown,
