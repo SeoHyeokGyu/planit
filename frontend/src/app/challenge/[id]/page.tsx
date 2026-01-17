@@ -34,23 +34,15 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/hooks/useConfirm";
 import { toast } from "sonner";
+import { layoutStyles, headerStyles, cardStyles, buttonStyles, themeStyles } from "@/styles/common";
 
 export default function ChallengeDetailPage() {
   const params = useParams();
   const router = useRouter();
   const challengeId = params.id as string;
-  const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
+  const { confirm, ConfirmDialog } = useConfirm();
 
   useEffect(() => {
     const incrementViewCount = async () => {
@@ -150,16 +142,24 @@ export default function ChallengeDetailPage() {
     });
   };
 
-  const handleWithdraw = () => {
-    withdrawMutation.mutate(challengeId, {
-      onSuccess: () => {
-        toast.success("챌린지를 포기했습니다.");
-        window.location.reload();
-      },
-      onError: (error: any) => {
-        toast.error(error.message || "포기에 실패했습니다.");
-      },
-    });
+  const handleWithdraw = async () => {
+    if (
+      await confirm({
+        title: "챌린지 포기",
+        description: "정말로 이 챌린지를 포기하시겠습니까? 포기 후에도 다시 참여할 수 있습니다.",
+        variant: "destructive",
+      })
+    ) {
+      withdrawMutation.mutate(challengeId, {
+        onSuccess: () => {
+          toast.success("챌린지를 포기했습니다.");
+          window.location.reload();
+        },
+        onError: (error: any) => {
+          toast.error(error.message || "포기에 실패했습니다.");
+        },
+      });
+    }
   };
 
   const getStatusInfo = (startDate: string, endDate: string) => {
@@ -429,7 +429,7 @@ export default function ChallengeDetailPage() {
                     인증하기
                   </Button>
                   <Button
-                    onClick={() => setIsWithdrawDialogOpen(true)}
+                    onClick={handleWithdraw}
                     disabled={withdrawMutation.isPending}
                     variant="outline"
                     className="flex-1 border-2 border-red-400 text-red-700 hover:bg-red-50 h-12 font-bold"
@@ -442,25 +442,7 @@ export default function ChallengeDetailPage() {
           )}
         </Card>
 
-        <AlertDialog open={isWithdrawDialogOpen} onOpenChange={setIsWithdrawDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>챌린지 포기</AlertDialogTitle>
-              <AlertDialogDescription>
-                정말로 이 챌린지를 포기하시겠습니까? 포기 후에도 다시 참여할 수 있습니다.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>취소</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleWithdraw}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                포기하기
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog />
       </div>
     </div>
   );
