@@ -19,7 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig(@Value("\${file.upload-url-path}") private val uploadUrlPath: String) {
+class SecurityConfig(@param:Value("\${file.upload-url-path}") private val uploadUrlPath: String) {
 
   @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
@@ -70,7 +70,7 @@ class SecurityConfig(@Value("\${file.upload-url-path}") private val uploadUrlPat
           .authenticated()
       }
       .exceptionHandling {
-        it.authenticationEntryPoint { request, response, _ ->
+        it.authenticationEntryPoint { _, response, _ ->
           response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
         }
       }

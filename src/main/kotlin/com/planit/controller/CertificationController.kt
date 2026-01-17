@@ -66,6 +66,21 @@ class CertificationController(
   }
 
   /**
+   * 특정 인증의 사진을 삭제합니다.
+   * @param id 사진을 삭제할 인증의 ID
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 사진 정보가 삭제된 인증 정보
+   */
+  @DeleteMapping("/{id}/photo")
+  fun deletePhoto(
+    @PathVariable id: Long,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.deleteCertificationPhoto(id, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
    * 특정 ID의 인증 정보를 조회합니다.
    * @param id 조회할 인증의 ID
    * @return 조회된 인증 정보

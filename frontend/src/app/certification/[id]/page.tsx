@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useCertification, useDeleteCertification, useUpdateCertification, useUploadCertificationPhoto } from "@/hooks/useCertification";
+import { useCertification, useDeleteCertification, useUpdateCertification, useUploadCertificationPhoto, useDeleteCertificationPhoto } from "@/hooks/useCertification";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,7 @@ export default function CertificationDetailPage() {
   const updateMutation = useUpdateCertification();
   const deleteMutation = useDeleteCertification();
   const uploadPhotoMutation = useUploadCertificationPhoto();
+  const deletePhotoMutation = useDeleteCertificationPhoto();
 
   const handleEditClick = () => {
     if (data) {
@@ -59,6 +60,34 @@ export default function CertificationDetailPage() {
       setEditedFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+    }
+  };
+
+  const handleDeletePhoto = async (e: React.MouseEvent) => {
+    e.preventDefault(); // 라벨 클릭 이벤트 전파 방지
+    if (!confirm("정말 사진을 삭제하시겠습니까?")) return;
+
+    try {
+      // 1. 새로 올리려던 파일이 있으면 취소
+      if (editedFile) {
+        setEditedFile(null);
+        setPreviewUrl(data?.photoUrl || null); // 원래 사진으로 복구? 아니면 삭제?
+        // 사용자가 "삭제"를 눌렀으니 원래 사진도 지우고 싶은 것일 수 있음.
+        // 하지만 여기서는 "업로드 취소" 개념과 "기존 사진 삭제" 개념이 섞임.
+        // 우선순위: 새 파일 취소 -> 그 다음 기존 사진 삭제
+      }
+
+      // 2. 기존 사진이 있거나, 새 파일을 취소했는데도 사진을 지우고 싶다면 API 호출
+      // 여기서는 "화면에 보이는 사진을 없앤다"는 의미로 접근
+      if (data?.photoUrl) {
+        await deletePhotoMutation.mutateAsync(certificationId);
+      }
+      
+      setPreviewUrl(null); // 미리보기 제거
+      setEditedFile(null); // 파일 선택 제거
+      refetch(); // 데이터 갱신
+    } catch (err) {
+      console.error("사진 삭제 실패:", err);
     }
   };
 
@@ -146,7 +175,7 @@ export default function CertificationDetailPage() {
   }
 
   const isAuthor = user?.nickname === data.authorNickname;
-  const isUpdating = updateMutation.isPending || uploadPhotoMutation.isPending;
+  const isUpdating = updateMutation.isPending || uploadPhotoMutation.isPending || deletePhotoMutation.isPending;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
@@ -224,35 +253,51 @@ export default function CertificationDetailPage() {
                 {isEditing ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-center w-full">
-                        <label htmlFor="photo-upload" className="flex flex-col items-center justify-center w-full h-64 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors relative overflow-hidden">
-                            {previewUrl ? (
-                                <FallbackImage 
-                                    src={previewUrl} 
-                                    alt="Preview" 
-                                    fill
-                                    className="object-contain opacity-50 hover:opacity-100 transition-opacity"
-                                    sizes="(max-width: 768px) 100vw, 50vw"
+                        <div className="relative w-full">
+                            <label htmlFor="photo-upload" className={`flex flex-col items-center justify-center w-full h-64 border-2 ${previewUrl ? 'border-solid border-gray-200' : 'border-dashed border-blue-300'} rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors relative overflow-hidden group`}>
+                                {previewUrl ? (
+                                    <FallbackImage 
+                                        src={previewUrl} 
+                                        alt="Preview" 
+                                        fill
+                                        className="object-contain opacity-100 group-hover:opacity-75 transition-opacity"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Camera className="w-10 h-10 mb-3 text-blue-500" />
+                                        <p className="mb-2 text-sm text-blue-700 font-semibold">클릭하여 사진 등록/변경</p>
+                                    </div>
+                                )}
+                                <input 
+                                    id="photo-upload" 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={handleFileChange}
                                 />
-                            ) : (
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Camera className="w-10 h-10 mb-3 text-blue-500" />
-                                    <p className="mb-2 text-sm text-blue-700 font-semibold">클릭하여 사진 수정</p>
-                                </div>
-                            )}
-                            <input 
-                                id="photo-upload" 
-                                type="file" 
-                                accept="image/*" 
-                                className="hidden" 
-                                onChange={handleFileChange}
-                            />
+                                {previewUrl && (
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 text-white font-bold pointer-events-none">
+                                        <Camera className="w-8 h-8 mb-2" />
+                                        <span className="ml-2">사진 변경하기</span>
+                                    </div>
+                                )}
+                            </label>
+                            
+                            {/* 사진 삭제 버튼 */}
                             {previewUrl && (
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/30 text-white font-bold">
-                                    <Camera className="w-8 h-8 mb-2" />
-                                    <span className="ml-2">사진 변경하기</span>
-                                </div>
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md z-10"
+                                    onClick={handleDeletePhoto}
+                                    title="사진 삭제"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
                             )}
-                        </label>
+                        </div>
                     </div>
                   </div>
                 ) : (

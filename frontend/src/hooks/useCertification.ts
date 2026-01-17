@@ -95,6 +95,18 @@ export const useUploadCertificationPhoto = () => {
   });
 };
 
+export const useDeleteCertificationPhoto = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => certificationService.deletePhoto(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["certification", id] });
+      queryClient.invalidateQueries({ queryKey: ["certifications"] });
+      toast.success("사진이 삭제되었습니다.");
+    },
+  });
+};
+
 export const useUpdateCertification = () => {
   const queryClient = useQueryClient();
   return useMutation({

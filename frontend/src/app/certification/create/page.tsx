@@ -31,9 +31,23 @@ function CreateCertificationContent() {
   const challengeId = challenge?.id;
   const isLoading = createMutation.isPending || uploadPhotoMutation.isPending;
 
+  // 챌린지 기간 체크
+  const today = new Date();
+  const startDate = challenge?.startDate ? new Date(challenge.startDate) : null;
+  const endDate = challenge?.endDate ? new Date(challenge.endDate) : null;
+
+  const isStarted = startDate ? startDate <= today : false;
+  const isEnded = endDate ? endDate < today : false;
+  const isClosed = !isStarted || isEnded;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (isClosed) {
+      setError(isEnded ? "이미 종료된 챌린지입니다." : "아직 시작되지 않은 챌린지입니다.");
+      return;
+    }
 
     if (!challengeId) {
       setError("챌린지 ID가 없거나 유효하지 않습니다.");
@@ -139,6 +153,17 @@ function CreateCertificationContent() {
                         </Alert>
                     )}
 
+                    {isClosed && (
+                        <Alert variant="destructive" className="bg-red-50 border-red-200">
+                            <AlertCircle className="h-4 w-4 text-red-600" />
+                            <AlertDescription className="text-red-700 font-semibold">
+                                {isEnded 
+                                    ? "이 챌린지는 이미 종료되었습니다. 인증을 등록할 수 없습니다." 
+                                    : "이 챌린지는 아직 시작되지 않았습니다. 시작일 이후에 인증해주세요."}
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
                     <div className="space-y-2">
                         <Label htmlFor="title" className="text-base font-bold flex items-center gap-2 text-gray-900">
                             <FileText className="w-4 h-4 text-green-600" />
@@ -204,8 +229,8 @@ function CreateCertificationContent() {
 
                     <Button 
                         type="submit" 
-                        className="w-full h-12 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all text-base font-bold text-white"
-                        disabled={isLoading || challengeId === null}
+                        className="w-full h-12 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all text-base font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isLoading || challengeId === null || isClosed}
                     >
                         {isLoading ? "인증 올리는 중..." : "인증하기"}
                     </Button>
