@@ -77,4 +77,12 @@ interface CertificationRepository : JpaRepository<Certification, Long> {
      */
     @Query("SELECT c.createdAt FROM Certification c WHERE c.user.id = :userId ORDER BY c.createdAt DESC")
     fun findDatesByUserId(@Param("userId") userId: Long): List<LocalDateTime>
+
+    /**
+     * DB에 저장된 모든 사진 URL 목록을 조회합니다. (삭제된 인증 포함)
+     * 고아 파일 정리 스케줄러에서 사용됩니다.
+     * @return 사진 URL 목록
+     */
+    @Query(value = "SELECT photo_url FROM certifications WHERE photo_url IS NOT NULL", nativeQuery = true)
+    fun findAllPhotoUrls(): List<String>
 }
