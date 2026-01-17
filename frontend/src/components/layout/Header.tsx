@@ -70,7 +70,7 @@ export default function Header() {
                 <ul className="flex items-center gap-1">
                   {navigationLinks.map((link) => {
                     const Icon = iconMap[link.icon];
-                    const linkClass = link.variant === "yellow"
+                    const linkClass = "variant" in link && link.variant === "yellow"
                       ? navStyles.link.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")
                       : navStyles.link;
 
@@ -279,7 +279,7 @@ export default function Header() {
                   <ul>
                     {navigationLinks.map((link) => {
                       const Icon = iconMap[link.icon];
-                      const linkClass = link.variant === "yellow"
+                      const linkClass = "variant" in link && link.variant === "yellow"
                         ? navStyles.mobileLink.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")
                         : navStyles.mobileLink;
 
