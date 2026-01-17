@@ -14,14 +14,13 @@ interface CertificationCalendarProps {
   onMonthChange: (date: Date) => void;
 }
 
-export function CertificationCalendar({ 
-  certifications, 
-  onDateClick, 
+export function CertificationCalendar({
+  certifications,
+  onDateClick,
   selectedDate,
   currentDate,
-  onMonthChange 
+  onMonthChange,
 }: CertificationCalendarProps) {
-  
   // 현재 월의 첫 날과 마지막 날 계산
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -65,11 +64,11 @@ export function CertificationCalendar({
       const dateStr = formatDate(dateObj);
       const hasCertification = certificationDates.has(dateStr);
       const isSelected = selectedDate === dateStr;
-      
+
       // 해당 날짜의 인증 갯수 (선택적 기능)
-      const count = certifications.filter(c => {
-         const d = new Date(c.createdAt);
-         return formatDate(d) === dateStr;
+      const count = certifications.filter((c) => {
+        const d = new Date(c.createdAt);
+        return formatDate(d) === dateStr;
       }).length;
 
       days.push(
@@ -78,9 +77,10 @@ export function CertificationCalendar({
           onClick={() => onDateClick(dateStr)}
           className={`h-14 flex flex-col items-center justify-center border rounded-md text-sm relative transition-all cursor-pointer hover:border-blue-500
             ${isSelected ? "ring-2 ring-blue-500 ring-offset-2 z-10" : ""}
-            ${hasCertification 
-              ? "bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 font-bold text-green-700 dark:text-green-300 shadow-sm" 
-              : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400"
+            ${
+              hasCertification
+                ? "bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 font-bold text-green-700 dark:text-green-300 shadow-sm"
+                : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400"
             }`}
         >
           <span>{i}</span>
@@ -88,7 +88,9 @@ export function CertificationCalendar({
             <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400" />
           )}
           {hasCertification && count > 1 && (
-             <span className="absolute top-0.5 right-1 text-[10px] text-green-600 opacity-70">x{count}</span>
+            <span className="absolute top-0.5 right-1 text-[10px] text-green-600 opacity-70">
+              x{count}
+            </span>
           )}
         </div>
       );
@@ -122,9 +124,7 @@ export function CertificationCalendar({
           ))}
         </div>
         {/* 날짜 그리드 */}
-        <div className="grid grid-cols-7 gap-1">
-          {generateCalendarDays()}
-        </div>
+        <div className="grid grid-cols-7 gap-1">{generateCalendarDays()}</div>
         <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-500">
           <div className="w-3 h-3 bg-green-100 dark:bg-green-900 border border-green-300 rounded-sm"></div>
           <span>인증 완료</span>

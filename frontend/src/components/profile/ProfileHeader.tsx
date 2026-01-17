@@ -5,6 +5,7 @@ import { useLogout } from "@/hooks/useAuth";
 import { useFollowStats } from "@/hooks/useFollow";
 import { Button } from "@/components/ui/button";
 import { User, Calendar, LogOut, Heart } from "lucide-react";
+import { componentStyles } from "@/styles/common";
 
 interface ProfileHeaderProps {
   user: UserProfile;
@@ -17,12 +18,10 @@ export default function ProfileHeader({
   user,
   isOwnProfile = false,
   onFollowersClick,
-  onFollowingsClick
+  onFollowingsClick,
 }: ProfileHeaderProps) {
   const logout = useLogout();
-  const { followerCount, followingCount, isLoading } = useFollowStats(
-    user.loginId
-  );
+  const { followerCount, followingCount, isLoading } = useFollowStats(user.loginId);
 
   const handleFollowersClick = () => {
     if (onFollowersClick) {
@@ -43,21 +42,19 @@ export default function ProfileHeader({
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white/20 rounded-full flex items-center justify-center border-4 border-white/30">
+              <div
+                className={`${componentStyles.avatar.base} ${componentStyles.avatar.large} border-4 border-white/30`}
+              >
                 <User className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
               </div>
               <div className="text-center sm:text-left">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                   {user.nickname}
                 </h1>
-                <p className="text-lg text-blue-100 dark:text-blue-200 mt-1">
-                  @{user.loginId}
-                </p>
+                <p className="text-lg text-blue-100 dark:text-blue-200 mt-1">@{user.loginId}</p>
                 <div className="flex items-center justify-center sm:justify-start space-x-2 text-sm text-blue-200 dark:text-blue-300 mt-2">
                   <Calendar className="w-4 h-4" />
-                  <span>
-                    가입일: {new Date(user.createdAt).toLocaleDateString()}
-                  </span>
+                  <span>가입일: {new Date(user.createdAt).toLocaleDateString()}</span>
                 </div>
 
                 {/* 팔로워/팔로잉 통계 */}

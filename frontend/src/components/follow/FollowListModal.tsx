@@ -32,9 +32,7 @@ export default function FollowListModal({
   defaultTab = "followers",
 }: FollowListModalProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"followers" | "followings">(
-    defaultTab
-  );
+  const [activeTab, setActiveTab] = useState<"followers" | "followings">(defaultTab);
   const [currentPage, setCurrentPage] = useState(0);
 
   // 팔로워/팔로잉 목록 조회
@@ -87,9 +85,7 @@ export default function FollowListModal({
         {/* 탭 */}
         <Tabs
           value={activeTab}
-          onValueChange={(value) =>
-            handleTabChange(value as "followers" | "followings")
-          }
+          onValueChange={(value) => handleTabChange(value as "followers" | "followings")}
           className="flex-1 flex flex-col"
         >
           <TabsList className="grid w-full grid-cols-2">
@@ -104,9 +100,7 @@ export default function FollowListModal({
                 <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
               </div>
             ) : isError ? (
-              <div className="text-center py-8 text-red-500">
-                팔로워 목록을 불러올 수 없습니다.
-              </div>
+              <div className="text-center py-8 text-red-500">팔로워 목록을 불러올 수 없습니다.</div>
             ) : followers && followers.length > 0 ? (
               <div className="space-y-3">
                 {followers.map((user) => (
@@ -118,18 +112,10 @@ export default function FollowListModal({
                       className="flex-1 cursor-pointer"
                       onClick={() => handleNavigateToProfile(user.loginId)}
                     >
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {user.nickname}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        @{user.loginId}
-                      </p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{user.nickname}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">@{user.loginId}</p>
                     </div>
-                    <FollowButton
-                      targetLoginId={user.loginId}
-                      variant="outline"
-                      size="sm"
-                    />
+                    <FollowButton targetLoginId={user.loginId} variant="outline" size="sm" />
                   </div>
                 ))}
               </div>
@@ -147,9 +133,7 @@ export default function FollowListModal({
                 <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
               </div>
             ) : isError ? (
-              <div className="text-center py-8 text-red-500">
-                팔로잉 목록을 불러올 수 없습니다.
-              </div>
+              <div className="text-center py-8 text-red-500">팔로잉 목록을 불러올 수 없습니다.</div>
             ) : followings && followings.length > 0 ? (
               <div className="space-y-3">
                 {followings.map((user) => (
@@ -161,18 +145,10 @@ export default function FollowListModal({
                       className="flex-1 cursor-pointer"
                       onClick={() => handleNavigateToProfile(user.loginId)}
                     >
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {user.nickname}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        @{user.loginId}
-                      </p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{user.nickname}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">@{user.loginId}</p>
                     </div>
-                    <FollowButton
-                      targetLoginId={user.loginId}
-                      variant="outline"
-                      size="sm"
-                    />
+                    <FollowButton targetLoginId={user.loginId} variant="outline" size="sm" />
                   </div>
                 ))}
               </div>

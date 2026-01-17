@@ -19,6 +19,9 @@ export const headerStyles = {
 export const cardStyles = {
   base: "border-2 shadow-xl bg-white overflow-hidden rounded-xl",
   headerGradient: "border-b p-6",
+  hover:
+    "bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-6", // Dashboard stats, etc.
+  feed: "border-0 bg-white overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow", // Feed items
 };
 
 // Buttons
@@ -26,12 +29,36 @@ export const buttonStyles = {
   back: "mb-6 hover:bg-blue-50 text-gray-700 font-medium",
   submit:
     "w-full h-12 shadow-lg hover:shadow-xl transition-all text-base font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed",
+  action:
+    "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium text-sm transition-all", // Dashboard 'more' buttons
 };
 
 // Inputs
 export const inputStyles = {
   base: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
   auth: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all",
+};
+
+// Typography & Common Components
+export const componentStyles = {
+  sectionTitle: "text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2",
+  avatar: {
+    base: "rounded-full flex items-center justify-center text-white font-bold shadow-md",
+    small: "w-9 h-9 text-sm", // Header
+    medium: "w-10 h-10 text-sm", // Feed
+    large: "w-24 h-24 sm:w-28 sm:h-28 text-3xl", // Profile
+  },
+};
+
+// Badge Grade Colors
+export const badgeGradeColors = {
+  BRONZE:
+    "text-amber-600 bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700/50 dark:text-amber-500",
+  SILVER:
+    "text-slate-500 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400",
+  GOLD: "text-yellow-600 bg-yellow-100 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700/50 dark:text-yellow-500",
+  PLATINUM:
+    "text-cyan-600 bg-cyan-100 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-700/50 dark:text-cyan-400",
 };
 
 // Themes

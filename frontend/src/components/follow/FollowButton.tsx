@@ -27,9 +27,7 @@ export default function FollowButton({
 }: FollowButtonProps) {
   const currentLoginId = useAuthStore((state) => state.loginId);
   const queryClient = useQueryClient();
-  const [manualIsFollowing, setManualIsFollowing] = useState<boolean | null>(
-    null
-  );
+  const [manualIsFollowing, setManualIsFollowing] = useState<boolean | null>(null);
 
   // initialIsFollowing이 제공되지 않으면 팔로잉 상태 조회
   const { data: followings } = useFollowings(
@@ -49,10 +47,10 @@ export default function FollowButton({
     manualIsFollowing !== null
       ? manualIsFollowing
       : initialIsFollowing !== undefined
-      ? initialIsFollowing
-      : followings && Array.isArray(followings)
-      ? followings.some((user) => user.loginId === targetLoginId)
-      : false;
+        ? initialIsFollowing
+        : followings && Array.isArray(followings)
+          ? followings.some((user) => user.loginId === targetLoginId)
+          : false;
 
   // 자신의 프로필이면 버튼 표시 안 함
   if (currentLoginId === targetLoginId) {

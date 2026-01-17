@@ -6,7 +6,18 @@ import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUser";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
-import { Users, LogOut, User, LayoutDashboard, Trophy, Zap, Settings, Flame, Medal, BarChart3 } from "lucide-react";
+import {
+  Users,
+  LogOut,
+  User,
+  LayoutDashboard,
+  Trophy,
+  Zap,
+  Settings,
+  Flame,
+  Medal,
+  BarChart3,
+} from "lucide-react";
 import { useState } from "react";
 
 export default function Header() {
@@ -104,8 +115,7 @@ export default function Header() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <User className="w-4 h-4" />
-                        내 프로필
+                        <User className="w-4 h-4" />내 프로필
                       </Link>
 
                       {/* 내 활동 */}
@@ -114,8 +124,7 @@ export default function Header() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <Flame className="w-4 h-4" />
-                        내 활동
+                        <Flame className="w-4 h-4" />내 활동
                       </Link>
 
                       {/* 내 통계 */}
@@ -124,8 +133,7 @@ export default function Header() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <BarChart3 className="w-4 h-4" />
-                        내 통계
+                        <BarChart3 className="w-4 h-4" />내 통계
                       </Link>
 
                       {/* 내 배지 */}
@@ -134,17 +142,15 @@ export default function Header() {
                         className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <Medal className="w-4 h-4" />
-                        내 배지
+                        <Medal className="w-4 h-4" />내 배지
                       </Link>
                       {/* 내 스트릭 */}
                       <Link
-                          href="/profile?tab=streaks"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-medium transition-colors border-b border-gray-100"
-                          onClick={() => setIsDropdownOpen(false)}
+                        href="/profile?tab=streaks"
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-medium transition-colors border-b border-gray-100"
+                        onClick={() => setIsDropdownOpen(false)}
                       >
-                        <Flame className="w-4 h-4" />
-                        내 스트릭
+                        <Flame className="w-4 h-4" />내 스트릭
                       </Link>
 
                       {/* 설정 */}

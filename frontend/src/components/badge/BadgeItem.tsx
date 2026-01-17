@@ -1,25 +1,15 @@
 "use client";
 
 import React from "react";
-import { BadgeResponse, BadgeGrade } from "@/types/badge";
+import { BadgeResponse } from "@/types/badge";
 import BadgeIcon from "./BadgeIcon";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { badgeGradeColors } from "@/styles/common";
 
 interface BadgeItemProps {
   badge: BadgeResponse;
 }
-
-const gradeColors: Record<BadgeGrade, string> = {
-  [BadgeGrade.BRONZE]:
-    "text-amber-600 bg-amber-100 border-amber-200 dark:bg-amber-900/20 dark:border-amber-700/50 dark:text-amber-500",
-  [BadgeGrade.SILVER]:
-    "text-slate-500 bg-slate-100 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400",
-  [BadgeGrade.GOLD]:
-    "text-yellow-600 bg-yellow-100 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-700/50 dark:text-yellow-500",
-  [BadgeGrade.PLATINUM]:
-    "text-cyan-600 bg-cyan-100 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-700/50 dark:text-cyan-400",
-};
 
 export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
   const isAcquired = badge.isAcquired;
@@ -36,7 +26,7 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
             isAcquired
               ? cn(
                   "border-transparent shadow-sm hover:shadow-md hover:-translate-y-1",
-                  gradeColors[badge.grade]
+                  badgeGradeColors[badge.grade]
                 )
               : "bg-gray-100 border-gray-300 text-gray-700 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-400 grayscale"
           )}
@@ -51,10 +41,7 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
           >
             <BadgeIcon
               iconCode={badge.iconCode}
-              className={cn(
-                "w-6 h-6",
-                !isAcquired && "text-gray-600 dark:text-gray-400"
-              )}
+              className={cn("w-6 h-6", !isAcquired && "text-gray-600 dark:text-gray-400")}
             />
           </div>
 
@@ -77,18 +64,13 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
             <div className="w-full mt-2 px-1">
               <div className="flex justify-between text-[10px] text-gray-700 dark:text-gray-300 mb-1 font-medium">
                 <span>진행률</span>
-                <span>
-                  {Math.floor((badge.currentValue / badge.requiredValue) * 100)}%
-                </span>
+                <span>{Math.floor((badge.currentValue / badge.requiredValue) * 100)}%</span>
               </div>
               <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-300"
                   style={{
-                    width: `${Math.min(
-                      100,
-                      (badge.currentValue / badge.requiredValue) * 100
-                    )}%`,
+                    width: `${Math.min(100, (badge.currentValue / badge.requiredValue) * 100)}%`,
                   }}
                 />
               </div>
