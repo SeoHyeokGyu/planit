@@ -1,10 +1,8 @@
 "use client";
 
 import { UserProfile } from "@/types/user";
-import { useLogout } from "@/hooks/useAuth";
 import { useFollowStats } from "@/hooks/useFollow";
-import { Button } from "@/components/ui/button";
-import { User, Calendar, LogOut, Heart } from "lucide-react";
+import { User, Calendar, Heart, Users } from "lucide-react";
 
 interface ProfileHeaderProps {
   user: UserProfile;
@@ -19,7 +17,6 @@ export default function ProfileHeader({
   onFollowersClick,
   onFollowingsClick
 }: ProfileHeaderProps) {
-  const logout = useLogout();
   const { followerCount, followingCount, isLoading } = useFollowStats(
     user.loginId
   );
@@ -66,8 +63,9 @@ export default function ProfileHeader({
                     onClick={handleFollowersClick}
                     disabled={isLoading}
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    aria-label={`팔로워 ${followerCount}명 보기`}
                   >
-                    <Heart className="w-4 h-4" />
+                    <Users className="w-4 h-4" />
                     <div>
                       <p className="text-xl font-bold">{followerCount}</p>
                       <p className="text-xs text-blue-200">팔로워</p>
@@ -77,6 +75,7 @@ export default function ProfileHeader({
                     onClick={handleFollowingsClick}
                     disabled={isLoading}
                     className="flex items-center space-x-2 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    aria-label={`팔로잉 ${followingCount}명 보기`}
                   >
                     <Heart className="w-4 h-4" />
                     <div>
@@ -88,19 +87,6 @@ export default function ProfileHeader({
               </div>
             </div>
 
-            {/* 자신의 프로필일 때만 로그아웃 버튼 표시 */}
-            {isOwnProfile && (
-              <div className="mt-6 sm:mt-0">
-                <Button
-                  onClick={logout}
-                  variant="outline"
-                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-700 transition-colors duration-200 group"
-                >
-                  <LogOut className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-                  로그아웃
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </header>
