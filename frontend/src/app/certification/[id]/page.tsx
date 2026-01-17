@@ -35,21 +35,12 @@ import {
   Camera,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { ALLOWED_IMAGE_EXTENSIONS_STRING } from "@/lib/imageUtils";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { layoutStyles, headerStyles, cardStyles, buttonStyles, themeStyles } from "@/styles/common";
+import { useConfirm } from "@/hooks/useConfirm";
 
 export default function CertificationDetailPage() {
   const router = useRouter();
@@ -60,7 +51,8 @@ export default function CertificationDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const { confirm, ConfirmDialog } = useConfirm();
 
   const {
     file: editedFile,
@@ -83,7 +75,6 @@ export default function CertificationDetailPage() {
     if (data) {
       setEditedTitle(data.title);
       setEditedContent(data.content);
-      // 기존 이미지 업로드 상태 초기화 후 현재 사진 설정
       resetImageUpload();
       setPreviewUrl(data.photoUrl || null);
       setIsEditing(true);
@@ -91,36 +82,36 @@ export default function CertificationDetailPage() {
   };
 
   const handleDeletePhoto = async (e: React.MouseEvent) => {
-    e.preventDefault(); // 라벨 클릭 이벤트 전파 방지
-    if (!confirm("정말 사진을 삭제하시겠습니까?")) return;
+    e.preventDefault();
 
-    try {
-      // 1. 새로 올리려던 파일이 있으면 취소
-      if (editedFile) {
+    if (editedFile) {
+      setFile(null);
+      setPreviewUrl(data?.photoUrl || null);
+      return;
+    }
+
+    if (
+      await confirm({
+        title: "사진 삭제",
+        description: "정말로 사진을 삭제하시겠습니까? 삭제된 사진은 복구할 수 없습니다.",
+        variant: "destructive",
+      })
+    ) {
+      try {
+        if (data?.photoUrl) {
+          await deletePhotoMutation.mutateAsync(certificationId);
+        }
+        setPreviewUrl(null);
         setFile(null);
-        setPreviewUrl(data?.photoUrl || null);
-        // 여기서 return 할지, 아니면 아래 로직을 탈지 결정 필요.
-        // 기존 로직: "우선순위: 새 파일 취소 -> 그 다음 기존 사진 삭제"
-        // 즉, 새 파일만 취소하고 함수 종료.
-        return;
+        refetch();
+      } catch (err) {
+        console.error("사진 삭제 실패:", err);
       }
-
-      // 2. 기존 사진이 있거나, 새 파일을 취소했는데도 사진을 지우고 싶다면 API 호출
-      if (data?.photoUrl) {
-        await deletePhotoMutation.mutateAsync(certificationId);
-      }
-
-      setPreviewUrl(null); // 미리보기 제거
-      setFile(null); // 파일 선택 제거
-      refetch(); // 데이터 갱신
-    } catch (err) {
-      console.error("사진 삭제 실패:", err);
     }
   };
 
   const handleUpdate = async () => {
     try {
-      // 1. 사진이 변경되었다면 먼저 업로드 수행
       if (editedFile) {
         const uploadResponse = await uploadPhotoMutation.mutateAsync({
           id: certificationId,
@@ -129,11 +120,10 @@ export default function CertificationDetailPage() {
 
         if (!uploadResponse.success) {
           toast.error(uploadResponse.message || "사진 업로드에 실패했습니다.");
-          return; // 사진 업로드 실패 시 텍스트 수정 중단
+          return;
         }
       }
 
-      // 2. 텍스트 정보 업데이트
       await updateMutation.mutateAsync({
         id: certificationId,
         data: { title: editedTitle, content: editedContent },
@@ -141,23 +131,30 @@ export default function CertificationDetailPage() {
 
       toast.success("인증이 성공적으로 수정되었습니다!");
       setIsEditing(false);
-      refetch(); // 데이터 갱신
+      refetch();
     } catch (err) {
       console.error("인증 업데이트 실패:", err);
-      // 토스트는 api.ts에서 전역적으로 처리됨
     }
   };
 
   const handleDelete = async () => {
-    try {
-      await deleteMutation.mutateAsync({
-        id: certificationId,
-        challengeId: data?.challengeId,
-      });
-      toast.success("인증이 성공적으로 삭제되었습니다!");
-      router.push("/");
-    } catch (err) {
-      console.error("인증 삭제 실패:", err);
+    if (
+      await confirm({
+        title: "인증 삭제",
+        description: "정말로 이 인증을 삭제하시겠습니까? 삭제된 인증은 복구할 수 없습니다.",
+        variant: "destructive",
+      })
+    ) {
+      try {
+        await deleteMutation.mutateAsync({
+          id: certificationId,
+          challengeId: data?.challengeId,
+        });
+        toast.success("인증이 성공적으로 삭제되었습니다!");
+        router.push("/");
+      } catch (err) {
+        console.error("인증 삭제 실패:", err);
+      }
     }
   };
 
@@ -318,7 +315,6 @@ export default function CertificationDetailPage() {
                       )}
                     </label>
 
-                    {/* 사진 삭제 버튼 */}
                     {previewUrl && (
                       <Button
                         type="button"
@@ -406,7 +402,7 @@ export default function CertificationDetailPage() {
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() => setIsDeleteDialogOpen(true)}
+                    onClick={handleDelete}
                     disabled={deleteMutation.isPending}
                     className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 shadow-none hover:shadow-sm transition-all"
                   >
@@ -423,25 +419,7 @@ export default function CertificationDetailPage() {
           )}
         </Card>
 
-        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>인증 삭제</AlertDialogTitle>
-              <AlertDialogDescription>
-                정말로 이 인증을 삭제하시겠습니까? 삭제된 인증은 복구할 수 없습니다.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>취소</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700 text-white"
-              >
-                삭제
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog />
       </div>
     </div>
   );
