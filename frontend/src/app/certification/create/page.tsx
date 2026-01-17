@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { CertificationCreateRequest } from "@/types/certification";
 import { ArrowLeft, Camera, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ALLOWED_IMAGE_EXTENSIONS_STRING } from "@/lib/imageUtils";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 function CreateCertificationContent() {
   const router = useRouter();
@@ -22,14 +24,20 @@ function CreateCertificationContent() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const { 
+    file, 
+    isCompressing, 
+    error: imageError, 
+    handleFileChange 
+  } = useImageUpload();
 
   const createMutation = useCreateCertification();
   const uploadPhotoMutation = useUploadCertificationPhoto();
 
   const challengeId = challenge?.id;
-  const isLoading = createMutation.isPending || uploadPhotoMutation.isPending;
+  const isLoading = createMutation.isPending || uploadPhotoMutation.isPending || isCompressing;
 
   // 챌린지 기간 체크
   const today = new Date();
@@ -42,19 +50,24 @@ function CreateCertificationContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setFormError(null);
+
+    if (imageError) {
+        setFormError("이미지 오류를 확인해주세요.");
+        return;
+    }
 
     if (isClosed) {
-      setError(isEnded ? "이미 종료된 챌린지입니다." : "아직 시작되지 않은 챌린지입니다.");
+      setFormError(isEnded ? "이미 종료된 챌린지입니다." : "아직 시작되지 않은 챌린지입니다.");
       return;
     }
 
     if (!challengeId) {
-      setError("챌린지 ID가 없거나 유효하지 않습니다.");
+      setFormError("챌린지 ID가 없거나 유효하지 않습니다.");
       return;
     }
     if (!title.trim() || !content.trim()) {
-      setError("제목과 내용은 비워둘 수 없습니다.");
+      setFormError("제목과 내용은 비워둘 수 없습니다.");
       return;
     }
 
@@ -79,16 +92,16 @@ function CreateCertificationContent() {
           });
           
           if (!uploadResponse.success) {
-            setError(uploadResponse.message || "사진 업로드에 실패했습니다.");
+            setFormError(uploadResponse.message || "사진 업로드에 실패했습니다.");
             return;
           }
         }
         router.push(`/certification/${certificationId}`); // Redirect to detail page
       } else {
-        setError(createResponse.message || "인증 생성에 실패했습니다.");
+        setFormError(createResponse.message || "인증 생성에 실패했습니다.");
       }
     } catch (err: any) {
-      setError(err.message || "예기치 않은 오류가 발생했습니다.");
+      setFormError(err.message || "예기치 않은 오류가 발생했습니다.");
     }
   };
 
@@ -211,18 +224,18 @@ function CreateCertificationContent() {
                                 <Input
                                     id="photo"
                                     type="file"
-                                    accept="image/*"
+                                    accept={ALLOWED_IMAGE_EXTENSIONS_STRING}
                                     className="hidden"
-                                    onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                                    onChange={handleFileChange}
                                 />
                             </label>
                         </div>
                     </div>
 
-                    {error && (
+                    {(formError || imageError) && (
                         <Alert variant="destructive" className="border-red-200">
                             <AlertDescription className="font-semibold">
-                                {error}
+                                {formError || imageError}
                             </AlertDescription>
                         </Alert>
                     )}
@@ -232,7 +245,7 @@ function CreateCertificationContent() {
                         className="w-full h-12 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all text-base font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={isLoading || challengeId === null || isClosed}
                     >
-                        {isLoading ? "인증 올리는 중..." : "인증하기"}
+                        {isCompressing ? "사진 압축 중..." : (isLoading ? "인증 올리는 중..." : "인증하기")}
                     </Button>
                 </form>
             </CardContent>
