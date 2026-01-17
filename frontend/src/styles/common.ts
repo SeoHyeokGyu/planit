@@ -72,6 +72,26 @@ export const navStyles = {
   mobileLink: "flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-colors",
 };
 
+// Navigation Links Configuration
+export const navigationLinks = [
+  { href: "/dashboard", label: "대시보드", icon: "LayoutDashboard" },
+  { href: "/goals", label: "목표", icon: "Target" },
+  { href: "/challenge", label: "챌린지", icon: "Trophy" },
+  { href: "/feed", label: "피드", icon: "Activity" },
+  { href: "/ranking", label: "랭킹", icon: "Crown", variant: "yellow" as const },
+] as const;
+
+export const activityLinks = [
+  { href: "/stats", label: "내 통계", icon: "BarChart3" },
+  { href: "/profile?tab=badges", label: "내 배지", icon: "Medal" },
+  { href: "/profile?tab=streaks", label: "내 스트릭", icon: "Flame" },
+  { href: "/users", label: "사용자 찾기", icon: "Users" },
+] as const;
+
+export const accountLinks = [
+  { href: "/settings", label: "설정", icon: "Settings" },
+] as const;
+
 // Dropdowns
 export const dropdownStyles = {
   wrapper:

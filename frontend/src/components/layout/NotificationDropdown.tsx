@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNotificationStore } from "@/stores/notificationStore";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { Bell, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,18 +18,8 @@ export default function NotificationDropdown() {
   const markAsRead = useNotificationStore((state) => state.markAsRead);
   const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
 
-  // 외부 클릭 시 드롭다운 닫기
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // Close dropdown when clicking outside
+  useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleNotificationClick = (id: string | undefined) => {
     if (id) {
