@@ -1,6 +1,7 @@
 package com.planit.config
 
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -18,7 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig(@param:Value("\${file.upload-url-path}") private val uploadUrlPath: String) {
 
   @Bean fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
@@ -55,6 +56,9 @@ class SecurityConfig {
             "/api-test/**",
           )
           .permitAll()
+          // 업로드된 이미지 파일 접근 허용
+          .requestMatchers("$uploadUrlPath/**")
+          .permitAll()
           // 인증 관련 엔드포인트 허용
           .requestMatchers("/api/auth/**")
           .permitAll()
@@ -66,7 +70,7 @@ class SecurityConfig {
           .authenticated()
       }
       .exceptionHandling {
-        it.authenticationEntryPoint { request, response, _ ->
+        it.authenticationEntryPoint { _, response, _ ->
           response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
         }
       }

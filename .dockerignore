@@ -52,6 +52,9 @@ FEATURES.md
 .env.local
 .env.*.local
 
+# Uploads
+uploads/
+
 # Logs
 *.log
 logs/

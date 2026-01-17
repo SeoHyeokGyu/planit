@@ -39,23 +39,46 @@ class CertificationController(
 
   /**
    * 특정 인증에 사진을 업로드합니다.
+   * 
+   * [동작 과정]
+   * 1. 클라이언트가 전송한 사진 파일(MultipartFile)을 받습니다.
+   * 2. FileStorageService를 통해 파일을 물리적 저장소에 저장하고, 웹 접근 URL을 반환받습니다.
+   * 3. 반환받은 URL을 CertificationService를 통해 해당 인증 데이터의 photoUrl 필드에 업데이트합니다.
+   * 
    * @param id 사진을 추가할 인증의 ID
-   * @param file 업로드할 사진 파일
+   * @param file 업로드할 사진 파일 (form-data key: "file")
    * @param userDetails 현재 로그인한 사용자 정보
-   * @return 사진 정보가 업데이트된 인증 정보
+   * @return 사진 정보가 업데이트된 최종 인증 정보
    */
-//  @PostMapping("/{id}/photo")
-//  fun uploadPhoto(
-//    @PathVariable id: Long,
-//    @RequestParam("file") file: MultipartFile,
-//    @AuthenticationPrincipal userDetails: CustomUserDetails
-//  ): ResponseEntity<ApiResponse<CertificationResponse>> {
-//    // 파일을 서버에 저장하고 접근 URL을 받음
-//    val photoUrl = fileStorageService.storeFile(file)
-//    // 인증 정보에 사진 URL을 업데이트
-//    val response = certificationService.uploadCertificationPhoto(id, photoUrl, userDetails.username)
-//    return ResponseEntity.ok(ApiResponse.success(response))
-//  }
+  @PostMapping("/{id}/photo")
+  fun uploadPhoto(
+    @PathVariable id: Long,
+    @RequestParam("file") file: MultipartFile,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    // 파일을 서버(로컬 또는 볼륨)에 저장하고 접근 URL을 받음
+    val photoUrl = fileStorageService.storeFile(file)
+    
+    // 인증 정보(DB)에 사진 URL을 업데이트
+    val response = certificationService.uploadCertificationPhoto(id, photoUrl, userDetails.username)
+    
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
+   * 특정 인증의 사진을 삭제합니다.
+   * @param id 사진을 삭제할 인증의 ID
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 사진 정보가 삭제된 인증 정보
+   */
+  @DeleteMapping("/{id}/photo")
+  fun deletePhoto(
+    @PathVariable id: Long,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.deleteCertificationPhoto(id, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
 
   /**
    * 특정 ID의 인증 정보를 조회합니다.

@@ -12,6 +12,7 @@ import { formatTimeAgo } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { FeedResponse } from "@/types/feed";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export default function FeedItem({
   certification,
@@ -105,13 +106,13 @@ export default function FeedItem({
       <div onClick={onClick} className="cursor-pointer">
         {/* 사진 */}
         {certification.photoUrl && (
-          <div className="relative h-80 w-full bg-gray-100">
-            <Image
+          <div className="relative h-[450px] w-full bg-gray-50 flex items-center justify-center border-y border-gray-50">
+            <FallbackImage
               src={certification.photoUrl}
               alt={certification.title}
-              layout="fill"
-              objectFit="cover"
-              className="hover:brightness-95 transition-all duration-300"
+              fill
+              className="object-contain hover:brightness-95 transition-all duration-300"
+              sizes="(max-width: 768px) 100vw, 600px"
             />
           </div>
         )}

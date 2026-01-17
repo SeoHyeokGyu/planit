@@ -51,6 +51,14 @@ class CertificationService(
     val challenge =
       challengeRepository.findById(request.challengeId).orElseThrow { ChallengeNotFoundException() }
 
+    val now = LocalDateTime.now()
+    if (challenge.startDate.isAfter(now)) {
+      throw CertificationNotStartedException()
+    }
+    if (challenge.endDate.isBefore(now)) {
+      throw CertificationEndedException()
+    }
+
     val certification =
       Certification(
         user = user,
@@ -112,7 +120,7 @@ class CertificationService(
    */
   @Transactional(readOnly = true)
   fun getCertificationsByUser(userLoginId: String, pageable: Pageable): Page<Certification> {
-    return certificationRepository.findByUser_LoginId(userLoginId, pageable)
+    return certificationRepository.findByUser_LoginIdOrderByCreatedAtDesc(userLoginId, pageable)
   }
 
   /**
@@ -251,6 +259,33 @@ class CertificationService(
     }
 
     certification.photoUrl = photoUrl
+    val updatedCertification = certificationRepository.save(certification)
+    return CertificationResponse.from(updatedCertification)
+  }
+
+  /**
+   * 특정 인증의 사진을 삭제합니다. (DB에서 photoUrl 제거)
+   *
+   * @param certificationId 사진을 삭제할 인증의 ID
+   * @param userLoginId 현재 로그인한 사용자의 ID
+   * @return 사진 정보가 삭제된 인증의 응답 객체
+   * @throws CertificationNotFoundException 인증을 찾을 수 없을 때
+   * @throws CertificationUpdateForbiddenException 사진 삭제 권한이 없을 때
+   */
+  @Transactional
+  fun deleteCertificationPhoto(certificationId: Long, userLoginId: String): CertificationResponse {
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow {
+        CertificationNotFoundException()
+      }
+
+    if (certification.user.loginId != userLoginId) {
+      throw CertificationUpdateForbiddenException("이 인증의 사진을 삭제할 권한이 없습니다")
+    }
+
+    // 실제 파일 삭제 로직은 추후 FileStorageService를 통해 구현 가능
+    certification.photoUrl = null
+
     val updatedCertification = certificationRepository.save(certification)
     return CertificationResponse.from(updatedCertification)
   }

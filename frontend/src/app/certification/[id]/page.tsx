@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useCertification, useDeleteCertification, useUpdateCertification } from "@/hooks/useCertification";
+import { useCertification, useDeleteCertification, useUpdateCertification, useUploadCertificationPhoto, useDeleteCertificationPhoto } from "@/hooks/useCertification";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { useUserProfile } from "@/hooks/useUser";
-import { ArrowLeft, CheckCircle, Calendar, User, FileText, Edit2, Trash2, Save, X } from "lucide-react";
+import { ArrowLeft, CheckCircle, Calendar, User, FileText, Edit2, Trash2, Save, X, Camera } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { FallbackImage } from "@/components/ui/fallback-image";
 
 export default function CertificationDetailPage() {
   const router = useRouter();
@@ -32,30 +33,90 @@ export default function CertificationDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
+  const [editedFile, setEditedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const { data, isLoading, error } = useCertification(certificationId);
+  const { data, isLoading, error, refetch } = useCertification(certificationId);
 
   const updateMutation = useUpdateCertification();
   const deleteMutation = useDeleteCertification();
+  const uploadPhotoMutation = useUploadCertificationPhoto();
+  const deletePhotoMutation = useDeleteCertificationPhoto();
 
   const handleEditClick = () => {
     if (data) {
       setEditedTitle(data.title);
       setEditedContent(data.content);
+      setEditedFile(null);
+      setPreviewUrl(data.photoUrl || null);
       setIsEditing(true);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEditedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleDeletePhoto = async (e: React.MouseEvent) => {
+    e.preventDefault(); // 라벨 클릭 이벤트 전파 방지
+    if (!confirm("정말 사진을 삭제하시겠습니까?")) return;
+
+    try {
+      // 1. 새로 올리려던 파일이 있으면 취소
+      if (editedFile) {
+        setEditedFile(null);
+        setPreviewUrl(data?.photoUrl || null); // 원래 사진으로 복구? 아니면 삭제?
+        // 사용자가 "삭제"를 눌렀으니 원래 사진도 지우고 싶은 것일 수 있음.
+        // 하지만 여기서는 "업로드 취소" 개념과 "기존 사진 삭제" 개념이 섞임.
+        // 우선순위: 새 파일 취소 -> 그 다음 기존 사진 삭제
+      }
+
+      // 2. 기존 사진이 있거나, 새 파일을 취소했는데도 사진을 지우고 싶다면 API 호출
+      // 여기서는 "화면에 보이는 사진을 없앤다"는 의미로 접근
+      if (data?.photoUrl) {
+        await deletePhotoMutation.mutateAsync(certificationId);
+      }
+      
+      setPreviewUrl(null); // 미리보기 제거
+      setEditedFile(null); // 파일 선택 제거
+      refetch(); // 데이터 갱신
+    } catch (err) {
+      console.error("사진 삭제 실패:", err);
     }
   };
 
   const handleUpdate = async () => {
     try {
+      // 1. 텍스트 정보 업데이트
       await updateMutation.mutateAsync({
         id: certificationId,
         data: { title: editedTitle, content: editedContent }
       });
+
+      // 2. 사진이 변경되었다면 업로드 수행
+      if (editedFile) {
+        const uploadResponse = await uploadPhotoMutation.mutateAsync({
+          id: certificationId,
+          file: editedFile
+        });
+        
+        if (!uploadResponse.success) {
+          toast.error("사진 업로드에 실패했습니다.");
+        }
+      }
+
+      toast.success("인증이 성공적으로 수정되었습니다!");
       setIsEditing(false);
+      refetch(); // 데이터 갱신
     } catch (err) {
       console.error("인증 업데이트 실패:", err);
+      // 토스트는 api.ts에서 전역적으로 처리됨
     }
   };
 
@@ -114,6 +175,7 @@ export default function CertificationDetailPage() {
   }
 
   const isAuthor = user?.nickname === data.authorNickname;
+  const isUpdating = updateMutation.isPending || uploadPhotoMutation.isPending || deletePhotoMutation.isPending;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
@@ -188,16 +250,68 @@ export default function CertificationDetailPage() {
             </CardHeader>
 
             <CardContent className="p-6 space-y-6">
-                {data.photoUrl && (
-                    <div className="relative w-full h-[400px] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
-                        <Image 
-                            src={data.photoUrl} 
-                            alt="Certification Photo" 
-                            layout="fill" 
-                            objectFit="contain" 
-                            className="hover:scale-105 transition-transform duration-500"
-                        />
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center w-full">
+                        <div className="relative w-full">
+                            <label htmlFor="photo-upload" className={`flex flex-col items-center justify-center w-full h-64 border-2 ${previewUrl ? 'border-solid border-gray-200' : 'border-dashed border-blue-300'} rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors relative overflow-hidden group`}>
+                                {previewUrl ? (
+                                    <FallbackImage 
+                                        src={previewUrl} 
+                                        alt="Preview" 
+                                        fill
+                                        className="object-contain opacity-100 group-hover:opacity-75 transition-opacity"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Camera className="w-10 h-10 mb-3 text-blue-500" />
+                                        <p className="mb-2 text-sm text-blue-700 font-semibold">클릭하여 사진 등록/변경</p>
+                                    </div>
+                                )}
+                                <input 
+                                    id="photo-upload" 
+                                    type="file" 
+                                    accept="image/*" 
+                                    className="hidden" 
+                                    onChange={handleFileChange}
+                                />
+                                {previewUrl && (
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 text-white font-bold pointer-events-none">
+                                        <Camera className="w-8 h-8 mb-2" />
+                                        <span className="ml-2">사진 변경하기</span>
+                                    </div>
+                                )}
+                            </label>
+                            
+                            {/* 사진 삭제 버튼 */}
+                            {previewUrl && (
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-8 w-8 rounded-full shadow-md z-10"
+                                    onClick={handleDeletePhoto}
+                                    title="사진 삭제"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            )}
+                        </div>
                     </div>
+                  </div>
+                ) : (
+                    data.photoUrl && (
+                        <div className="relative w-full h-[400px] rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shadow-inner">
+                            <FallbackImage 
+                                src={data.photoUrl} 
+                                alt="Certification Photo" 
+                                fill
+                                className="object-contain hover:scale-105 transition-transform duration-500"
+                                sizes="(max-width: 768px) 100vw, 800px"
+                            />
+                        </div>
+                    )
                 )}
                 
                 <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
@@ -227,7 +341,7 @@ export default function CertificationDetailPage() {
                             <Button 
                                 variant="outline" 
                                 onClick={() => setIsEditing(false)} 
-                                disabled={updateMutation.isPending}
+                                disabled={isUpdating}
                                 className="border-gray-300 hover:bg-gray-100"
                             >
                                 <X className="w-4 h-4 mr-2" />
@@ -235,10 +349,10 @@ export default function CertificationDetailPage() {
                             </Button>
                             <Button 
                                 onClick={handleUpdate} 
-                                disabled={updateMutation.isPending}
+                                disabled={isUpdating}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
-                                {updateMutation.isPending ? (
+                                {isUpdating ? (
                                     <span className="animate-spin mr-2">⏳</span>
                                 ) : (
                                     <Save className="w-4 h-4 mr-2" />

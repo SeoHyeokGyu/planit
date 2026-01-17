@@ -25,6 +25,18 @@ class GlobalExceptionHandler {
 
   private val log = LoggerFactory.getLogger(javaClass)
 
+  /** 
+   * 비즈니스 예외 처리
+   * BusinessException을 상속받은 모든 커스텀 예외를 처리합니다.
+   * 예외 객체에 정의된 status, errorCode, message를 그대로 클라이언트에 전달합니다.
+   */
+  @ExceptionHandler(BusinessException::class)
+  fun handleBusinessException(ex: BusinessException): ResponseEntity<ApiResponse<Unit>> {
+    log.warn("비즈니스 예외 발생: [{}] {}", ex.errorCode, ex.message)
+    return ResponseEntity.status(ex.status)
+        .body(ApiResponse.error(ex.errorCode, ex.message))
+  }
+
   /** 400 Bad Request - JSR-303 Validator 주로 @Valid 또는 @Validated 애노테이션을 사용한 유효성 검사 실패 시 발생합니다. */
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleMethodArgumentNotValidException(

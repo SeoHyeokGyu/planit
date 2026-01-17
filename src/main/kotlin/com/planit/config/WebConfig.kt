@@ -1,39 +1,27 @@
 package com.planit.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-/**
- * Spring Web MVC 설정을 담당하는 클래스입니다.
- * SPA 라우팅 및 리소스 핸들러를 설정합니다.
- */
+/** Spring Web MVC 설정을 담당하는 클래스입니다. SPA 라우팅 및 정적 리소스(업로드 파일 등) 서빙을 설정합니다. */
 @Configuration
-class WebConfig : WebMvcConfigurer {
+class WebConfig(
+  // 실제 파일이 저장된 물리적 경로 (예: uploads 또는 /app/uploads)
+  @param:Value("\${file.upload-dir}") private val uploadDir: String,
+  // 웹에서 접근할 때 사용할 URL 접두사 (예: /images)
+  @param:Value("\${file.upload-url-path}") private val uploadUrlPath: String,
+) : WebMvcConfigurer {
 
   /**
-   * SPA(Single Page Application) 라우팅 설정
-   * API 요청이 아닌 모든 경로를 index.html로 포워딩하여 클라이언트 사이드 라우팅을 지원합니다.
-   */
-  override fun addViewControllers(registry: ViewControllerRegistry) {
-    // 루트 경로를 index.html로 포워딩
-    registry.addViewController("/").setViewName("forward:/index.html")
-    // API가 아닌 모든 경로를 index.html로 포워딩 (SPA 라우팅)
-    registry.addViewController("/{x:[\\w\\-]+}/**").setViewName("forward:/index.html")
-  }
-
-  /**
-   *   정적 리소스 핸들러를 추가하여 특정 경로의 파일을 서빙합니다.
-   *   /uploads/\**  경로로 들어오는 요청에 대해 'uploads/' 디렉토리의 파일을 제공합니다.
+   * 정적 리소스 핸들러 설정 특정 URL 패턴으로 들어오는 요청을 서버의 물리적 파일 시스템 경로로 매핑합니다.
+   *
+   * [설정 내용]
+   * - URL 패턴: 설정된 경로 하위의 모든 파일 (예: /images/photo.png)
+   * - 물리적 경로: 서버 내부의 실제 저장소 위치 (예: file:uploads/)
    */
   override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-    registry.addResourceHandler("/uploads/**")
-      .addResourceLocations("file:uploads/")
+    registry.addResourceHandler("$uploadUrlPath/**").addResourceLocations("file:$uploadDir/")
   }
 }
-
-
-
-
-

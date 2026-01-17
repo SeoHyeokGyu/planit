@@ -28,6 +28,9 @@ application-secret.yml
 .DS_Store
 Thumbs.db
 
+# Uploads
+uploads/
+
 # CLAUDE.md - AI 가이드 파일 (필요시 포함)
 /CLAUDE.md
 
