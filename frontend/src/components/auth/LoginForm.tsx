@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLogin } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { inputStyles, themeStyles } from "@/styles/common";
 
 export function LoginForm() {
   const [loginId, setLoginId] = useState("");
@@ -38,7 +39,7 @@ export function LoginForm() {
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
             disabled={loginMutation.isPending}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className={inputStyles.auth}
           />
         </div>
 
@@ -55,7 +56,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loginMutation.isPending}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className={inputStyles.auth}
           />
         </div>
 
@@ -72,7 +73,7 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={loginMutation.isPending}
-          className="w-full py-3 mt-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md"
+          className={`w-full py-3 mt-2 ${themeStyles.primary.btn} text-white font-semibold rounded-lg transition-all shadow-sm hover:shadow-md`}
         >
           {loginMutation.isPending ? "로그인 중..." : "로그인"}
         </Button>
