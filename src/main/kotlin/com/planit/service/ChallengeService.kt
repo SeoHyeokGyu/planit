@@ -74,32 +74,54 @@ class ChallengeService(
     }
 
     /**
-     * 챌린지 목록 조회 (필터링)
+     * 챌린지 목록 조회 (필터링 + 정렬)
      */
     fun getChallenges(request: ChallengeSearchRequest): List<ChallengeListResponse> {
+        val sortBy = request.sortBy ?: "LATEST"
+
         val challenges = when {
             // 키워드 검색 (최우선)
             !request.keyword.isNullOrBlank() -> {
-                challengeRepository.findByTitleContainingOrDescriptionContaining(
-                    request.keyword,
-                    request.keyword
-                )
+                when (sortBy) {
+                    "NAME" -> challengeRepository.findByKeywordOrderByTitleAsc(request.keyword)
+                    "DIFFICULTY" -> challengeRepository.findByKeywordOrderByDifficulty(request.keyword)
+                    "POPULAR" -> challengeRepository.findByKeywordOrderByParticipantCntDesc(request.keyword)
+                    else -> challengeRepository.findByKeywordOrderByCreatedAtDesc(request.keyword)
+                }
             }
             // 카테고리 + 난이도
             !request.category.isNullOrBlank() && !request.difficulty.isNullOrBlank() -> {
-                challengeRepository.findByCategoryAndDifficulty(request.category, request.difficulty)
+                when (sortBy) {
+                    "NAME" -> challengeRepository.findByCategoryAndDifficultyOrderByTitleAsc(request.category, request.difficulty)
+                    "POPULAR" -> challengeRepository.findByCategoryAndDifficultyOrderByParticipantCntDesc(request.category, request.difficulty)
+                    else -> challengeRepository.findByCategoryAndDifficultyOrderByCreatedAtDesc(request.category, request.difficulty)
+                }
             }
             // 카테고리만
             !request.category.isNullOrBlank() -> {
-                challengeRepository.findByCategory(request.category)
+                when (sortBy) {
+                    "NAME" -> challengeRepository.findByCategoryOrderByTitleAsc(request.category)
+                    "DIFFICULTY" -> challengeRepository.findByCategoryOrderByDifficulty(request.category)
+                    "POPULAR" -> challengeRepository.findByCategoryOrderByParticipantCntDesc(request.category)
+                    else -> challengeRepository.findByCategoryOrderByCreatedAtDesc(request.category)
+                }
             }
             // 난이도만
             !request.difficulty.isNullOrBlank() -> {
-                challengeRepository.findByDifficulty(request.difficulty)
+                when (sortBy) {
+                    "NAME" -> challengeRepository.findByDifficultyOrderByTitleAsc(request.difficulty)
+                    "POPULAR" -> challengeRepository.findByDifficultyOrderByParticipantCntDesc(request.difficulty)
+                    else -> challengeRepository.findByDifficultyOrderByCreatedAtDesc(request.difficulty)
+                }
             }
             // 기본: 전체 조회
             else -> {
-                challengeRepository.findAll()
+                when (sortBy) {
+                    "NAME" -> challengeRepository.findAllOrderByTitleAsc()
+                    "DIFFICULTY" -> challengeRepository.findAllOrderByDifficulty()
+                    "POPULAR" -> challengeRepository.findAllOrderByParticipantCntDesc()
+                    else -> challengeRepository.findAllOrderByCreatedAtDesc()
+                }
             }
         }
 

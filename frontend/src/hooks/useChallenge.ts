@@ -9,7 +9,7 @@ import { ChallengeRequest, ChallengeSearchRequest } from "@/types/challenge";
 
 export const useChallenges = (params?: ChallengeSearchRequest) => {
   return useQuery({
-    queryKey: ["challenges", params],
+    queryKey: ["challenges", params?.category, params?.difficulty, params?.sortBy, params?.page, params?.size],
     queryFn: () => challengeService.getChallenges(params),
     select: (data) => data.data, // ApiResponse<T>에서 data 추출
   });

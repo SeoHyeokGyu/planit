@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useChallenges, useSearchChallenges } from "@/hooks/useChallenge";
 import { Button } from "@/components/ui/button";
@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy } from "lucide-react";
-import { ChallengeListResponse } from "@/types/challenge";
+import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check } from "lucide-react";
+import { ChallengeListResponse, ChallengeSortType } from "@/types/challenge";
 import { pageHeaderStyles, iconGradients } from "@/styles/pageHeader";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -32,16 +32,53 @@ export default function ChallengesPage() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [category, setCategory] = useState<string | undefined>();
   const [difficulty, setDifficulty] = useState<string | undefined>();
+  const [sortBy, setSortBy] = useState<ChallengeSortType>("LATEST");
 
-  const { data: challenges, isLoading } = useChallenges({
+  // 디버깅: sortBy 변경 시 확인
+  useEffect(() => {
+    console.log("정렬 조건 변경:", { category, difficulty, sortBy });
+  }, [category, difficulty, sortBy]);
+
+  // category, difficulty, sortBy가 변경되면 자동으로 재조회됨 (React Query의 queryKey 의존성)
+  const { data: challenges, isLoading, isFetching } = useChallenges({
     category,
     difficulty,
+    sortBy,
   });
+
+  // 디버깅: 데이터 조회 상태 확인
+  useEffect(() => {
+    console.log("챌린지 데이터:", challenges?.slice(0, 3)?.map(c => ({ title: c.title, participants: c.participantCnt })));
+    console.log("로딩 상태:", { isLoading, isFetching });
+  }, [challenges, isLoading, isFetching]);
 
   const shouldSearch = searchKeyword.trim().length >= 1;
   const { data: searchResults } = useSearchChallenges(searchKeyword);
 
-  const displayChallenges = shouldSearch && searchResults ? searchResults : challenges;
+  // 검색 결과에도 정렬 적용
+  const getSortedChallenges = (challenges: ChallengeListResponse[] | undefined) => {
+    if (!challenges) return undefined;
+
+    switch (sortBy) {
+      case "NAME":
+        return [...challenges].sort((a, b) => a.title.localeCompare(b.title));
+      case "DIFFICULTY":
+        const difficultyOrder = { EASY: 1, MEDIUM: 2, HARD: 3 };
+        return [...challenges].sort((a, b) => {
+          const orderA = difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 99;
+          const orderB = difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 99;
+          return orderA === orderB ? a.title.localeCompare(b.title) : orderA - orderB;
+        });
+      case "POPULAR":
+        return [...challenges].sort((a, b) => b.participantCnt - a.participantCnt);
+      default: // LATEST
+        return challenges; // 기본적으로 최신순으로 오므로 그대로 사용
+    }
+  };
+
+  const displayChallenges = shouldSearch
+      ? getSortedChallenges(searchResults)
+      : challenges;
 
   const getStatusBadge = (startDate: string, endDate: string) => {
     const now = new Date();
@@ -50,23 +87,23 @@ export default function ChallengesPage() {
 
     if (now < start)
       return (
-        <Badge
-          variant="secondary"
-          className="bg-blue-100 text-blue-800 border-blue-200 font-semibold"
-        >
-          예정
-        </Badge>
+          <Badge
+              variant="secondary"
+              className="bg-blue-100 text-blue-800 border-blue-200 font-semibold"
+          >
+            예정
+          </Badge>
       );
     if (now > end)
       return (
-        <Badge variant="outline" className="border-gray-400 text-gray-700 font-semibold">
-          종료
-        </Badge>
+          <Badge variant="outline" className="border-gray-400 text-gray-700 font-semibold">
+            종료
+          </Badge>
       );
     return (
-      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 border-0 text-white font-semibold">
-        진행중
-      </Badge>
+        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 border-0 text-white font-semibold">
+          진행중
+        </Badge>
     );
   };
 
@@ -85,9 +122,9 @@ export default function ChallengesPage() {
 
     const config = variants[difficulty] || variants.MEDIUM;
     return (
-      <Badge variant="outline" className={config.className}>
-        {config.label}
-      </Badge>
+        <Badge variant="outline" className={config.className}>
+          {config.label}
+        </Badge>
     );
   };
 
@@ -102,171 +139,217 @@ export default function ChallengesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className={pageHeaderStyles.container}>
-          <div className={pageHeaderStyles.wrapper}>
-            <div className={pageHeaderStyles.titleSection}>
-              <div className={pageHeaderStyles.titleWrapper}>
-                <div className={`${pageHeaderStyles.iconBase} ${iconGradients.challenge}`}>
-                  <Trophy className="w-6 h-6" />
-                </div>
-                <div>
-                  <h1 className={pageHeaderStyles.title}>챌린지</h1>
-                  <p className={pageHeaderStyles.description}>
-                    다양한 챌린지에 참여하고 함께 성장하세요
-                  </p>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className={pageHeaderStyles.container}>
+            <div className={pageHeaderStyles.wrapper}>
+              <div className={pageHeaderStyles.titleSection}>
+                <div className={pageHeaderStyles.titleWrapper}>
+                  <div className={`${pageHeaderStyles.iconBase} ${iconGradients.challenge}`}>
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h1 className={pageHeaderStyles.title}>챌린지</h1>
+                    <p className={pageHeaderStyles.description}>
+                      다양한 챌린지에 참여하고 함께 성장하세요
+                    </p>
+                  </div>
                 </div>
               </div>
+              <Button
+                  onClick={() => router.push("/challenge/create")}
+                  className={pageHeaderStyles.actionButton}
+              >
+                <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
+                챌린지 만들기
+              </Button>
             </div>
-            <Button
-              onClick={() => router.push("/challenge/create")}
-              className={pageHeaderStyles.actionButton}
-            >
-              <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
-              챌린지 만들기
-            </Button>
           </div>
-        </div>
 
-        {/* Filters */}
-        <Card className="mb-8 border-2 shadow-lg bg-white">
-          <CardContent className="pt-6 bg-white">
-            <div className="flex flex-col gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  placeholder="챌린지 검색..."
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
-                  className="pl-10 h-12 text-base border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-gray-400 font-medium"
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex items-center gap-2 flex-1">
-                  <Filter className="w-4 h-4 text-gray-600" />
+          {/* Filters */}
+          <Card className="mb-8 border-2 shadow-lg bg-white">
+            <CardContent className="pt-6 bg-white">
+              <div className="flex flex-col gap-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                      placeholder="챌린지 검색..."
+                      value={searchKeyword}
+                      onChange={(e) => setSearchKeyword(e.target.value)}
+                      className="pl-10 h-12 text-base border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-gray-400 font-medium"
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex items-center gap-2 flex-1">
+                    <Filter className="w-4 h-4 text-gray-600" />
+                    <Select
+                        value={category}
+                        onValueChange={(value) => setCategory(value === "all" ? undefined : value)}
+                    >
+                      <SelectTrigger className="border-2 border-gray-300 bg-white text-gray-900 font-medium">
+                        <SelectValue placeholder="카테고리" className="text-gray-900" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem
+                            value="all"
+                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                        >
+                          전체
+                        </SelectItem>
+                        <SelectItem
+                            value="HEALTH"
+                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                        >
+                          🏃 건강
+                        </SelectItem>
+                        <SelectItem
+                            value="STUDY"
+                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                        >
+                          📚 학습
+                        </SelectItem>
+                        <SelectItem
+                            value="HOBBY"
+                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                        >
+                          🎨 취미
+                        </SelectItem>
+                        <SelectItem
+                            value="LIFESTYLE"
+                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                        >
+                          🌱 라이프스타일
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <Select
-                    value={category}
-                    onValueChange={(value) => setCategory(value === "all" ? undefined : value)}
+                      value={difficulty}
+                      onValueChange={(value) => setDifficulty(value === "all" ? undefined : value)}
                   >
-                    <SelectTrigger className="border-2 border-gray-300 bg-white text-gray-900 font-medium">
-                      <SelectValue placeholder="카테고리" className="text-gray-900" />
+                    <SelectTrigger className="flex-1 border-2 border-gray-300 bg-white text-gray-900 font-medium">
+                      <SelectValue placeholder="난이도" className="text-gray-900" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       <SelectItem
-                        value="all"
-                        className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          value="all"
+                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
                       >
                         전체
                       </SelectItem>
                       <SelectItem
-                        value="HEALTH"
-                        className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          value="EASY"
+                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
                       >
-                        🏃 건강
+                        ⭐ 쉬움
                       </SelectItem>
                       <SelectItem
-                        value="STUDY"
-                        className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          value="MEDIUM"
+                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
                       >
-                        📚 학습
+                        ⭐⭐ 보통
                       </SelectItem>
                       <SelectItem
-                        value="HOBBY"
-                        className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          value="HARD"
+                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
                       >
-                        🎨 취미
+                        ⭐⭐⭐ 어려움
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as ChallengeSortType)}>
+                    <SelectTrigger className={`flex-1 ${pageHeaderStyles.standardButton}`}>
+                      <div className="flex items-center gap-2">
+                        <ArrowUpDown className="w-4 h-4 text-blue-600" />
+                        <SelectValue placeholder="정렬" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-2 border-gray-300 shadow-xl rounded-lg p-1 animate-in fade-in-0 zoom-in-95">
+                      <SelectItem
+                          value="LATEST"
+                          className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span>최신순</span>
+                          {sortBy === "LATEST" && <Check className="w-4 h-4 ml-2" />}
+                        </div>
                       </SelectItem>
                       <SelectItem
-                        value="LIFESTYLE"
-                        className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          value="NAME"
+                          className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
                       >
-                        🌱 라이프스타일
+                        <div className="flex items-center justify-between w-full">
+                          <span>이름순</span>
+                          {sortBy === "NAME" && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                          value="DIFFICULTY"
+                          className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span>난이도순</span>
+                          {sortBy === "DIFFICULTY" && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                          value="POPULAR"
+                          className="cursor-pointer rounded-md text-gray-800 hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white transition-colors duration-150 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white font-semibold py-2.5"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span>인기순</span>
+                          {sortBy === "POPULAR" && <Check className="w-4 h-4 ml-2" />}
+                        </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <Select
-                  value={difficulty}
-                  onValueChange={(value) => setDifficulty(value === "all" ? undefined : value)}
-                >
-                  <SelectTrigger className="flex-1 border-2 border-gray-300 bg-white text-gray-900 font-medium">
-                    <SelectValue placeholder="난이도" className="text-gray-900" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem
-                      value="all"
-                      className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
-                    >
-                      전체
-                    </SelectItem>
-                    <SelectItem
-                      value="EASY"
-                      className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
-                    >
-                      ⭐ 쉬움
-                    </SelectItem>
-                    <SelectItem
-                      value="MEDIUM"
-                      className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
-                    >
-                      ⭐⭐ 보통
-                    </SelectItem>
-                    <SelectItem
-                      value="HARD"
-                      className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
-                    >
-                      ⭐⭐⭐ 어려움
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Challenge List */}
-        {isLoading ? (
-          <ChallengeListSkeleton />
-        ) : displayChallenges && displayChallenges.length > 0 ? (
-          <>
-            <div className="mb-4 text-sm text-gray-700 font-medium">
-              총 <span className="font-bold text-blue-600">{displayChallenges.length}</span>개의
-              챌린지
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayChallenges.map((challenge, index) => (
-                <ChallengeCard
-                  key={`${challenge.id}-${index}`}
-                  challenge={challenge}
-                  statusBadge={getStatusBadge(challenge.startDate, challenge.endDate)}
-                  difficultyBadge={getDifficultyBadge(challenge.difficulty)}
-                  categoryLabel={getCategoryLabel(challenge.category)}
-                  onClick={() => router.push(`/challenge/${challenge.id}`)}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <EmptyState
-            icon={Search}
-            title="챌린지가 없습니다."
-            description="다른 검색 조건을 시도해보세요."
-          />
-        )}
+          {/* Challenge List */}
+          {isLoading ? (
+              <ChallengeListSkeleton />
+          ) : displayChallenges && displayChallenges.length > 0 ? (
+              <>
+                <div className="mb-4 text-sm text-gray-700 font-medium">
+                  이 <span className="font-bold text-blue-600">{displayChallenges.length}</span>개의
+                  챌린지
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayChallenges.map((challenge, index) => (
+                      <ChallengeCard
+                          key={`${challenge.id}-${index}`}
+                          challenge={challenge}
+                          statusBadge={getStatusBadge(challenge.startDate, challenge.endDate)}
+                          difficultyBadge={getDifficultyBadge(challenge.difficulty)}
+                          categoryLabel={getCategoryLabel(challenge.category)}
+                          onClick={() => router.push(`/challenge/${challenge.id}`)}
+                      />
+                  ))}
+                </div>
+              </>
+          ) : (
+              <EmptyState
+                  icon={Search}
+                  title="챌린지가 없습니다."
+                  description="다른 검색 조건을 시도해보세요."
+              />
+          )}
+        </div>
       </div>
-    </div>
   );
 }
 
 function ChallengeCard({
-  challenge,
-  statusBadge,
-  difficultyBadge,
-  categoryLabel,
-  onClick,
-}: {
+                         challenge,
+                         statusBadge,
+                         difficultyBadge,
+                         categoryLabel,
+                         onClick,
+                       }: {
   challenge: ChallengeListResponse;
   statusBadge: React.ReactNode;
   difficultyBadge: React.ReactNode;
@@ -274,87 +357,87 @@ function ChallengeCard({
   onClick: () => void;
 }) {
   return (
-    <Card
-      className="cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 group bg-gradient-to-br from-white to-gray-50"
-      onClick={onClick}
-    >
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start gap-2 mb-2">
-          <CardTitle className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
-            {challenge.title}
-          </CardTitle>
-          {statusBadge}
-        </div>
-        <CardDescription className="flex items-center gap-1 text-xs text-gray-600 font-medium">
-          <Calendar className="w-3 h-3" />
-          {new Date(challenge.startDate).toLocaleDateString("ko-KR", {
-            month: "short",
-            day: "numeric",
-          })}{" "}
-          ~{" "}
-          {new Date(challenge.endDate).toLocaleDateString("ko-KR", {
-            month: "short",
-            day: "numeric",
-          })}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pb-3">
-        <div className="flex gap-2 mb-3">
-          <Badge variant="outline" className="border-blue-200 text-blue-800 font-semibold">
-            {categoryLabel}
-          </Badge>
-          {difficultyBadge}
-        </div>
-        <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed font-medium">
-          {challenge.description}
-        </p>
-      </CardContent>
-      <CardFooter className="pt-3 border-t">
-        <div className="flex justify-between w-full text-sm text-gray-700">
-          <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-            <Users className="w-4 h-4" />
-            <span className="font-bold">{challenge.participantCnt}</span>
+      <Card
+          className="cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 group bg-gradient-to-br from-white to-gray-50"
+          onClick={onClick}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex justify-between items-start gap-2 mb-2">
+            <CardTitle className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+              {challenge.title}
+            </CardTitle>
+            {statusBadge}
           </div>
-          <div className="flex items-center gap-1 hover:text-purple-600 transition-colors">
-            <Award className="w-4 h-4" />
-            <span className="font-bold">{challenge.certificationCnt}</span>
+          <CardDescription className="flex items-center gap-1 text-xs text-gray-600 font-medium">
+            <Calendar className="w-3 h-3" />
+            {new Date(challenge.startDate).toLocaleDateString("ko-KR", {
+              month: "short",
+              day: "numeric",
+            })}{" "}
+            ~{" "}
+            {new Date(challenge.endDate).toLocaleDateString("ko-KR", {
+              month: "short",
+              day: "numeric",
+            })}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pb-3">
+          <div className="flex gap-2 mb-3">
+            <Badge variant="outline" className="border-blue-200 text-blue-800 font-semibold">
+              {categoryLabel}
+            </Badge>
+            {difficultyBadge}
           </div>
-          <div className="flex items-center gap-1 hover:text-gray-900 transition-colors">
-            <Eye className="w-4 h-4" />
-            <span className="font-bold">{challenge.viewCnt}</span>
+          <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed font-medium">
+            {challenge.description}
+          </p>
+        </CardContent>
+        <CardFooter className="pt-3 border-t">
+          <div className="flex justify-between w-full text-sm text-gray-700">
+            <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+              <Users className="w-4 h-4" />
+              <span className="font-bold">{challenge.participantCnt}</span>
+            </div>
+            <div className="flex items-center gap-1 hover:text-purple-600 transition-colors">
+              <Award className="w-4 h-4" />
+              <span className="font-bold">{challenge.certificationCnt}</span>
+            </div>
+            <div className="flex items-center gap-1 hover:text-gray-900 transition-colors">
+              <Eye className="w-4 h-4" />
+              <span className="font-bold">{challenge.viewCnt}</span>
+            </div>
           </div>
-        </div>
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
   );
 }
 
 function ChallengeListSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {[...Array(6)].map((_, i) => (
-        <Card key={i} className="border-2">
-          <CardHeader>
-            <Skeleton className="h-6 w-3/4 mb-2" />
-            <Skeleton className="h-4 w-1/2" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2 mb-3">
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-16" />
-            </div>
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-2/3" />
-          </CardContent>
-          <CardFooter className="border-t pt-3">
-            <div className="flex justify-between w-full">
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-4 w-12" />
-            </div>
-          </CardFooter>
-        </Card>
-      ))}
-    </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+            <Card key={i} className="border-2">
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2 mb-3">
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-16" />
+                </div>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+              <CardFooter className="border-t pt-3">
+                <div className="flex justify-between w-full">
+                  <Skeleton className="h-4 w-12" />
+                  <Skeleton className="h-4 w-12" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+              </CardFooter>
+            </Card>
+        ))}
+      </div>
   );
 }

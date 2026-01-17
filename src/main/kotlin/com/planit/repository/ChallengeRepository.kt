@@ -50,4 +50,143 @@ interface ChallengeRepository : JpaRepository<Challenge, String> {
     @Modifying
     @Query("UPDATE Challenge c SET c.participantCnt = c.participantCnt - 1 WHERE c.id = :id AND c.participantCnt > 0")
     fun decrementParticipantCount(@Param("id") id: String)
+
+    // ===== 정렬 쿼리 메서드 추가 =====
+
+    // 전체 조회 - 최신순
+    @Query("SELECT c FROM Challenge c ORDER BY c.createdAt DESC")
+    fun findAllOrderByCreatedAtDesc(): List<Challenge>
+
+    // 전체 조회 - 이름순
+    @Query("SELECT c FROM Challenge c ORDER BY c.title ASC")
+    fun findAllOrderByTitleAsc(): List<Challenge>
+
+    // 전체 조회 - 난이도순
+    @Query("""
+        SELECT c FROM Challenge c 
+        ORDER BY 
+            CASE c.difficulty 
+                WHEN 'EASY' THEN 1 
+                WHEN 'MEDIUM' THEN 2 
+                WHEN 'HARD' THEN 3 
+                ELSE 99 
+            END ASC,
+            c.title ASC
+    """)
+    fun findAllOrderByDifficulty(): List<Challenge>
+
+    // 전체 조회 - 인기순
+    @Query("SELECT c FROM Challenge c ORDER BY c.participantCnt DESC")
+    fun findAllOrderByParticipantCntDesc(): List<Challenge>
+
+    // 카테고리별 - 최신순
+    @Query("SELECT c FROM Challenge c WHERE c.category = :category ORDER BY c.createdAt DESC")
+    fun findByCategoryOrderByCreatedAtDesc(@Param("category") category: String): List<Challenge>
+
+    // 카테고리별 - 이름순
+    @Query("SELECT c FROM Challenge c WHERE c.category = :category ORDER BY c.title ASC")
+    fun findByCategoryOrderByTitleAsc(@Param("category") category: String): List<Challenge>
+
+    // 카테고리별 - 난이도순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.category = :category
+        ORDER BY 
+            CASE c.difficulty 
+                WHEN 'EASY' THEN 1 
+                WHEN 'MEDIUM' THEN 2 
+                WHEN 'HARD' THEN 3 
+                ELSE 99 
+            END ASC,
+            c.title ASC
+    """)
+    fun findByCategoryOrderByDifficulty(@Param("category") category: String): List<Challenge>
+
+    // 카테고리별 - 인기순
+    @Query("SELECT c FROM Challenge c WHERE c.category = :category ORDER BY c.participantCnt DESC")
+    fun findByCategoryOrderByParticipantCntDesc(@Param("category") category: String): List<Challenge>
+
+    // 난이도별 - 최신순
+    @Query("SELECT c FROM Challenge c WHERE c.difficulty = :difficulty ORDER BY c.createdAt DESC")
+    fun findByDifficultyOrderByCreatedAtDesc(@Param("difficulty") difficulty: String): List<Challenge>
+
+    // 난이도별 - 이름순
+    @Query("SELECT c FROM Challenge c WHERE c.difficulty = :difficulty ORDER BY c.title ASC")
+    fun findByDifficultyOrderByTitleAsc(@Param("difficulty") difficulty: String): List<Challenge>
+
+    // 난이도별 - 인기순
+    @Query("SELECT c FROM Challenge c WHERE c.difficulty = :difficulty ORDER BY c.participantCnt DESC")
+    fun findByDifficultyOrderByParticipantCntDesc(@Param("difficulty") difficulty: String): List<Challenge>
+
+    // 카테고리+난이도 - 최신순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.category = :category AND c.difficulty = :difficulty 
+        ORDER BY c.createdAt DESC
+    """)
+    fun findByCategoryAndDifficultyOrderByCreatedAtDesc(
+        @Param("category") category: String,
+        @Param("difficulty") difficulty: String
+    ): List<Challenge>
+
+    // 카테고리+난이도 - 이름순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.category = :category AND c.difficulty = :difficulty 
+        ORDER BY c.title ASC
+    """)
+    fun findByCategoryAndDifficultyOrderByTitleAsc(
+        @Param("category") category: String,
+        @Param("difficulty") difficulty: String
+    ): List<Challenge>
+
+    // 카테고리+난이도 - 인기순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.category = :category AND c.difficulty = :difficulty 
+        ORDER BY c.participantCnt DESC
+    """)
+    fun findByCategoryAndDifficultyOrderByParticipantCntDesc(
+        @Param("category") category: String,
+        @Param("difficulty") difficulty: String
+    ): List<Challenge>
+
+    // 키워드 검색 - 최신순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.title LIKE %:keyword% OR c.description LIKE %:keyword%
+        ORDER BY c.createdAt DESC
+    """)
+    fun findByKeywordOrderByCreatedAtDesc(@Param("keyword") keyword: String): List<Challenge>
+
+    // 키워드 검색 - 이름순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.title LIKE %:keyword% OR c.description LIKE %:keyword%
+        ORDER BY c.title ASC
+    """)
+    fun findByKeywordOrderByTitleAsc(@Param("keyword") keyword: String): List<Challenge>
+
+    // 키워드 검색 - 난이도순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.title LIKE %:keyword% OR c.description LIKE %:keyword%
+        ORDER BY 
+            CASE c.difficulty 
+                WHEN 'EASY' THEN 1 
+                WHEN 'MEDIUM' THEN 2 
+                WHEN 'HARD' THEN 3 
+                ELSE 99 
+            END ASC,
+            c.title ASC
+    """)
+    fun findByKeywordOrderByDifficulty(@Param("keyword") keyword: String): List<Challenge>
+
+    // 키워드 검색 - 인기순
+    @Query("""
+        SELECT c FROM Challenge c 
+        WHERE c.title LIKE %:keyword% OR c.description LIKE %:keyword%
+        ORDER BY c.participantCnt DESC
+    """)
+    fun findByKeywordOrderByParticipantCntDesc(@Param("keyword") keyword: String): List<Challenge>
 }

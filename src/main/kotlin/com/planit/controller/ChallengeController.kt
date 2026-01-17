@@ -54,7 +54,7 @@ class ChallengeController(
     }
 
     /**
-     * 챌린지 목록 조회 (필터링)
+     * 챌린지 목록 조회 (필터링 + 정렬)
      * GET /api/challenge
      */
     @GetMapping
@@ -62,13 +62,15 @@ class ChallengeController(
         @RequestParam(required = false) keyword: String?,
         @RequestParam(required = false) category: String?,
         @RequestParam(required = false) difficulty: String?,
-        @RequestParam(required = false) status: String?
+        @RequestParam(required = false) status: String?,
+        @RequestParam(required = false, defaultValue = "LATEST") sortBy: String?
     ): ResponseEntity<ApiResponse<List<ChallengeListResponse>>> {
         val request = ChallengeSearchRequest(
             keyword = keyword,
             category = category,
             difficulty = difficulty,
-            status = status
+            status = status,
+            sortBy = sortBy
         )
 
         // 디버깅 로그
@@ -77,6 +79,7 @@ class ChallengeController(
         println("category: $category")
         println("difficulty: $difficulty")
         println("status: $status")
+        println("sortBy: $sortBy")
 
         val challenges = challengeService.getChallenges(request)
 

@@ -46,12 +46,16 @@ export interface ChallengeListResponse {
   isEnded: boolean; // 종료 여부
 }
 
+// 챌린지 정렬 타입
+export type ChallengeSortType = "LATEST" | "NAME" | "DIFFICULTY" | "POPULAR";
+
 // 챌린지 검색 요청
 export interface ChallengeSearchRequest {
   category?: string;
   difficulty?: string; // 'EASY' | 'MEDIUM' | 'HARD'
   page?: number;
   size?: number;
+  sortBy?: ChallengeSortType;
 }
 
 // 참여자 응답
