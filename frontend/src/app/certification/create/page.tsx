@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCreateCertification, useUploadCertificationPhoto } from "@/hooks/useCertification";
+import { useCreateCertification, useUploadCertificationPhoto, useDeleteCertification } from "@/hooks/useCertification";
 import { useChallenge } from "@/hooks/useChallenge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,9 +35,10 @@ function CreateCertificationContent() {
 
   const createMutation = useCreateCertification();
   const uploadPhotoMutation = useUploadCertificationPhoto();
+  const deleteMutation = useDeleteCertification();
 
   const challengeId = challenge?.id;
-  const isLoading = createMutation.isPending || uploadPhotoMutation.isPending || isCompressing;
+  const isLoading = createMutation.isPending || uploadPhotoMutation.isPending || deleteMutation.isPending || isCompressing;
 
   // 챌린지 기간 체크
   const today = new Date();
@@ -92,7 +93,12 @@ function CreateCertificationContent() {
           });
           
           if (!uploadResponse.success) {
-            setFormError(uploadResponse.message || "사진 업로드에 실패했습니다.");
+            // 사진 업로드 실패 시 생성된 인증 삭제 (Rollback)
+            await deleteMutation.mutateAsync({ 
+                id: certificationId, 
+                challengeId: challengeId 
+            });
+            setFormError(uploadResponse.message || "사진 업로드에 실패하여 인증 생성이 취소되었습니다.");
             return;
           }
         }
