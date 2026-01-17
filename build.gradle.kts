@@ -46,6 +46,9 @@ dependencies {
   // Swagger/OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
+  // Image Processing
+  implementation("net.coobird:thumbnailator:0.4.20")
+
   // Test
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")

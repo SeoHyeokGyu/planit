@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { FallbackImage } from "@/components/ui/fallback-image";
+import { ALLOWED_IMAGE_EXTENSIONS_STRING } from "@/lib/imageUtils";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 export default function CertificationDetailPage() {
   const router = useRouter();
@@ -33,9 +35,17 @@ export default function CertificationDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
-  const [editedFile, setEditedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const { 
+    file: editedFile, 
+    previewUrl, 
+    isCompressing, 
+    handleFileChange, 
+    setPreviewUrl, 
+    setFile,
+    reset: resetImageUpload
+  } = useImageUpload();
 
   const { data, isLoading, error, refetch } = useCertification(certificationId);
 
@@ -48,18 +58,10 @@ export default function CertificationDetailPage() {
     if (data) {
       setEditedTitle(data.title);
       setEditedContent(data.content);
-      setEditedFile(null);
+      // 기존 이미지 업로드 상태 초기화 후 현재 사진 설정
+      resetImageUpload();
       setPreviewUrl(data.photoUrl || null);
       setIsEditing(true);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setEditedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
     }
   };
 
@@ -70,21 +72,21 @@ export default function CertificationDetailPage() {
     try {
       // 1. 새로 올리려던 파일이 있으면 취소
       if (editedFile) {
-        setEditedFile(null);
-        setPreviewUrl(data?.photoUrl || null); // 원래 사진으로 복구? 아니면 삭제?
-        // 사용자가 "삭제"를 눌렀으니 원래 사진도 지우고 싶은 것일 수 있음.
-        // 하지만 여기서는 "업로드 취소" 개념과 "기존 사진 삭제" 개념이 섞임.
-        // 우선순위: 새 파일 취소 -> 그 다음 기존 사진 삭제
+        setFile(null);
+        setPreviewUrl(data?.photoUrl || null); 
+        // 여기서 return 할지, 아니면 아래 로직을 탈지 결정 필요.
+        // 기존 로직: "우선순위: 새 파일 취소 -> 그 다음 기존 사진 삭제"
+        // 즉, 새 파일만 취소하고 함수 종료.
+        return;
       }
 
       // 2. 기존 사진이 있거나, 새 파일을 취소했는데도 사진을 지우고 싶다면 API 호출
-      // 여기서는 "화면에 보이는 사진을 없앤다"는 의미로 접근
       if (data?.photoUrl) {
         await deletePhotoMutation.mutateAsync(certificationId);
       }
       
       setPreviewUrl(null); // 미리보기 제거
-      setEditedFile(null); // 파일 선택 제거
+      setFile(null); // 파일 선택 제거
       refetch(); // 데이터 갱신
     } catch (err) {
       console.error("사진 삭제 실패:", err);
@@ -93,13 +95,7 @@ export default function CertificationDetailPage() {
 
   const handleUpdate = async () => {
     try {
-      // 1. 텍스트 정보 업데이트
-      await updateMutation.mutateAsync({
-        id: certificationId,
-        data: { title: editedTitle, content: editedContent }
-      });
-
-      // 2. 사진이 변경되었다면 업로드 수행
+      // 1. 사진이 변경되었다면 먼저 업로드 수행
       if (editedFile) {
         const uploadResponse = await uploadPhotoMutation.mutateAsync({
           id: certificationId,
@@ -107,9 +103,16 @@ export default function CertificationDetailPage() {
         });
         
         if (!uploadResponse.success) {
-          toast.error("사진 업로드에 실패했습니다.");
+          toast.error(uploadResponse.message || "사진 업로드에 실패했습니다.");
+          return; // 사진 업로드 실패 시 텍스트 수정 중단
         }
       }
+
+      // 2. 텍스트 정보 업데이트
+      await updateMutation.mutateAsync({
+        id: certificationId,
+        data: { title: editedTitle, content: editedContent }
+      });
 
       toast.success("인증이 성공적으로 수정되었습니다!");
       setIsEditing(false);
@@ -175,7 +178,7 @@ export default function CertificationDetailPage() {
   }
 
   const isAuthor = user?.nickname === data.authorNickname;
-  const isUpdating = updateMutation.isPending || uploadPhotoMutation.isPending || deletePhotoMutation.isPending;
+  const isUpdating = updateMutation.isPending || uploadPhotoMutation.isPending || deletePhotoMutation.isPending || isCompressing;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
@@ -272,7 +275,7 @@ export default function CertificationDetailPage() {
                                 <input 
                                     id="photo-upload" 
                                     type="file" 
-                                    accept="image/*" 
+                                    accept={ALLOWED_IMAGE_EXTENSIONS_STRING}
                                     className="hidden" 
                                     onChange={handleFileChange}
                                 />
@@ -357,7 +360,7 @@ export default function CertificationDetailPage() {
                                 ) : (
                                     <Save className="w-4 h-4 mr-2" />
                                 )}
-                                저장하기
+                                {isCompressing ? "사진 압축 중..." : "저장하기"}
                             </Button>
                         </>
                     ) : (

@@ -11,6 +11,7 @@ import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
 import com.planit.service.badge.BadgeService
+import com.planit.service.storage.FileStorageService
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -25,10 +26,10 @@ class CertificationService(
   private val userRepository: UserRepository,
   private val challengeRepository: ChallengeRepository,
   private val participantRepository: ChallengeParticipantRepository,
-  private val notificationService: NotificationService,
   private val rewardService: RewardService,
   private val badgeService: BadgeService,
   private val streakService: StreakService,
+  private val fileStorageService: FileStorageService,
 ) {
 
   private val logger = LoggerFactory.getLogger(CertificationService::class.java)
@@ -283,7 +284,8 @@ class CertificationService(
       throw CertificationUpdateForbiddenException("이 인증의 사진을 삭제할 권한이 없습니다")
     }
 
-    // 실제 파일 삭제 로직은 추후 FileStorageService를 통해 구현 가능
+    // 실제 파일 삭제
+    certification.photoUrl?.let { fileStorageService.deleteFile(it) }
     certification.photoUrl = null
 
     val updatedCertification = certificationRepository.save(certification)
