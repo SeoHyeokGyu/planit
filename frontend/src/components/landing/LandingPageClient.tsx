@@ -5,7 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { FEATURES, STATS, GRADIENT_PRIMARY, GRADIENT_PRIMARY_HOVER } from "@/constants/landing";
+import { FEATURES, STATS } from "@/constants/landing";
 
 export default function LandingPageClient() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -49,8 +49,9 @@ export default function LandingPageClient() {
                 <>
                   <Link href="/dashboard" aria-label="대시보드로 이동">
                     <Button
+                      variant="gradient"
                       size="lg"
-                      className={`w-full sm:w-auto ${GRADIENT_PRIMARY} ${GRADIENT_PRIMARY_HOVER} text-white shadow-lg hover:shadow-xl transition-all group font-semibold`}
+                      className="w-full sm:w-auto font-semibold group"
                     >
                       대시보드로 가기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -60,7 +61,7 @@ export default function LandingPageClient() {
                     onClick={logout}
                     variant="outline"
                     size="lg"
-                    className="w-full sm:w-auto border-2 border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold"
+                    className="w-full sm:w-auto font-semibold"
                     aria-label="로그아웃"
                   >
                     로그아웃
@@ -70,8 +71,9 @@ export default function LandingPageClient() {
                 <>
                   <Link href="/signup" aria-label="무료로 회원가입하기">
                     <Button
+                      variant="gradient"
                       size="lg"
-                      className={`w-full sm:w-auto ${GRADIENT_PRIMARY} ${GRADIENT_PRIMARY_HOVER} text-white shadow-lg hover:shadow-xl transition-all group font-semibold`}
+                      className="w-full sm:w-auto font-semibold group"
                     >
                       무료로 시작하기
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -79,8 +81,9 @@ export default function LandingPageClient() {
                   </Link>
                   <Link href="/login" aria-label="로그인하기">
                     <Button
+                      variant="outlineGradient"
                       size="lg"
-                      className="w-full sm:w-auto bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 shadow-md hover:shadow-lg font-semibold transition-all"
+                      className="w-full sm:w-auto font-semibold"
                     >
                       로그인
                     </Button>
@@ -143,7 +146,7 @@ export default function LandingPageClient() {
       </section>
 
       {/* Stats Section */}
-      <section className={`py-16 ${GRADIENT_PRIMARY}`} aria-labelledby="stats-title">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-600" aria-labelledby="stats-title">
         <h2 id="stats-title" className="sr-only">주요 기능 통계</h2>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
@@ -177,8 +180,9 @@ export default function LandingPageClient() {
           {isAuthenticated ? (
             <Link href="/challenge" aria-label="챌린지 둘러보기">
               <Button
-                size="lg"
-                className={`${GRADIENT_PRIMARY} ${GRADIENT_PRIMARY_HOVER} text-white shadow-lg hover:shadow-xl transition-all group font-semibold px-8 py-3`}
+                variant="gradient"
+                size="xl"
+                className="font-semibold group"
               >
                 챌린지 둘러보기
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -187,8 +191,9 @@ export default function LandingPageClient() {
           ) : (
             <Link href="/signup" aria-label="무료로 회원가입하기">
               <Button
-                size="lg"
-                className={`${GRADIENT_PRIMARY} ${GRADIENT_PRIMARY_HOVER} text-white shadow-lg hover:shadow-xl transition-all group font-semibold px-8 py-3`}
+                variant="gradient"
+                size="xl"
+                className="font-semibold group"
               >
                 무료로 시작하기
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
