@@ -12,9 +12,6 @@ on:
       - 'gradle/**'
       - 'Dockerfile'
       - '.github/workflows/backend-ci.yml'
-    paths-ignore:
-      - 'backend/**/*.md'
-      - 'backend/docs/**'
 
 jobs:
   # Build and Test Backend

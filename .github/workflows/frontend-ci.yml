@@ -7,9 +7,6 @@ on:
       - 'frontend/**'
       - 'Dockerfile.frontend'
       - '.github/workflows/frontend-ci.yml'
-    paths-ignore:
-      - 'frontend/**/*.md'
-      - 'frontend/docs/**'
 
 jobs:
   # Build and Test Frontend
