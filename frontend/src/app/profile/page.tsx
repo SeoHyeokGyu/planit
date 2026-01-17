@@ -153,8 +153,8 @@ function ProfileContent() {
                 onClick={() => setActiveTab("streaks")}
                 className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
                     activeTab === "streaks"
-                        ? "border-orange-600 text-orange-700 bg-orange-100 shadow-sm"
-                        : "border-transparent text-gray-700 hover:text-orange-600 hover:bg-gray-100"
+                        ? "border-blue-600 text-blue-700 bg-orange-100 shadow-sm"
+                        : "border-transparent text-gray-700 hover:text-blue-600 hover:bg-gray-100"
                 }`}
             >
               <Flame className="w-5 h-5" />

@@ -17,7 +17,10 @@ import { toast } from "sonner";
 export function useStreak(challengeId: string, loginId: string) {
   return useQuery<StreakResponse>({
     queryKey: ["streak", challengeId, loginId],
-    queryFn: () => streakService.getStreak(challengeId, loginId),
+    queryFn: async () => {
+      const response = await streakService.getStreak(challengeId, loginId);
+      return response.data;
+    },
     staleTime: 1000 * 60 * 5, // 5분
   });
 }
@@ -28,18 +31,24 @@ export function useStreak(challengeId: string, loginId: string) {
 export function useAllStreaks(loginId: string) {
   return useQuery<StreakSummaryResponse>({
     queryKey: ["streaks", "summary", loginId],
-    queryFn: () => streakService.getAllStreaks(loginId),
+    queryFn: async () => {
+      const response = await streakService.getAllStreaks(loginId);
+      return response.data;
+    },
     staleTime: 1000 * 60 * 5, // 5분
   });
 }
 
 /**
- * 활동 캘린더 조회 (최근 N일)
+ * 활동 캘린더 조회 (연도별)
  */
-export function useActivityCalendar(loginId: string, days: number = 30) {
+export function useActivityCalendar(loginId: string, year?: number) {
   return useQuery<ActivityCalendarResponse>({
-    queryKey: ["streaks", "calendar", loginId, days],
-    queryFn: () => streakService.getActivityCalendar(loginId, days),
+    queryKey: ["streaks", "calendar", loginId, year],
+    queryFn: async () => {
+      const response = await streakService.getActivityCalendar(loginId, year);
+      return response.data;
+    },
     staleTime: 1000 * 60 * 5, // 5분
   });
 }
@@ -48,13 +57,16 @@ export function useActivityCalendar(loginId: string, days: number = 30) {
  * 스트릭 통계 조회
  */
 export function useStreakStatistics(
-  loginId: string,
-  period: "daily" | "weekly" | "monthly" = "daily",
-  days: number = 30
+    loginId: string,
+    period: "daily" | "weekly" | "monthly" = "daily",
+    days: number = 30
 ) {
   return useQuery<StreakStatisticsResponse>({
     queryKey: ["streaks", "statistics", loginId, period, days],
-    queryFn: () => streakService.getStreakStatistics(loginId, period, days),
+    queryFn: async () => {
+      const response = await streakService.getStreakStatistics(loginId, period, days);
+      return response.data;
+    },
     staleTime: 1000 * 60 * 5, // 5분
   });
 }
@@ -65,7 +77,10 @@ export function useStreakStatistics(
 export function useStreakLeaderboard(challengeId: string, limit: number = 10) {
   return useQuery<StreakLeaderboardResponse>({
     queryKey: ["streaks", "leaderboard", challengeId, limit],
-    queryFn: () => streakService.getStreakLeaderboard(challengeId, limit),
+    queryFn: async () => {
+      const response = await streakService.getStreakLeaderboard(challengeId, limit);
+      return response.data;
+    },
     staleTime: 1000 * 60 * 5, // 5분
   });
 }
@@ -77,8 +92,10 @@ export function useRecordCertification() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ challengeId, loginId }: { challengeId: string; loginId: string }) =>
-      streakService.recordCertification(challengeId, loginId),
+    mutationFn: async ({ challengeId, loginId }: { challengeId: string; loginId: string }) => {
+      const response = await streakService.recordCertification(challengeId, loginId);
+      return response.data;
+    },
     onSuccess: (data, variables) => {
       // 스트릭 관련 쿼리 무효화
       queryClient.invalidateQueries({
@@ -114,7 +131,7 @@ export function useRecordCertification() {
 /**
  * 여러 스트릭 데이터를 한번에 프리페치
  */
-export function usePrefetchStreaks(loginId: string) {
+export function usePrefetchStreaks(loginId: string, year?: number) {
   const queryClient = useQueryClient();
 
   return {
@@ -122,11 +139,17 @@ export function usePrefetchStreaks(loginId: string) {
       await Promise.all([
         queryClient.prefetchQuery({
           queryKey: ["streaks", "summary", loginId],
-          queryFn: () => streakService.getAllStreaks(loginId),
+          queryFn: async () => {
+            const response = await streakService.getAllStreaks(loginId);
+            return response.data;
+          },
         }),
         queryClient.prefetchQuery({
-          queryKey: ["streaks", "calendar", loginId, 30],
-          queryFn: () => streakService.getActivityCalendar(loginId, 30),
+          queryKey: ["streaks", "calendar", loginId, year],
+          queryFn: async () => {
+            const response = await streakService.getActivityCalendar(loginId, year);
+            return response.data;
+          },
         }),
       ]);
     },

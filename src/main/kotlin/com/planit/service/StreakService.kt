@@ -96,12 +96,16 @@ class StreakService(
     }
 
     /**
-     * 잔디 캘린더 데이터 조회 (최근 30일)
+     * 잔디 캘린더 데이터 조회 (연도별 - 1년치)
      */
     @Transactional(readOnly = true)
-    fun getActivityCalendar(loginId: String, days: Int = 30): ActivityCalendarResponse {
-        val endDate = LocalDate.now()
-        val startDate = endDate.minusDays(days.toLong() - 1)
+    fun getActivityCalendar(loginId: String, year: Int?): ActivityCalendarResponse {
+        val targetYear = year ?: LocalDate.now().year
+
+        // 해당 연도의 1월 1일부터 12월 31일까지 (또는 현재 날짜까지)
+        val startDate = LocalDate.of(targetYear, 1, 1)
+        val today = LocalDate.now()
+        val endDate = if (targetYear == today.year) today else LocalDate.of(targetYear, 12, 31)
 
         val activities = dailyActivityRepository.findActivitiesByDateRange(loginId, startDate, endDate)
 
@@ -123,12 +127,13 @@ class StreakService(
 
         val totalCertifications = activities.sumOf { it.certificationCount }
         val activeDays = activities.count { it.certificationCount > 0 }
+        val totalDays = allDates.size
 
         return ActivityCalendarResponse(
             loginId = loginId,
             startDate = startDate,
             endDate = endDate,
-            totalDays = days,
+            totalDays = totalDays,
             activeDays = activeDays,
             totalCertifications = totalCertifications,
             activities = dailyActivities

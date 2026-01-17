@@ -1,84 +1,92 @@
 import { api } from "@/lib/api";
-import {
+import { ApiResponse } from "@/types/api";
+import type {
   StreakResponse,
   StreakSummaryResponse,
   ActivityCalendarResponse,
   StreakStatisticsResponse,
   StreakLeaderboardResponse,
 } from "@/types/streak";
-import { ApiResponse } from "@/types/api";
 
-/**
- * 스트릭 API 서비스
- */
 export const streakService = {
   /**
    * 특정 챌린지의 스트릭 조회
    */
-  getStreak: async (challengeId: string, loginId: string): Promise<StreakResponse> => {
-    const response = await api.get<ApiResponse<StreakResponse>>(
-      `/api/streaks/${challengeId}?loginId=${loginId}`
-    );
-    return response.data;
+  async getStreak(
+      challengeId: string,
+      loginId: string
+  ): Promise<ApiResponse<StreakResponse>> {
+    const searchParams = new URLSearchParams({
+      loginId,
+    });
+    return api.get(`/api/streaks/${challengeId}?${searchParams.toString()}`);
   },
 
   /**
-   * 사용자의 모든 스트릭 조회 (요약)
+   * 사용자의 모든 스트릭 조회
    */
-  getAllStreaks: async (loginId: string): Promise<StreakSummaryResponse> => {
-    const response = await api.get<ApiResponse<StreakSummaryResponse>>(
-      `/api/streaks?loginId=${loginId}`
-    );
-    return response.data;
+  async getAllStreaks(loginId: string): Promise<ApiResponse<StreakSummaryResponse>> {
+    const searchParams = new URLSearchParams({
+      loginId,
+    });
+    return api.get(`/api/streaks?${searchParams.toString()}`);
   },
 
   /**
-   * 인증 성공 시 스트릭 기록 (내부적으로 CertificationService에서 호출)
+   * 활동 캘린더 조회 (연도별)
    */
-  recordCertification: async (challengeId: string, loginId: string): Promise<StreakResponse> => {
-    const response = await api.post<ApiResponse<StreakResponse>>(
-      `/api/streaks/${challengeId}/record?loginId=${loginId}`
-    );
-    return response.data;
+  async getActivityCalendar(
+      loginId: string,
+      year?: number
+  ): Promise<ApiResponse<ActivityCalendarResponse>> {
+    const searchParams = new URLSearchParams({
+      loginId,
+    });
+    if (year) {
+      searchParams.append("year", String(year));
+    }
+    return api.get(`/api/streaks/calendar?${searchParams.toString()}`);
   },
 
   /**
-   * 활동 캘린더 조회 (최근 N일)
+   * 스트릭 통계 조회
    */
-  getActivityCalendar: async (
-    loginId: string,
-    days: number = 30
-  ): Promise<ActivityCalendarResponse> => {
-    const response = await api.get<ApiResponse<ActivityCalendarResponse>>(
-      `/api/streaks/calendar?loginId=${loginId}&days=${days}`
-    );
-    return response.data;
-  },
-
-  /**
-   * 스트릭 통계 조회 (일별/주별/월별)
-   */
-  getStreakStatistics: async (
-    loginId: string,
-    period: "daily" | "weekly" | "monthly" = "daily",
-    days: number = 30
-  ): Promise<StreakStatisticsResponse> => {
-    const response = await api.get<ApiResponse<StreakStatisticsResponse>>(
-      `/api/streaks/statistics?loginId=${loginId}&period=${period}&days=${days}`
-    );
-    return response.data;
+  async getStreakStatistics(
+      loginId: string,
+      period: "daily" | "weekly" | "monthly" = "daily",
+      days: number = 30
+  ): Promise<ApiResponse<StreakStatisticsResponse>> {
+    const searchParams = new URLSearchParams({
+      loginId,
+      period,
+      days: String(days),
+    });
+    return api.get(`/api/streaks/statistics?${searchParams.toString()}`);
   },
 
   /**
    * 챌린지별 스트릭 리더보드
    */
-  getStreakLeaderboard: async (
-    challengeId: string,
-    limit: number = 10
-  ): Promise<StreakLeaderboardResponse> => {
-    const response = await api.get<ApiResponse<StreakLeaderboardResponse>>(
-      `/api/streaks/${challengeId}/leaderboard?limit=${limit}`
-    );
-    return response.data;
+  async getStreakLeaderboard(
+      challengeId: string,
+      limit: number = 10
+  ): Promise<ApiResponse<StreakLeaderboardResponse>> {
+    const searchParams = new URLSearchParams({
+      limit: String(limit),
+    });
+    return api.get(`/api/streaks/${challengeId}/leaderboard?${searchParams.toString()}`);
+  },
+
+  /**
+   * 인증 기록
+   */
+  async recordCertification(
+      challengeId: string,
+      loginId: string
+  ): Promise<ApiResponse<StreakResponse>> {
+    const searchParams = new URLSearchParams({
+      loginId,
+    });
+    return api.post(`/api/streaks/${challengeId}/record?${searchParams.toString()}`);
   },
 };
