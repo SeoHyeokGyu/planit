@@ -2,16 +2,20 @@ package com.planit.service.storage
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.springframework.mock.web.MockMultipartFile
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import javax.imageio.ImageIO
 
 class FileStorageServiceTest {
 
@@ -30,8 +34,8 @@ class FileStorageServiceTest {
   @Test
   fun `storeFile_파일을_저장하고_URL을_반환한다`() {
     // given
-    val content = "Hello, World!"
-    val file = MockMultipartFile("file", "test.txt", "text/plain", content.toByteArray())
+    val content = createTestImage()
+    val file = MockMultipartFile("file", "test.jpg", "image/jpeg", content)
 
     // when
     val fileUrl = fileStorageService.storeFile(file)
@@ -46,10 +50,35 @@ class FileStorageServiceTest {
   }
 
   @Test
+  fun `storeFile_잘못된_확장자_예외발생`() {
+    // given
+    val content = "Invalid content".toByteArray()
+    val file = MockMultipartFile("file", "test.txt", "text/plain", content)
+
+    // when & then
+    assertThrows(IllegalArgumentException::class.java) {
+      fileStorageService.storeFile(file)
+    }
+  }
+
+  @Test
+  fun `storeFile_잘못된_MIME타입_예외발생`() {
+    // given
+    val content = createTestImage()
+    // 확장자는 jpg지만 mime type이 text/plain인 경우
+    val file = MockMultipartFile("file", "test.jpg", "text/plain", content)
+
+    // when & then
+    assertThrows(IllegalArgumentException::class.java) {
+      fileStorageService.storeFile(file)
+    }
+  }
+
+  @Test
   fun `deleteFile_파일을_삭제한다`() {
     // given
-    val content = "Delete me"
-    val file = MockMultipartFile("file", "delete.txt", "text/plain", content.toByteArray())
+    val content = createTestImage()
+    val file = MockMultipartFile("file", "delete.png", "image/png", content)
     val fileUrl = fileStorageService.storeFile(file)
 
     // when
@@ -89,16 +118,23 @@ class FileStorageServiceTest {
     assertTrue(Files.exists(recentFile), "최신 파일은 유지되어야 함")
   }
 
+  private fun createTestImage(): ByteArray {
+    val image = BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)
+    val graphics = image.createGraphics()
+    graphics.dispose()
+
+    val baos = ByteArrayOutputStream()
+    ImageIO.write(image, "jpg", baos)
+    return baos.toByteArray()
+  }
+
   private fun createDummyFile(filename: String, creationTime: Instant): Path {
-    // 날짜별 디렉토리 구조 흉내 (오늘 날짜 사용)
-    // 실제 로직은 날짜별로 폴더를 만들지만, 테스트 단순화를 위해 uploadDir 직속 혹은 임의 폴더 사용 가능
-    // 하지만 cleanupFiles 로직이 하위 폴더를 탐색하므로 그냥 uploadDir 바로 아래에 만들어도 무방하나
-    // 실제 구조와 유사하게 하기 위해 서브 디렉토리 하나 생성
     val subDir = uploadDir.resolve("2026/01/01")
     Files.createDirectories(subDir)
 
     val file = subDir.resolve(filename)
-    Files.writeString(file, "dummy content")
+    // 썸네일 생성기가 읽을 수 있는 유효한 이미지 데이터 쓰기
+    Files.write(file, createTestImage())
 
     // 생성 시간 조작
     Files.setAttribute(file, "creationTime", FileTime.from(creationTime))
