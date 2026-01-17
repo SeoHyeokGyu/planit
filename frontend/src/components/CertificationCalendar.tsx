@@ -5,6 +5,7 @@ import { CertificationResponse } from "@/types/certification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { calendarStyles } from "@/styles/common";
 
 interface CertificationCalendarProps {
   certifications: CertificationResponse[];
@@ -75,15 +76,14 @@ export function CertificationCalendar({
         <div
           key={dateStr}
           onClick={() => onDateClick(dateStr)}
-          className={`h-14 flex flex-col items-center justify-center border rounded-md text-sm relative transition-all cursor-pointer hover:border-blue-500
-            ${isSelected ? "ring-2 ring-blue-500 ring-offset-2 z-10" : ""}
-            ${
-              hasCertification
-                ? "bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 font-bold text-green-700 dark:text-green-300 shadow-sm"
-                : "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400"
-            }`}
+          className={`${calendarStyles.day}
+
+                  ${isSelected ? calendarStyles.selected : ""}
+
+                  ${hasCertification ? calendarStyles.hasEvent : calendarStyles.empty}`}
         >
           <span>{i}</span>
+
           {hasCertification && (
             <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400" />
           )}

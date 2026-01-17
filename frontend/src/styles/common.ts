@@ -39,6 +39,29 @@ export const inputStyles = {
   auth: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all",
 };
 
+// Navigation
+export const navStyles = {
+  link: "flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all",
+  activeLink: "bg-blue-50 text-blue-600", // Optional: for active state
+};
+
+// Dropdowns
+export const dropdownStyles = {
+  wrapper:
+    "absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden",
+  item: "flex items-center gap-3 px-4 py-3 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors border-b border-gray-100 last:border-0 cursor-pointer w-full text-left",
+  header: "px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50",
+};
+
+// Calendar
+export const calendarStyles = {
+  day: "h-14 flex flex-col items-center justify-center border rounded-md text-sm relative transition-all cursor-pointer hover:border-blue-500",
+  selected: "ring-2 ring-blue-500 ring-offset-2 z-10",
+  hasEvent:
+    "bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 font-bold text-green-700 dark:text-green-300 shadow-sm",
+  empty: "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400",
+};
+
 // Typography & Common Components
 export const componentStyles = {
   sectionTitle: "text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2",

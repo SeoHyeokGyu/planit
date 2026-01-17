@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
@@ -19,6 +17,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useState } from "react";
+import { navStyles } from "@/styles/common";
 
 export default function Header() {
   const router = useRouter();
@@ -37,31 +36,19 @@ export default function Header() {
         <nav className="flex items-center gap-1">
           {token ? (
             <>
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all"
-              >
+              <Link href="/dashboard" className={navStyles.link}>
                 <LayoutDashboard className="w-4 h-4" />
                 대시보드
               </Link>
-              <Link
-                href="/challenge"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all"
-              >
+              <Link href="/challenge" className={navStyles.link}>
                 <Trophy className="w-4 h-4" />
                 챌린지
               </Link>
-              <Link
-                href="/feed"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all"
-              >
+              <Link href="/feed" className={navStyles.link}>
                 <Zap className="w-4 h-4" />
                 피드
               </Link>
-              <Link
-                href="/users"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all"
-              >
+              <Link href="/users" className={navStyles.link}>
                 <Users className="w-4 h-4" />
                 사용자 찾기
               </Link>
@@ -181,10 +168,7 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="px-3 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-all"
-              >
+              <Link href="/login" className={navStyles.link}>
                 로그인
               </Link>
               <Link
