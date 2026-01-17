@@ -40,15 +40,14 @@ interface StreakRepository : JpaRepository<Streak, StreakId> {
      * 특정 사용자의 총 스트릭 통계
      */
     @Query("""
-        SELECT new map(
-            COALESCE(SUM(s.currentStreak), 0) as totalCurrentStreak,
-            COALESCE(MAX(s.longestStreak), 0) as maxLongestStreak,
-            COUNT(s) as activeStreakCount
-        )
-        FROM Streak s 
-        WHERE s.loginId = :loginId 
-        AND s.currentStreak > 0
-    """)
+    SELECT new map(
+        COALESCE(SUM(CASE WHEN s.currentStreak > 0 THEN s.currentStreak ELSE 0 END), 0) as totalCurrentStreak,
+        COALESCE(MAX(s.longestStreak), 0) as maxLongestStreak,
+        COUNT(CASE WHEN s.currentStreak > 0 THEN 1 END) as activeStreakCount
+    )
+    FROM Streak s 
+    WHERE s.loginId = :loginId
+""")
     fun getStreakStatistics(@Param("loginId") loginId: String): Map<String, Any>
 
     /**

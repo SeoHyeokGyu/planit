@@ -50,15 +50,15 @@ class StreakController(
     }
 
     /**
-     * 잔디 캘린더 데이터 조회 (최근 N일)
-     * GET /api/streaks/calendar?loginId=xxx&days=30
+     * 잔디 캘린더 데이터 조회 (연도별)
+     * GET /api/streaks/calendar?loginId=xxx&year=2026
      */
     @GetMapping("/calendar")
     fun getActivityCalendar(
         @RequestParam loginId: String,
-        @RequestParam(defaultValue = "30") days: Int
+        @RequestParam(required = false) year: Int?
     ): ResponseEntity<ApiResponse<ActivityCalendarResponse>> {
-        val calendar = streakService.getActivityCalendar(loginId, days)
+        val calendar = streakService.getActivityCalendar(loginId, year)
         return ResponseEntity.ok(ApiResponse.success(calendar))
     }
 
