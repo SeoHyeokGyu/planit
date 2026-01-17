@@ -10,13 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   ArrowLeft,
   Heart,
   MessageCircle,
@@ -25,8 +18,6 @@ import {
   Calendar,
   Activity,
   Send,
-  ArrowUpDown,
-  Check,
 } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -79,7 +70,7 @@ export default function FeedPage() {
                   </p>
                 </div>
               </div>
-            </Select>
+            </div>
           </div>
         </div>
 
