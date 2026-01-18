@@ -158,7 +158,7 @@ export default function LandingPageClient() {
                     <Icon className="h-8 w-8" />
                   </div>
                   <div className="text-4xl font-bold mb-2">{stat.label}</div>
-                  <div className="text-blue-100">{stat.description}</div>
+                  <div className="text-white">{stat.description}</div>
                 </div>
               );
             })}

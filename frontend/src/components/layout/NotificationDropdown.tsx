@@ -75,7 +75,7 @@ export default function NotificationDropdown() {
           <div className="overflow-y-auto flex-1 p-2 space-y-2 max-h-[400px]">
             {notifications.length === 0 ? (
               <div className="py-12 text-center flex flex-col items-center justify-center text-gray-500">
-                <Bell className="h-8 w-8 text-gray-300 mb-2" />
+                <Bell className="h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm">새로운 알림이 없습니다.</p>
               </div>
             ) : (

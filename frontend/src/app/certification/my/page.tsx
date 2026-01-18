@@ -60,7 +60,7 @@ export default function MyCertificationsPage() {
         ) : (
           <div className="text-center py-20 bg-white rounded-2xl shadow-sm border-2 border-dashed border-gray-200">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
-              <Search className="w-8 h-8 text-gray-300" />
+              <Search className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-gray-700 text-lg font-semibold">작성한 인증글이 없습니다.</p>
             <p className="text-gray-500 text-sm mt-2 mb-6">

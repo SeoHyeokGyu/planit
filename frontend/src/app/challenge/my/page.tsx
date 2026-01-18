@@ -119,7 +119,7 @@ export default function MyChallengesPage() {
         ) : (
           <div className="text-center py-20 bg-white rounded-2xl shadow-sm border-2 border-dashed border-gray-200">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
-              <Search className="w-8 h-8 text-gray-300" />
+              <Search className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-gray-700 text-lg font-semibold">참여 중인 챌린지가 없습니다.</p>
             <p className="text-gray-500 text-sm mt-2 mb-6">새로운 챌린지에 도전해보세요!</p>

@@ -26,7 +26,7 @@ export function EmptyState({
   return (
     <div className={containerClass}>
       <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full mb-4">
-        <Icon className="w-8 h-8 text-gray-300" />
+        <Icon className="w-8 h-8 text-gray-400" />
       </div>
       <p className="text-gray-700 text-lg font-semibold">{title}</p>
       {description && <p className="text-gray-500 text-sm mt-2 mb-6">{description}</p>}

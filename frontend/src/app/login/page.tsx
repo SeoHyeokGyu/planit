@@ -84,7 +84,7 @@ export default function LoginPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">{benefit.title}</h3>
-                    <p className="text-blue-100 text-sm mt-1">{benefit.description}</p>
+                    <p className="text-white text-sm mt-1">{benefit.description}</p>
                   </div>
                 </div>
               );

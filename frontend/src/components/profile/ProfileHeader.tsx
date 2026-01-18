@@ -64,7 +64,7 @@ export default function ProfileHeader({
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                   {user.nickname}
                 </h1>
-                <p className="text-lg text-blue-100 dark:text-blue-200 mt-1">@{user.loginId}</p>
+                <p className="text-lg text-white dark:text-blue-200 mt-1">@{user.loginId}</p>
                 <div className="flex items-center justify-center sm:justify-start space-x-2 text-sm text-blue-200 dark:text-blue-300 mt-2">
                   <Calendar className="w-4 h-4" />
                   <span>가입일: {new Date(user.createdAt).toLocaleDateString()}</span>
