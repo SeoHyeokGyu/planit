@@ -28,20 +28,20 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
                   "border-transparent shadow-sm hover:shadow-md hover:-translate-y-1",
                   badgeGradeColors[badge.grade]
                 )
-              : "bg-gray-100 border-gray-300 text-gray-700 dark:bg-gray-800/50 dark:border-gray-700 dark:text-gray-400 grayscale"
+              : "bg-gray-100 border-gray-300 text-gray-700 grayscale"
           )}
         >
           <div
             className={cn(
               "w-12 h-12 flex items-center justify-center rounded-full mb-3 transition-transform duration-300",
               isAcquired
-                ? "bg-white/80 dark:bg-black/20 group-hover:scale-110"
-                : "bg-gray-300 dark:bg-gray-700"
+                ? "bg-white/80 group-hover:scale-110"
+                : "bg-gray-300"
             )}
           >
             <BadgeIcon
               iconCode={badge.iconCode}
-              className={cn("w-6 h-6", !isAcquired && "text-gray-600 dark:text-gray-400")}
+              className={cn("w-6 h-6", !isAcquired && "text-gray-600")}
             />
           </div>
 
@@ -62,26 +62,26 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
             </span>
           ) : (
             <div className="w-full mt-2 px-1">
-              <div className="flex justify-between text-[10px] text-gray-700 dark:text-gray-300 mb-1 font-medium">
+              <div className="flex justify-between text-[10px] text-gray-700 mb-1 font-medium">
                 <span>진행률</span>
                 <span>{Math.floor((badge.currentValue / badge.requiredValue) * 100)}%</span>
               </div>
-              <div className="w-full h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="w-full h-1.5 bg-gray-300 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-300"
+                  className="h-full bg-blue-600 transition-all duration-300"
                   style={{
                     width: `${Math.min(100, (badge.currentValue / badge.requiredValue) * 100)}%`,
                   }}
                 />
               </div>
-              <div className="text-[10px] text-center text-gray-600 dark:text-gray-400 mt-1 font-medium">
+              <div className="text-[10px] text-center text-gray-600 mt-1 font-medium">
                 {badge.currentValue} / {badge.requiredValue}
               </div>
             </div>
           )}
         </div>
       </TooltipTrigger>
-      <TooltipContent className="max-w-[200px] text-center p-3 bg-white dark:bg-gray-950">
+      <TooltipContent className="max-w-[200px] text-center p-3 bg-white">
         <p className="font-bold mb-1">{badge.name}</p>
         <p className="text-xs text-muted-foreground">{badge.description}</p>
         {!isAcquired && (
