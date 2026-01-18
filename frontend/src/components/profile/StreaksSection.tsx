@@ -108,14 +108,16 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
         <CardContent className="space-y-6">
           {/* 전체 통계 카드 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-2 border-orange-100              <CardHeader className="pb-3">
+            <Card className="border-2 border-orange-100">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                   <Flame className="w-4 h-4 text-orange-500" />
                   현재 스트릭
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-orange-600                  {streakSummary.totalCurrentStreak}
+                <div className="text-3xl font-bold text-orange-600">
+                  {streakSummary.totalCurrentStreak}
                   <span className="text-lg text-gray-500 ml-1">일</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -124,28 +126,32 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-purple-100              <CardHeader className="pb-3">
+            <Card className="border-2 border-purple-100">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                   <Award className="w-4 h-4 text-purple-500" />
                   최장 기록
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-purple-600                  {streakSummary.maxLongestStreak}
+                <div className="text-3xl font-bold text-purple-600">
+                  {streakSummary.maxLongestStreak}
                   <span className="text-lg text-gray-500 ml-1">일</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">역대 최고 연속 달성</p>
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-blue-100              <CardHeader className="pb-3">
+            <Card className="border-2 border-blue-100">
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-blue-500" />
                   활동 일수
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600                  {calendar?.activeDays || 0}
+                <div className="text-3xl font-bold text-blue-600">
+                  {calendar?.activeDays || 0}
                   <span className="text-lg text-gray-500 ml-1">일</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">{selectedYear}년 활동</p>
@@ -201,7 +207,8 @@ function StreakOverview({ streaks }: { streaks: StreakResponse[] }) {
                         {streak.challengeTitle}
                       </h3>
                       {streak.isCertifiedToday && (
-                          <Badge className="bg-green-100 text-green-700 border-green-200                            오늘 인증 완료 ✓
+                          <Badge className="bg-green-100 text-green-700 border-green-200">
+                            오늘 인증 완료 ✓
                           </Badge>
                       )}
                       {streak.isStreakAtRisk && (
@@ -210,7 +217,8 @@ function StreakOverview({ streaks }: { streaks: StreakResponse[] }) {
                           </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600                  <span className="flex items-center gap-1">
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     마지막 인증: {streak.lastCertificationDate || "없음"}
                   </span>
@@ -326,7 +334,8 @@ function ActivityCalendarView({
       case 4:
         return "bg-green-800 hover:bg-green-900";
       default:
-        return "bg-gray-100    }
+        return "bg-gray-100";
+    }
   };
 
   // 월 레이블 표시 위치 계산

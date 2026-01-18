@@ -85,7 +85,7 @@ export function CertificationCalendar({
           <span>{i}</span>
 
           {hasCertification && (
-            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500 />
+            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500" />
           )}
           {hasCertification && count > 1 && (
             <span className="absolute top-0.5 right-1 text-[10px] text-green-600 opacity-70">

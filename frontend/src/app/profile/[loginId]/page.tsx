@@ -45,7 +45,8 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg h-64">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg h-64">
           <Skeleton className="w-full h-full" />
         </div>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -74,7 +75,8 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50      {/* 페이지 헤더 */}
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+      {/* 페이지 헤더 */}
       <div className="mb-6 pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <Button
           variant="ghost"
@@ -160,17 +162,24 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
 
           {/* 오른쪽: 정보 */}
           <div>
-            <Card className="shadow-lg rounded-xl              <CardHeader>
+            <Card className="shadow-lg rounded-xl">
+              <CardHeader>
                 <CardTitle>사용자 정보</CardTitle>
                 <CardDescription>{user.nickname}님의 정보입니다.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500                  <p className="font-semibold text-gray-900                </div>
+                  <p className="text-sm text-gray-500">이름</p>
+                  <p className="font-semibold text-gray-900">{user.nickname}</p>
+                </div>
                 <div>
-                  <p className="text-sm text-gray-500                  <p className="font-semibold text-gray-900                </div>
+                  <p className="text-sm text-gray-500">아이디</p>
+                  <p className="font-semibold text-gray-900">@{user.loginId}</p>
+                </div>
                 <div>
-                  <p className="text-sm text-gray-500                  <p className="font-semibold text-gray-900                    {new Date(user.createdAt).toLocaleDateString()}
+                  <p className="text-sm text-gray-500">가입일</p>
+                  <p className="font-semibold text-gray-900">
+                    {new Date(user.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </CardContent>
