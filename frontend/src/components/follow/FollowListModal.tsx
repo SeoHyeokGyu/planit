@@ -112,13 +112,16 @@ export default function FollowListModal({
                       className="flex-1 cursor-pointer"
                       onClick={() => handleNavigateToProfile(user.loginId)}
                     >
-                      <p className="font-semibold text-gray-900                      <p className="text-sm text-gray-500                    </div>
+                      <p className="font-semibold text-gray-900">{user.nickname}</p>
+                      <p className="text-sm text-gray-500">@{user.loginId}</p>
+                    </div>
                     <FollowButton targetLoginId={user.loginId} variant="outline" size="sm" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500                팔로워가 없습니다.
+              <div className="text-center py-8 text-gray-500">
+                팔로워가 없습니다.
               </div>
             )}
           </TabsContent>
@@ -142,13 +145,16 @@ export default function FollowListModal({
                       className="flex-1 cursor-pointer"
                       onClick={() => handleNavigateToProfile(user.loginId)}
                     >
-                      <p className="font-semibold text-gray-900                      <p className="text-sm text-gray-500                    </div>
+                      <p className="font-semibold text-gray-900">{user.nickname}</p>
+                      <p className="text-sm text-gray-500">@{user.loginId}</p>
+                    </div>
                     <FollowButton targetLoginId={user.loginId} variant="outline" size="sm" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500                팔로잉이 없습니다.
+              <div className="text-center py-8 text-gray-500">
+                팔로잉이 없습니다.
               </div>
             )}
           </TabsContent>
@@ -165,7 +171,8 @@ export default function FollowListModal({
             >
               이전
             </Button>
-            <span className="text-sm text-gray-600              {currentPage + 1} 페이지
+            <span className="text-sm text-gray-600">
+              {currentPage + 1} 페이지
             </span>
             <Button
               variant="outline"
