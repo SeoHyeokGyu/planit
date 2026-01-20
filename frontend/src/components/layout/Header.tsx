@@ -4,10 +4,12 @@ import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUser";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useNotificationStore } from "@/stores/notificationStore";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
 import { Users, LogOut, LayoutDashboard, Trophy, Activity, Settings, Flame, Medal, BarChart3, Crown, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { navStyles, dropdownStyles, componentStyles, navigationLinks, activityLinks, accountLinks } from "@/styles/common";
+import { Badge } from "@/components/ui/badge";
 
 // Icon mapping helper
 const iconMap = {
@@ -28,6 +30,7 @@ export default function Header() {
   const token = useAuthStore((state) => state.token);
   const logout = useLogout();
   const { data: currentUser } = useUserProfile();
+  const newFeedCount = useNotificationStore((state) => state.newFeedCount);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -72,12 +75,21 @@ export default function Header() {
                     const linkClass = "variant" in link && link.variant === "yellow"
                       ? navStyles.link.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")
                       : navStyles.link;
+                    const isFeedLink = link.href === "/feed";
 
                     return (
                       <li key={link.href}>
-                        <Link href={link.href} className={linkClass}>
+                        <Link href={link.href} className={`${linkClass} relative`}>
                           <Icon className="w-4 h-4" />
                           {link.label}
+                          {isFeedLink && newFeedCount > 0 && (
+                            <Badge
+                              variant="destructive"
+                              className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[9px]"
+                            >
+                              {newFeedCount > 9 ? "9+" : newFeedCount}
+                            </Badge>
+                          )}
                         </Link>
                       </li>
                     );
@@ -281,17 +293,26 @@ export default function Header() {
                       const linkClass = "variant" in link && link.variant === "yellow"
                         ? navStyles.mobileLink.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")
                         : navStyles.mobileLink;
+                      const isFeedLink = link.href === "/feed";
 
                       return (
                         <li key={link.href}>
                           <Link
                             href={link.href}
-                            className={linkClass}
+                            className={`${linkClass} relative`}
                             onClick={() => setIsMobileMenuOpen(false)}
                             role="menuitem"
                           >
                             <Icon className="w-5 h-5" />
                             {link.label}
+                            {isFeedLink && newFeedCount > 0 && (
+                              <Badge
+                                variant="destructive"
+                                className="ml-auto h-5 w-5 flex items-center justify-center p-0 text-[9px]"
+                              >
+                                {newFeedCount > 9 ? "9+" : newFeedCount}
+                              </Badge>
+                            )}
                           </Link>
                         </li>
                       );
