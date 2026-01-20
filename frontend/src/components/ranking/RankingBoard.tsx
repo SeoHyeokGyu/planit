@@ -73,7 +73,7 @@ const RankChangeIndicator = ({
     );
   }
 
-  return <span className="text-gray-400 text-sm" aria-label="순위 변동 없음">-</span>;
+  return <span className="text-gray-500 text-sm" aria-label="순위 변동 없음">-</span>;
 };
 
 // Top 3 Podium 컴포넌트
@@ -102,7 +102,7 @@ const Top3Podium = ({
         return {
           height: "h-24",
           bgColor: "bg-gradient-to-b from-gray-300 to-gray-400",
-          crownColor: "text-gray-400",
+          crownColor: "text-gray-500",
           size: "w-16 h-16",
         };
       case 3:
@@ -116,7 +116,7 @@ const Top3Podium = ({
         return {
           height: "h-16",
           bgColor: "bg-gray-200",
-          crownColor: "text-gray-400",
+          crownColor: "text-gray-500",
           size: "w-12 h-12",
         };
     }
@@ -300,7 +300,7 @@ const MyRankingSummary = () => {
               <div className="text-2xl font-bold text-blue-600">
                 {data.rank ? `${data.rank}위` : "-"}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-500">
                 {data.score.toLocaleString()}점
               </div>
             </div>
@@ -365,7 +365,7 @@ const TabContent = ({ type }: { type: "weekly" | "monthly" | "all" }) => {
       </nav>
 
       {/* 페이지 정보 */}
-      <div className="text-center text-sm text-gray-400 mt-4">
+      <div className="text-center text-sm text-gray-500 mt-4">
         총 {data.totalParticipants.toLocaleString()}명 참여
       </div>
     </div>
