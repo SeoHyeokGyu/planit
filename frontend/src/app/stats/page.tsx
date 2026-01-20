@@ -24,6 +24,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Zap, Calendar } from "lucide-react";
+import { layoutStyles } from "@/styles/common";
 
 export default function StatsPage() {
   const token = useAuthStore((state) => state.isAuthenticated);
@@ -48,7 +49,7 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={layoutStyles.pageRoot}>
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* 헤더 */}
         <div className="mb-8">
