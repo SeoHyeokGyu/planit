@@ -24,6 +24,7 @@ import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.util.*
 
@@ -39,6 +40,7 @@ class CertificationServiceTest {
   @MockK private lateinit var badgeService: BadgeService
   @MockK private lateinit var streakService: StreakService
   @MockK private lateinit var fileStorageService: FileStorageService
+  @MockK private lateinit var geminiService: GeminiService
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -62,6 +64,89 @@ class CertificationServiceTest {
         certificationCnt = 0,
       )
     challenge.setPrivateProperty("id", challengeId)
+  }
+
+  @Nested
+  @DisplayName("analyzeCertificationPhoto 메서드는")
+  inner class DescribeAnalyzeCertificationPhoto {
+    private lateinit var certification: Certification
+    @MockK private lateinit var file: MultipartFile
+
+    @BeforeEach
+    fun setup() {
+      certification = Certification(
+        user = user,
+        challenge = challenge,
+        title = "Title",
+        content = "Content"
+      )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("Gemini를 호출하여 사진 분석 결과를 반환한다")
+    fun `calls Gemini and returns analysis result`() {
+      // Given
+      val expectedResult = "적합 여부: 예\n이유: 운동 중입니다."
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { geminiService.analyzeImage(any(), any()) } returns expectedResult
+
+      // When
+      val result = certificationService.analyzeCertificationPhoto(1L, file)
+
+      // Then
+      assertThat(result).isEqualTo(expectedResult)
+      verify(exactly = 1) { geminiService.analyzeImage(any(), file) }
+    }
+
+    @Test
+    @DisplayName("Gemini 분석 실패 시 기본 메시지를 반환한다")
+    fun `returns default message when Gemini analysis fails`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { geminiService.analyzeImage(any(), any()) } throws RuntimeException("API Error")
+
+      // When
+      val result = certificationService.analyzeCertificationPhoto(1L, file)
+
+      // Then
+      assertThat(result).contains("이미지 분석을 완료할 수 없습니다")
+    }
+  }
+
+  @Nested
+  @DisplayName("uploadCertificationPhoto 메서드는")
+  inner class DescribeUploadCertificationPhoto {
+    private lateinit var certification: Certification
+
+    @BeforeEach
+    fun setup() {
+      certification = Certification(
+        user = user,
+        challenge = challenge,
+        title = "Title",
+        content = "Content"
+      )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("사진 URL과 분석 결과를 저장한다")
+    fun `saves photo url and analysis result`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      val analysisResult = "AI 분석 결과"
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { certificationRepository.save(any()) } answers { firstArg() }
+
+      // When
+      val response = certificationService.uploadCertificationPhoto(1L, photoUrl, analysisResult, user.loginId)
+
+      // Then
+      assertThat(response.photoUrl).isEqualTo(photoUrl)
+      assertThat(response.analysisResult).isEqualTo(analysisResult)
+      verify(exactly = 1) { certificationRepository.save(any()) }
+    }
   }
 
   @Nested

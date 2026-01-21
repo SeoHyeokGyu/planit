@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 
 /** 챌린지 인증(Certification)과 관련된 비즈니스 로직을 처리하는 서비스 클래스입니다. */
@@ -30,9 +31,37 @@ class CertificationService(
   private val badgeService: BadgeService,
   private val streakService: StreakService,
   private val fileStorageService: FileStorageService,
+  private val geminiService: GeminiService
 ) {
 
   private val logger = LoggerFactory.getLogger(CertificationService::class.java)
+
+  /**
+   * Gemini를 사용하여 인증 사진을 분석합니다. (별도 메소드로 분리)
+   */
+  fun analyzeCertificationPhoto(
+    certificationId: Long,
+    file: MultipartFile
+  ): String {
+    val certification = certificationRepository.findById(certificationId)
+      .orElseThrow { CertificationNotFoundException() }
+
+    val prompt = """
+            이 사진이 다음 챌린지 주제에 적합한지 판단해줘.
+            챌린지 제목: ${certification.challenge.title}
+            
+            답변은 짧게 다음 형식으로만 해줘:
+            적합 여부: [예/아니오]
+            이유: [한 문장으로 설명]
+        """.trimIndent()
+
+    return try {
+      geminiService.analyzeImage(prompt, file)
+    } catch (e: Exception) {
+      logger.error("Gemini 이미지 분석 실패", e)
+      "이미지 분석을 완료할 수 없습니다."
+    }
+  }
 
   /**
    * 새로운 인증을 생성합니다.
@@ -235,19 +264,19 @@ class CertificationService(
   }
 
   /**
-   * 특정 인증에 사진 URL을 업로드(등록)합니다. 작성자만 사진 URL 등록이 가능합니다.
+   * 특정 인증에 사진 URL과 AI 분석 결과를 등록합니다.
    *
    * @param certificationId 사진 URL을 등록할 인증의 ID
    * @param photoUrl 업로드된 사진의 URL
+   * @param analysisResult AI 분석 결과 (선택 사항)
    * @param userLoginId 현재 로그인한 사용자의 ID
    * @return 사진 정보가 업데이트된 인증의 응답 객체
-   * @throws CertificationNotFoundException 인증을 찾을 수 없을 때
-   * @throws CertificationUpdateForbiddenException 사진 업로드 권한이 없을 때
    */
   @Transactional
   fun uploadCertificationPhoto(
     certificationId: Long,
     photoUrl: String,
+    analysisResult: String?,
     userLoginId: String,
   ): CertificationResponse {
     val certification =
@@ -260,6 +289,7 @@ class CertificationService(
     }
 
     certification.photoUrl = photoUrl
+    certification.analysisResult = analysisResult
     val updatedCertification = certificationRepository.save(certification)
     return CertificationResponse.from(updatedCertification)
   }
