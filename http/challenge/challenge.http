@@ -108,3 +108,6 @@ Content-Type: application/json
 Authorization: Bearer {{auth_token}}
 
 ###
+GET http://localhost:8080/api/challenge/recommend
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
