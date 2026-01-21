@@ -26,6 +26,16 @@ data class CertificationUpdateRequest(
 )
 
 /**
+ * AI 인증 사진 분석 결과 DTO
+ * @property isSuitable 챌린지 주제 적합 여부
+ * @property reason 판단 근거 또는 실패 사유
+ */
+data class CertificationAnalysisResponse(
+    val isSuitable: Boolean,
+    val reason: String
+)
+
+/**
  * 인증 정보 응답 DTO
  * @property id 인증 ID
  * @property title 인증 제목

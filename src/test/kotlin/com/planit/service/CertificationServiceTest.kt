@@ -2,6 +2,7 @@ package com.planit.service
 
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationUpdateRequest
+import com.planit.dto.CertificationAnalysisResponse
 import com.planit.entity.Certification
 import com.planit.entity.Challenge
 import com.planit.entity.User
@@ -15,6 +16,7 @@ import com.planit.enums.BadgeType
 import com.planit.service.badge.BadgeService
 import com.planit.service.storage.FileStorageService
 import com.planit.util.setPrivateProperty
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -41,6 +43,7 @@ class CertificationServiceTest {
   @MockK private lateinit var streakService: StreakService
   @MockK private lateinit var fileStorageService: FileStorageService
   @MockK private lateinit var geminiService: GeminiService
+  @MockK private lateinit var objectMapper: ObjectMapper
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -87,15 +90,19 @@ class CertificationServiceTest {
     @DisplayName("Gemini를 호출하여 사진 분석 결과를 반환한다")
     fun `calls Gemini and returns analysis result`() {
       // Given
-      val expectedResult = "적합 여부: 예\n이유: 운동 중입니다."
+      val jsonResponse = "{\"isSuitable\": true, \"reason\": \"운동 중입니다.\"}"
+      val expectedDto = CertificationAnalysisResponse(isSuitable = true, reason = "운동 중입니다.")
+      
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any()) } returns expectedResult
+      every { geminiService.analyzeImage(any(), any()) } returns jsonResponse
+      every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } returns expectedDto
 
       // When
       val result = certificationService.analyzeCertificationPhoto(1L, file)
 
       // Then
-      assertThat(result).isEqualTo(expectedResult)
+      assertThat(result.isSuitable).isTrue()
+      assertThat(result.reason).isEqualTo("운동 중입니다.")
       verify(exactly = 1) { geminiService.analyzeImage(any(), file) }
     }
 
@@ -110,7 +117,8 @@ class CertificationServiceTest {
       val result = certificationService.analyzeCertificationPhoto(1L, file)
 
       // Then
-      assertThat(result).contains("이미지 분석을 완료할 수 없습니다")
+      assertThat(result.isSuitable).isFalse()
+      assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
     }
   }
 
@@ -135,17 +143,84 @@ class CertificationServiceTest {
     fun `saves photo url and analysis result`() {
       // Given
       val photoUrl = "/images/test.jpg"
-      val analysisResult = "AI 분석 결과"
+      val analysisDto = CertificationAnalysisResponse(isSuitable = true, reason = "AI 분석 결과")
+      val jsonResult = "{\"isSuitable\":true,\"reason\":\"AI 분석 결과\"}"
+      
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
       every { certificationRepository.save(any()) } answers { firstArg() }
+      every { objectMapper.writeValueAsString(analysisDto) } returns jsonResult
 
       // When
-      val response = certificationService.uploadCertificationPhoto(1L, photoUrl, analysisResult, user.loginId)
+      val response = certificationService.uploadCertificationPhoto(1L, photoUrl, analysisDto, user.loginId)
 
       // Then
       assertThat(response.photoUrl).isEqualTo(photoUrl)
-      assertThat(response.analysisResult).isEqualTo(analysisResult)
+      assertThat(response.analysisResult).isEqualTo(jsonResult)
       verify(exactly = 1) { certificationRepository.save(any()) }
+    }
+  }
+
+  @Nested
+  @DisplayName("processCertificationPhoto 메서드는")
+  inner class DescribeProcessCertificationPhoto {
+    private lateinit var certification: Certification
+    @MockK private lateinit var file: MultipartFile
+
+    @BeforeEach
+    fun setup() {
+      certification = Certification(
+        user = user,
+        challenge = challenge,
+        title = "Title",
+        content = "Content"
+      )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("파일 저장, AI 분석, DB 업데이트를 순차적으로 수행한다")
+    fun `executes file upload, ai analysis and db update sequentially`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      val analysisDto = CertificationAnalysisResponse(isSuitable = true, reason = "OK")
+      val jsonResult = "{\"isSuitable\":true,\"reason\":\"OK\"}"
+
+      every { fileStorageService.storeFile(any()) } returns photoUrl
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      // analyzeCertificationPhoto 내부 모킹
+      every { geminiService.analyzeImage(any(), any()) } returns "{\"isSuitable\":true,\"reason\":\"OK\"}"
+      every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } returns analysisDto
+      
+      // uploadCertificationPhoto 내부 모킹
+      every { objectMapper.writeValueAsString(analysisDto) } returns jsonResult
+      every { certificationRepository.save(any()) } answers { firstArg() }
+
+      // When
+      val response = certificationService.processCertificationPhoto(1L, file, user.loginId)
+
+      // Then
+      assertThat(response.photoUrl).isEqualTo(photoUrl)
+      assertThat(response.analysisResult).isEqualTo(jsonResult)
+      verify(exactly = 1) { fileStorageService.storeFile(file) }
+      verify(exactly = 1) { geminiService.analyzeImage(any(), file) }
+      verify(exactly = 1) { certificationRepository.save(any()) }
+    }
+
+    @Test
+    @DisplayName("처리 중 예외가 발생하면 업로드된 파일을 삭제하고 예외를 던진다")
+    fun `deletes uploaded file and throws exception when error occurs`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      every { fileStorageService.storeFile(any()) } returns photoUrl
+      every { certificationRepository.findById(1L) } throws RuntimeException("DB Error")
+      justRun { fileStorageService.deleteFile(any()) }
+
+      // When & Then
+      assertThrows<RuntimeException> {
+        certificationService.processCertificationPhoto(1L, file, user.loginId)
+      }
+
+      verify(exactly = 1) { fileStorageService.deleteFile(photoUrl) }
     }
   }
 

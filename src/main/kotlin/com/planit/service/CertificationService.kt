@@ -1,5 +1,7 @@
 package com.planit.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.planit.dto.CertificationAnalysisResponse
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationResponse
 import com.planit.dto.CertificationUpdateRequest
@@ -31,35 +33,79 @@ class CertificationService(
   private val badgeService: BadgeService,
   private val streakService: StreakService,
   private val fileStorageService: FileStorageService,
-  private val geminiService: GeminiService
+  private val geminiService: GeminiService,
+  private val objectMapper: ObjectMapper,
 ) {
 
   private val logger = LoggerFactory.getLogger(CertificationService::class.java)
 
-  /**
-   * Gemini를 사용하여 인증 사진을 분석합니다. (별도 메소드로 분리)
-   */
+  /** Gemini를 사용하여 인증 사진을 분석합니다. (별도 메소드로 분리) */
   fun analyzeCertificationPhoto(
     certificationId: Long,
-    file: MultipartFile
-  ): String {
-    val certification = certificationRepository.findById(certificationId)
-      .orElseThrow { CertificationNotFoundException() }
+    file: MultipartFile,
+  ): CertificationAnalysisResponse {
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow {
+        CertificationNotFoundException()
+      }
 
-    val prompt = """
-            이 사진이 다음 챌린지 주제에 적합한지 판단해줘.
-            챌린지 제목: ${certification.challenge.title}
-            
-            답변은 짧게 다음 형식으로만 해줘:
-            적합 여부: [예/아니오]
-            이유: [한 문장으로 설명]
-        """.trimIndent()
+    val prompt =
+      """
+        이 사진이 다음 챌린지 주제에 적합한지 판단해줘.
+        챌린지 제목: ${certification.challenge.title}
+
+        답변은 다음 JSON 형식으로만 해줘. 마크다운 태그 없이 순수 JSON 문자열만 반환해:
+        {
+          "isSuitable": boolean,
+          "reason": "string"
+        }
+        """
+        .trimIndent()
 
     return try {
-      geminiService.analyzeImage(prompt, file)
+      val response = geminiService.analyzeImage(prompt, file)
+      val jsonString = response.replace("```json", "").replace("```", "").trim()
+      objectMapper.readValue(jsonString, CertificationAnalysisResponse::class.java)
     } catch (e: Exception) {
       logger.error("Gemini 이미지 분석 실패", e)
-      "이미지 분석을 완료할 수 없습니다."
+      CertificationAnalysisResponse(isSuitable = false, reason = "이미지 분석을 완료할 수 없습니다.")
+    }
+  }
+
+  /**
+   * 인증 사진 업로드 및 분석 프로세스를 처리합니다.
+   *
+   * 파일 저장 -> AI 분석 -> DB 업데이트 순으로 진행되며, 실패 시 저장된 파일을 롤백(삭제)합니다.
+   *
+   * @param certificationId 인증 ID
+   * @param file 업로드할 사진 파일
+   * @param userLoginId 사용자 로그인 ID
+   * @return 업데이트된 인증 정보
+   */
+  @Transactional
+  fun processCertificationPhoto(
+    certificationId: Long,
+    file: MultipartFile,
+    userLoginId: String,
+  ): CertificationResponse {
+    // 1. 파일 저장
+    val photoUrl = fileStorageService.storeFile(file)
+
+    try {
+      // 2. AI 분석 (외부 API 호출이므로 트랜잭션 범위 밖에서 수행)
+      val analysisResult = analyzeCertificationPhoto(certificationId, file)
+
+      // 3. DB 업데이트 (트랜잭션)
+      return uploadCertificationPhoto(certificationId, photoUrl, analysisResult, userLoginId)
+    } catch (e: Exception) {
+      // 실패 시 저장된 파일 삭제 (롤백)
+      logger.error("인증 사진 처리 중 오류 발생. 업로드된 파일 삭제 시도: $photoUrl", e)
+      try {
+        fileStorageService.deleteFile(photoUrl)
+      } catch (deleteEx: Exception) {
+        logger.error("업로드된 파일 롤백 삭제 실패: $photoUrl", deleteEx)
+      }
+      throw e
     }
   }
 
@@ -276,7 +322,7 @@ class CertificationService(
   fun uploadCertificationPhoto(
     certificationId: Long,
     photoUrl: String,
-    analysisResult: String?,
+    analysisResult: CertificationAnalysisResponse?,
     userLoginId: String,
   ): CertificationResponse {
     val certification =
@@ -289,7 +335,7 @@ class CertificationService(
     }
 
     certification.photoUrl = photoUrl
-    certification.analysisResult = analysisResult
+    certification.analysisResult = analysisResult?.let { objectMapper.writeValueAsString(it) }
     val updatedCertification = certificationRepository.save(certification)
     return CertificationResponse.from(updatedCertification)
   }

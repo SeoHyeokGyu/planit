@@ -57,15 +57,7 @@ class CertificationController(
     @RequestParam("file") file: MultipartFile,
     @AuthenticationPrincipal userDetails: CustomUserDetails
   ): ResponseEntity<ApiResponse<CertificationResponse>> {
-    // 1. 파일을 서버에 저장 (기본 기능 유지)
-    val photoUrl = fileStorageService.storeFile(file)
-    
-    // 2. Gemini를 이용한 AI 분석 (분리된 기능 호출)
-    val analysisResult = certificationService.analyzeCertificationPhoto(id, file)
-    
-    // 3. 사진 URL과 분석 결과를 DB에 업데이트
-    val response = certificationService.uploadCertificationPhoto(id, photoUrl, analysisResult, userDetails.username)
-    
+    val response = certificationService.processCertificationPhoto(id, file, userDetails.username)
     return ResponseEntity.ok(ApiResponse.success(response))
   }
 
