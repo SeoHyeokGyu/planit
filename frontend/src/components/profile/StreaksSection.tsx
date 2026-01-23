@@ -52,7 +52,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
           <CardContent>
             <p className="text-red-500">스트릭 데이터를 불러올 수 없습니다.</p>
             {summaryError && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-blue-600 mt-2">
                   {summaryError instanceof Error ? summaryError.message : "Unknown error"}
                 </p>
             )}
@@ -70,7 +70,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
             </div>
             <div>
               <CardTitle className="text-2xl font-bold text-gray-900">스트릭 현황</CardTitle>
-              <CardDescription className="text-gray-600">연속 달성 기록을 확인하세요</CardDescription>
+              <CardDescription className="text-blue-700">연속 달성 기록을 확인하세요</CardDescription>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="border-2 border-orange-100">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-blue-700 flex items-center gap-2">
                   <Flame className="w-4 h-4 text-orange-500" />
                   현재 스트릭
                 </CardTitle>
@@ -118,9 +118,9 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
               <CardContent>
                 <div className="text-3xl font-bold text-orange-600">
                   {streakSummary.totalCurrentStreak}
-                  <span className="text-lg text-gray-500 ml-1">일</span>
+                  <span className="text-lg text-blue-600 ml-1">일</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-blue-600 mt-1">
                   {streakSummary.activeStreakCount}개 챌린지 활동 중
                 </p>
               </CardContent>
@@ -128,7 +128,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
 
             <Card className="border-2 border-purple-100">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-blue-700 flex items-center gap-2">
                   <Award className="w-4 h-4 text-purple-500" />
                   최장 기록
                 </CardTitle>
@@ -136,15 +136,15 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
               <CardContent>
                 <div className="text-3xl font-bold text-purple-600">
                   {streakSummary.maxLongestStreak}
-                  <span className="text-lg text-gray-500 ml-1">일</span>
+                  <span className="text-lg text-blue-600 ml-1">일</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">역대 최고 연속 달성</p>
+                <p className="text-xs text-blue-600 mt-1">역대 최고 연속 달성</p>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-blue-100">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-blue-700 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-blue-500" />
                   활동 일수
                 </CardTitle>
@@ -152,9 +152,9 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
                   {calendar?.activeDays || 0}
-                  <span className="text-lg text-gray-500 ml-1">일</span>
+                  <span className="text-lg text-blue-600 ml-1">일</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">{selectedYear}년 활동</p>
+                <p className="text-xs text-blue-600 mt-1">{selectedYear}년 활동</p>
               </CardContent>
             </Card>
           </div>
@@ -217,7 +217,7 @@ function StreakOverview({ streaks }: { streaks: StreakResponse[] }) {
                           </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-blue-700">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5" />
                     마지막 인증: {streak.lastCertificationDate || "없음"}
@@ -231,14 +231,14 @@ function StreakOverview({ streaks }: { streaks: StreakResponse[] }) {
                         <Flame className="w-5 h-5" />
                         {streak.currentStreak}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">현재</p>
+                      <p className="text-xs text-blue-600 mt-1">현재</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600 flex items-center gap-1">
                         <Award className="w-5 h-5" />
                         {streak.longestStreak}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">최고</p>
+                      <p className="text-xs text-blue-600 mt-1">최고</p>
                     </div>
                   </div>
                 </div>
@@ -376,7 +376,7 @@ function ActivityCalendarView({
               <CardTitle className="flex items-center gap-2 text-xl font-bold">
                 <Activity className="w-5 h-5 text-green-600" />
                 <span className="text-gray-900">{calendar.totalCertifications}개 인증</span>
-                <span className="text-gray-400">·</span>
+                <span className="text-blue-500">·</span>
                 <span className="text-gray-900">{selectedYear}년</span>
               </CardTitle>
               <CardDescription className="text-sm font-medium text-gray-900 mt-1">
@@ -418,7 +418,7 @@ function ActivityCalendarView({
               <div className="flex flex-col gap-[3px] w-[27px]">
                 <div className="h-[16px]" /> {/* 월 레이블 공간 */}
                 {["월", "", "수", "", "금", "", ""].map((day, i) => (
-                    <div key={i} className="h-[10px] text-xs text-gray-600 font-medium flex items-center justify-end pr-1">
+                    <div key={i} className="h-[10px] text-xs text-blue-700 font-medium flex items-center justify-end pr-1">
                       {day}
                     </div>
                 ))}
@@ -431,7 +431,7 @@ function ActivityCalendarView({
                   {monthLabels.map((label, index) => (
                       <div
                           key={index}
-                          className="text-xs text-gray-700 font-semibold"
+                          className="text-xs text-blue-800 font-semibold"
                           style={{
                             position: 'absolute',
                             left: `${label.weekIndex * 13 + 15}px`,
@@ -482,7 +482,7 @@ function ActivityCalendarView({
             </div>
 
             {/* 범례 */}
-            <div className="flex items-center justify-end gap-2 text-xs text-gray-500 mt-4">
+            <div className="flex items-center justify-end gap-2 text-xs text-blue-600 mt-4">
               <span>적음</span>
               {[0, 1, 2, 3, 4].map((level) => (
                   <div

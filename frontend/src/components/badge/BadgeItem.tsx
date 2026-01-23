@@ -41,7 +41,7 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
           >
             <BadgeIcon
               iconCode={badge.iconCode}
-              className={cn("w-6 h-6", !isAcquired && "text-gray-600")}
+              className={cn("w-6 h-6", !isAcquired && "text-blue-700")}
             />
           </div>
 
@@ -74,7 +74,7 @@ export default React.memo(function BadgeItem({ badge }: BadgeItemProps) {
                   }}
                 />
               </div>
-              <div className="text-[10px] text-center text-gray-600 mt-1 font-medium">
+              <div className="text-[10px] text-center text-blue-700 mt-1 font-medium">
                 {badge.currentValue} / {badge.requiredValue}
               </div>
             </div>

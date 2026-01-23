@@ -239,7 +239,7 @@ function ProfileContent() {
                       </div>
                     </>
                 ) : (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-blue-600">
                       팔로워가 없습니다.
                     </div>
                 )}
@@ -302,7 +302,7 @@ function ProfileContent() {
                       </div>
                     </>
                 ) : (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-blue-600">
                       팔로잉이 없습니다.
                     </div>
                 )}

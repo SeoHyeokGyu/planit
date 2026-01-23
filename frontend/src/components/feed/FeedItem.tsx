@@ -94,10 +94,10 @@ export default function FeedItem({
                   </Badge>
                 )}
               </div>
-              <p className="text-xs text-gray-500">@{certification.authorLoginId || "unknown"}</p>
+              <p className="text-xs text-blue-600">@{certification.authorLoginId || "unknown"}</p>
             </div>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-blue-600">
             {formatTimeAgo(new Date(certification.createdAt))}
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function FeedItem({
             e.stopPropagation();
             toggleLikeMutation.mutate();
           }}
-          className={`flex items-center gap-1 transition-colors text-sm ${isLiked ? "text-red-500" : "text-gray-600 hover:text-red-500"}`}
+          className={`flex items-center gap-1 transition-colors text-sm ${isLiked ? "text-red-500" : "text-blue-700 hover:text-red-500"}`}
         >
           <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
           <span>{likeCount}</span>
@@ -153,12 +153,12 @@ export default function FeedItem({
             e.stopPropagation();
             setShowComments(!showComments);
           }}
-          className="flex items-center gap-1 text-gray-600 hover:text-blue-500 transition-colors text-sm"
+          className="flex items-center gap-1 text-blue-700 hover:text-blue-500 transition-colors text-sm"
         >
           <MessageCircle className="w-5 h-5" />
           <span>{commentCount}</span>
         </button>
-        <button className="ml-auto text-gray-600 hover:text-gray-900 transition-colors">
+        <button className="ml-auto text-blue-700 hover:text-gray-900 transition-colors">
           <Share className="w-5 h-5" />
         </button>
       </div>
@@ -176,13 +176,13 @@ export default function FeedItem({
                   {comment.authorNickname}
                 </span>
                 <span className="text-gray-700 break-all">{comment.content}</span>
-                <span className="text-xs text-gray-400 ml-auto flex-shrink-0 flex items-center gap-2">
+                <span className="text-xs text-blue-500 ml-auto flex-shrink-0 flex items-center gap-2">
                   {formatTimeAgo(new Date(comment.createdAt))}
                 </span>
               </div>
             ))}
             {comments?.length === 0 && (
-              <p className="text-center text-gray-500 text-sm py-2">첫 댓글을 남겨보세요!</p>
+              <p className="text-center text-blue-600 text-sm py-2">첫 댓글을 남겨보세요!</p>
             )}
           </div>
           <form onSubmit={handleCommentSubmit} className="flex gap-2">

@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AlertCircle, Search } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { useRankingStore } from "@/stores/rankingStore";
 import {
   useRanking,
   useMyRankings,
@@ -73,7 +72,7 @@ const RankChangeIndicator = ({
     );
   }
 
-  return <span className="text-gray-500 text-sm" aria-label="순위 변동 없음">-</span>;
+  return <span className="text-blue-600 text-sm" aria-label="순위 변동 없음">-</span>;
 };
 
 // Top 3 Podium 컴포넌트
@@ -175,7 +174,7 @@ const Top3Podium = ({
             </span>
 
             {/* 점수 */}
-            <span className="text-xs text-gray-500 mb-2">
+            <span className="text-xs text-blue-600 mb-2">
               {entry.score.toLocaleString()}점
             </span>
 
@@ -208,7 +207,7 @@ const RankingListItem = ({
     if (rank === 1) return "bg-yellow-100 text-yellow-800 border-yellow-300";
     if (rank === 2) return "bg-gray-100 text-gray-800 border-gray-300";
     if (rank === 3) return "bg-amber-100 text-amber-800 border-amber-300";
-    return "bg-white text-gray-600 border-gray-200";
+    return "bg-blue-50 text-blue-700 border-blue-200";
   };
 
   return (
@@ -248,7 +247,7 @@ const RankingListItem = ({
             </Badge>
           )}
         </div>
-        <span className="text-sm text-gray-500">@{entry.loginId}</span>
+        <span className="text-sm text-blue-600">@{entry.loginId}</span>
       </div>
 
       {/* 점수 */}
@@ -256,7 +255,7 @@ const RankingListItem = ({
         <div className="font-semibold text-lg">
           {entry.score.toLocaleString()}
         </div>
-        <div className="text-xs text-gray-500">점</div>
+        <div className="text-xs text-blue-600">점</div>
       </div>
     </article>
   );
@@ -296,11 +295,11 @@ const MyRankingSummary = () => {
         <div className="grid grid-cols-3 gap-4">
           {periods.map(({ label, data }) => (
             <div key={label} className="text-center">
-              <div className="text-sm text-gray-500 mb-1">{label}</div>
+              <div className="text-sm text-blue-700 mb-1">{label}</div>
               <div className="text-2xl font-bold text-blue-600">
                 {data.rank ? `${data.rank}위` : "-"}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-blue-600">
                 {data.score.toLocaleString()}점
               </div>
             </div>
@@ -365,7 +364,7 @@ const TabContent = ({ type }: { type: "weekly" | "monthly" | "all" }) => {
       </nav>
 
       {/* 페이지 정보 */}
-      <div className="text-center text-sm text-gray-500 mt-4">
+      <div className="text-center text-sm text-blue-600 mt-4">
         총 {data.totalParticipants.toLocaleString()}명 참여
       </div>
     </div>
@@ -375,7 +374,6 @@ const TabContent = ({ type }: { type: "weekly" | "monthly" | "all" }) => {
 // 메인 RankingBoard 컴포넌트
 export default function RankingBoard() {
   const [activeTab, setActiveTab] = useState<RankingTabType>("weekly");
-  const isConnected = useRankingStore((state) => state.isConnected);
 
   return (
     <div className="space-y-4">
@@ -385,17 +383,7 @@ export default function RankingBoard() {
       {/* 메인 랭킹 보드 */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <span>랭킹</span>
-              {isConnected && (
-                <Badge variant="outline" className="text-xs bg-green-50 text-green-600 border-green-200">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse" />
-                  Live
-                </Badge>
-              )}
-            </CardTitle>
-          </div>
+          <CardTitle>랭킹</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs

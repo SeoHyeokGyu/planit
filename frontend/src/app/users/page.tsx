@@ -91,12 +91,12 @@ export default function UsersPage() {
         <Card className="mb-8 border-2 shadow-lg bg-white">
           <CardContent className="pt-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 w-5 h-5" />
               <Input
                 placeholder="사용자 이름 또는 아이디로 검색..."
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                className="pl-10 h-12 text-base border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-gray-400 font-medium"
+                className="pl-10 h-12 text-base border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-blue-500 font-medium"
               />
             </div>
           </CardContent>
@@ -125,17 +125,17 @@ export default function UsersPage() {
               <Search className="w-8 h-8 text-red-400" />
             </div>
             <p className="text-gray-700 text-lg font-semibold">검색에 실패했습니다.</p>
-            <p className="text-gray-500 text-sm mt-2">다시 시도해주세요.</p>
+            <p className="text-blue-600 text-sm mt-2">다시 시도해주세요.</p>
           </div>
         )}
 
         {hasSearched && !isLoading && !isError && users.length === 0 && (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
+              <Search className="w-8 h-8 text-blue-500" />
             </div>
             <p className="text-gray-700 text-lg font-semibold">검색 결과가 없습니다.</p>
-            <p className="text-gray-500 text-sm mt-2">다른 검색 조건을 시도해보세요.</p>
+            <p className="text-blue-600 text-sm mt-2">다른 검색 조건을 시도해보세요.</p>
           </div>
         )}
 
@@ -159,13 +159,13 @@ export default function UsersPage() {
                       <CardTitle className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                         {user.nickname}
                       </CardTitle>
-                      <CardDescription className="text-sm text-gray-600">
+                      <CardDescription className="text-sm text-blue-700">
                         @{user.loginId}
                       </CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-blue-600">
                       📅 가입: {new Date(user.createdAt).toLocaleDateString()}
                     </p>
                     <div className="flex gap-2 pt-2">
@@ -200,7 +200,7 @@ export default function UsersPage() {
               <Search className="w-8 h-8 text-blue-400" />
             </div>
             <p className="text-gray-700 text-lg font-semibold">사용자를 검색하세요.</p>
-            <p className="text-gray-500 text-sm mt-2">
+            <p className="text-blue-600 text-sm mt-2">
               위에 사용자 이름 또는 아이디를 입력하여 검색해주세요.
             </p>
           </div>

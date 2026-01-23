@@ -144,7 +144,7 @@ export default function Header() {
                             <p className="font-semibold text-gray-900 text-sm truncate">
                               {currentUser.nickname}
                             </p>
-                            <p className="text-xs text-gray-500 truncate">@{currentUser.loginId}</p>
+                            <p className="text-xs text-blue-600 truncate">@{currentUser.loginId}</p>
                           </div>
                         </button>
                       </div>
@@ -276,7 +276,7 @@ export default function Header() {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">{currentUser.nickname}</p>
-                        <p className="text-sm text-gray-500">@{currentUser.loginId}</p>
+                        <p className="text-sm text-blue-600">@{currentUser.loginId}</p>
                       </div>
                     </Link>
                   </div>
@@ -284,7 +284,7 @@ export default function Header() {
 
                 {/* Navigation Section */}
                 <nav className="px-2 py-3" aria-label="모바일 메뉴">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  <div className="px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider">
                     메뉴
                   </div>
                   <ul>
@@ -322,7 +322,7 @@ export default function Header() {
 
                 {/* Activity Section */}
                 <div className="px-2 py-3 border-t border-gray-100">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  <div className="px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider">
                     활동
                   </div>
                   <ul>
@@ -347,7 +347,7 @@ export default function Header() {
 
                 {/* Account Section */}
                 <div className="px-2 py-3 border-t border-gray-100">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  <div className="px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider">
                     계정
                   </div>
                   <ul>
