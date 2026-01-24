@@ -104,7 +104,7 @@ jobs:
           docker compose --env-file .env.prod -f docker-compose.prod.yml rm -f frontend
 
           echo "🏗️  Building and starting frontend service..."
-          docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build frontend
+          docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build --no-deps frontend
 
           # Check container status
           echo "📊 Container status:"
