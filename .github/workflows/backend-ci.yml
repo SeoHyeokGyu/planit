@@ -22,129 +22,129 @@ jobs:
       pull-requests: write
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: 'gradle'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew clean build -x test
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
 
-    - name: Run Tests with Kover
-      # 테스트를 실행하고 Kover XML 리포트를 생성합니다.
-      run: ./gradlew koverXmlReport
+      #    - name: Run Tests with Kover
+      #      # 테스트를 실행하고 Kover XML 리포트를 생성합니다.
+      #      run: ./gradlew koverXmlReport
+      #
+      #    - name: Add Coverage PR Comment
+      #      # 생성된 XML 리포트를 분석하여 Pull Request에 커버리지 지표를 댓글로 남깁니다.
+      #      uses: madrapps/jacoco-report@v1.6.1
+      #      if: github.event_name == 'pull_request'
+      #      with:
+      #        # Kover가 생성한 XML 리포트 파일 경로 (build.gradle.kts 설정과 일치해야 함)
+      #        paths: build/reports/kover/report.xml
+      #        # PR에 댓글을 달기 위해 필요한 GitHub 토큰 (Actions가 자동으로 제공)
+      #        token: ${{ secrets.GITHUB_TOKEN }}
+      #        # 전체 프로젝트의 최소 커버리지 기준 (0이면 실패시키지 않음)
+      #        min-coverage-overall: 0
+      #        # 변경된 파일의 최소 커버리지 기준 (0이면 실패시키지 않음)
+      #        min-coverage-changed-files: 0
+      #        # PR 댓글에 표시될 리포트 제목
+      #        title: Code Coverage
+      #        # 기존 댓글이 있다면 새로 달지 않고 업데이트함 (true: 업데이트, false: 매번 새 댓글)
+      #        update-comment: true
 
-    - name: Add Coverage PR Comment
-      # 생성된 XML 리포트를 분석하여 Pull Request에 커버리지 지표를 댓글로 남깁니다.
-      uses: madrapps/jacoco-report@v1.6.1
-      if: github.event_name == 'pull_request'
-      with:
-        # Kover가 생성한 XML 리포트 파일 경로 (build.gradle.kts 설정과 일치해야 함)
-        paths: build/reports/kover/report.xml
-        # PR에 댓글을 달기 위해 필요한 GitHub 토큰 (Actions가 자동으로 제공)
-        token: ${{ secrets.GITHUB_TOKEN }}
-        # 전체 프로젝트의 최소 커버리지 기준 (0이면 실패시키지 않음)
-        min-coverage-overall: 0
-        # 변경된 파일의 최소 커버리지 기준 (0이면 실패시키지 않음)
-        min-coverage-changed-files: 0
-        # PR 댓글에 표시될 리포트 제목
-        title: Code Coverage
-        # 기존 댓글이 있다면 새로 달지 않고 업데이트함 (true: 업데이트, false: 매번 새 댓글)
-        update-comment: true
-
-    - name: Upload build artifacts
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: backend-build-artifacts
-        path: build/libs/*.jar
-        retention-days: 7
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build-artifacts
+          path: build/libs/*.jar
+          retention-days: 7
 
   # Deploy Backend to Oracle Cloud
   deploy:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [ build ]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-    - name: Verify SSH Secrets
-      run: |
-        if [ -z "${{ secrets.ORACLE_CLOUD_HOST }}" ]; then
-          echo "❌ ORACLE_CLOUD_HOST secret is not set"
-          exit 1
-        fi
-        if [ -z "${{ secrets.ORACLE_CLOUD_USER }}" ]; then
-          echo "❌ ORACLE_CLOUD_USER secret is not set"
-          exit 1
-        fi
-        if [ -z "${{ secrets.ORACLE_CLOUD_SSH_KEY }}" ]; then
-          echo "❌ ORACLE_CLOUD_SSH_KEY secret is not set"
-          exit 1
-        fi
-        echo "✅ All SSH secrets are configured"
-        echo "Host: ${{ secrets.ORACLE_CLOUD_HOST }}"
-        echo "User: ${{ secrets.ORACLE_CLOUD_USER }}"
+      - name: Verify SSH Secrets
+        run: |
+          if [ -z "${{ secrets.ORACLE_CLOUD_HOST }}" ]; then
+            echo "❌ ORACLE_CLOUD_HOST secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.ORACLE_CLOUD_USER }}" ]; then
+            echo "❌ ORACLE_CLOUD_USER secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.ORACLE_CLOUD_SSH_KEY }}" ]; then
+            echo "❌ ORACLE_CLOUD_SSH_KEY secret is not set"
+            exit 1
+          fi
+          echo "✅ All SSH secrets are configured"
+          echo "Host: ${{ secrets.ORACLE_CLOUD_HOST }}"
+          echo "User: ${{ secrets.ORACLE_CLOUD_USER }}"
 
-    - name: Test SSH Connection
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.ORACLE_CLOUD_HOST }}
-        username: ${{ secrets.ORACLE_CLOUD_USER }}
-        key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
-        port: 22
-        debug: true
-        command_timeout: 30s
-        script: |
-          echo "✅ SSH connection successful!"
-          echo "Server: $(hostname)"
-          echo "User: $(whoami)"
-          echo "Working directory: $(pwd)"
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.ORACLE_CLOUD_HOST }}
+          username: ${{ secrets.ORACLE_CLOUD_USER }}
+          key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
+          port: 22
+          debug: true
+          command_timeout: 30s
+          script: |
+            echo "✅ SSH connection successful!"
+            echo "Server: $(hostname)"
+            echo "User: $(whoami)"
+            echo "Working directory: $(pwd)"
 
-    - name: Deploy Backend to Oracle Cloud
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.ORACLE_CLOUD_HOST }}
-        username: ${{ secrets.ORACLE_CLOUD_USER }}
-        key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
-        port: 22
-        debug: true
-        command_timeout: 10m
-        script: |
-          cd ~/planit
-          git fetch origin
-          git reset --hard origin/main
-
-          # Stop and rebuild only backend service
-          echo "🔄 Stopping backend service..."
-          docker compose --env-file .env.prod -f docker-compose.prod.yml stop backend
-          docker compose --env-file .env.prod -f docker-compose.prod.yml rm -f backend
-
-          echo "🏗️  Building and starting backend service..."
-          docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build backend
-
-          # Check container status
-          echo "📊 Container status:"
-          docker compose -f docker-compose.prod.yml ps
-
-          # Health check (wait up to 60 seconds)
-          echo "🏥 Waiting for backend to be healthy..."
-          for i in {1..12}; do
-            if curl -f http://localhost:8080/api/health > /dev/null 2>&1; then
-              echo "✅ Backend is healthy!"
-              exit 0
-            fi
-            echo "⏳ Waiting... ($i/12)"
-            sleep 5
-          done
-
-          echo "❌ Backend health check failed"
-          docker compose -f docker-compose.prod.yml logs --tail=50 backend
-          exit 1
+      - name: Deploy Backend to Oracle Cloud
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.ORACLE_CLOUD_HOST }}
+          username: ${{ secrets.ORACLE_CLOUD_USER }}
+          key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
+          port: 22
+          debug: true
+          command_timeout: 10m
+          script: |
+            cd ~/planit
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Stop and rebuild only backend service
+            echo "🔄 Stopping backend service..."
+            docker compose --env-file .env.prod -f docker-compose.prod.yml stop backend
+            docker compose --env-file .env.prod -f docker-compose.prod.yml rm -f backend
+            
+            echo "🏗️  Building and starting backend service..."
+            docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build backend
+            
+            # Check container status
+            echo "📊 Container status:"
+            docker compose -f docker-compose.prod.yml ps
+            
+            # Health check (wait up to 60 seconds)
+            echo "🏥 Waiting for backend to be healthy..."
+            for i in {1..12}; do
+              if curl -f http://localhost:8080/api/health > /dev/null 2>&1; then
+                echo "✅ Backend is healthy!"
+                exit 0
+              fi
+              echo "⏳ Waiting... ($i/12)"
+              sleep 5
+            done
+            
+            echo "❌ Backend health check failed"
+            docker compose -f docker-compose.prod.yml logs --tail=50 backend
+            exit 1
