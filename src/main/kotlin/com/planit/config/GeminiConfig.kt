@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class GeminiConfig(@param:Value("\${gemini.api-key}") private val apiKey: String) {
+class GeminiConfig(@Value("\${gemini.api-key}") private val apiKey: String) {
 
   /** Gemini API 클라이언트를 스프링 빈으로 등록합니다. 'gemini.api-key' 프로퍼티 값을 사용하여 Client를 초기화합니다. */
   @Bean

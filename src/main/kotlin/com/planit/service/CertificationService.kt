@@ -41,7 +41,7 @@ class CertificationService(
 
   private fun buildAnalysisPrompt(challengeTitle: String): String {
     return """
-        이 사진이 다음 챌린지 주제에 적합한지 판단해줘.
+        이 사진이 다음 챌린지 주제에 적합한 일일 인증인지 판단해줘.
         챌린지 제목: $challengeTitle
 
         답변은 다음 JSON 형식으로만 해줘. 마크다운 태그 없이 순수 JSON 문자열만 반환해:
@@ -49,7 +49,8 @@ class CertificationService(
           "isSuitable": boolean,
           "reason": "string"
         }
-        """.trimIndent()
+        """
+      .trimIndent()
   }
 
   private fun parseAnalysisResponse(jsonStringRaw: String): CertificationAnalysisResponse {
@@ -92,9 +93,10 @@ class CertificationService(
    */
   @Transactional
   fun reanalyzeCertification(certificationId: Long, userLoginId: String): CertificationResponse {
-    val certification = certificationRepository.findById(certificationId).orElseThrow {
-      CertificationNotFoundException()
-    }
+    val certification =
+      certificationRepository.findById(certificationId).orElseThrow {
+        CertificationNotFoundException()
+      }
 
     if (certification.user.loginId != userLoginId) {
       throw CertificationUpdateForbiddenException("이 인증을 재분석할 권한이 없습니다.")
