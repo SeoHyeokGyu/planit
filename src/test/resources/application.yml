@@ -25,3 +25,6 @@ logging:
   level:
     com.planit: DEBUG
     org.hibernate.SQL: DEBUG
+
+gemini:
+  models: gemini-1.5-flash
