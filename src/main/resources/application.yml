@@ -52,6 +52,10 @@ google:
 weather:
   api-key: ${WEATHER_API_KEY:}
 
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model-id: gemini-3-flash-preview
+
 logging:
   level:
     com.planit: DEBUG

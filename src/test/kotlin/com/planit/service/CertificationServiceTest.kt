@@ -8,6 +8,7 @@ import com.planit.entity.Challenge
 import com.planit.entity.User
 import com.planit.exception.CertificationUpdateForbiddenException
 import com.planit.exception.CertificationUpdatePeriodExpiredException
+import com.planit.exception.CertificationNotFoundException
 import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
@@ -120,6 +121,34 @@ class CertificationServiceTest {
       assertThat(result.isSuitable).isFalse()
       assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
     }
+
+    @Test
+    @DisplayName("인증 정보가 없으면 CertificationNotFoundException을 던진다")
+    fun `throws CertificationNotFoundException when certification not found`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.empty()
+
+      // When & Then
+      assertThrows<CertificationNotFoundException> {
+        certificationService.analyzeCertificationPhoto(1L, file)
+      }
+    }
+
+    @Test
+    @DisplayName("JSON 파싱 실패 시 기본 메시지를 반환한다")
+    fun `returns default message when JSON parsing fails`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { geminiService.analyzeImage(any(), any()) } returns "Invalid JSON"
+      every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } throws RuntimeException("JSON Error")
+
+      // When
+      val result = certificationService.analyzeCertificationPhoto(1L, file)
+
+      // Then
+      assertThat(result.isSuitable).isFalse()
+      assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
+    }
   }
 
   @Nested
@@ -220,6 +249,24 @@ class CertificationServiceTest {
         certificationService.processCertificationPhoto(1L, file, user.loginId)
       }
 
+      verify(exactly = 1) { fileStorageService.deleteFile(photoUrl) }
+    }
+
+    @Test
+    @DisplayName("롤백 삭제 실패 시에도 원래 예외를 던진다")
+    fun `throws original exception even if rollback deletion fails`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      every { fileStorageService.storeFile(any()) } returns photoUrl
+      every { certificationRepository.findById(1L) } throws RuntimeException("Original DB Error")
+      every { fileStorageService.deleteFile(any()) } throws RuntimeException("Delete Error")
+
+      // When & Then
+      val exception = assertThrows<RuntimeException> {
+        certificationService.processCertificationPhoto(1L, file, user.loginId)
+      }
+
+      assertThat(exception.message).isEqualTo("Original DB Error")
       verify(exactly = 1) { fileStorageService.deleteFile(photoUrl) }
     }
   }
