@@ -8,6 +8,7 @@ import {
   useUpdateCertification,
   useUploadCertificationPhoto,
   useDeleteCertificationPhoto,
+  useReanalyzeCertification,
 } from "@/hooks/useCertification";
 import {
   Card,
@@ -34,6 +35,9 @@ import {
   X,
   Camera,
   Bot,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -71,6 +75,7 @@ export default function CertificationDetailPage() {
   const deleteMutation = useDeleteCertification();
   const uploadPhotoMutation = useUploadCertificationPhoto();
   const deletePhotoMutation = useDeleteCertificationPhoto();
+  const reanalyzeMutation = useReanalyzeCertification();
 
   const handleEditClick = () => {
     if (data) {
@@ -206,6 +211,26 @@ export default function CertificationDetailPage() {
     uploadPhotoMutation.isPending ||
     deletePhotoMutation.isPending ||
     isCompressing;
+
+  // AI 분석 결과 처리 (JSON 문자열인 경우 파싱)
+  const getAnalysisData = () => {
+    if (!data.analysisResult) return { suitable: data.isSuitable, reason: null };
+    
+    if (data.analysisResult.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(data.analysisResult);
+        return {
+          suitable: data.isSuitable ?? parsed.isSuitable,
+          reason: parsed.reason || data.analysisResult
+        };
+      } catch (e) {
+        return { suitable: data.isSuitable, reason: data.analysisResult };
+      }
+    }
+    return { suitable: data.isSuitable, reason: data.analysisResult };
+  };
+
+  const { suitable, reason } = getAnalysisData();
 
   return (
     <div className={layoutStyles.pageRoot}>
@@ -345,14 +370,43 @@ export default function CertificationDetailPage() {
               )
             )}
 
-            {data.analysisResult && (
-              <div className={aiStyles.container}>
+            {reason && (
+              <div className={`${aiStyles.container} ${
+                suitable === true ? aiStyles.variants.suitable : 
+                suitable === false ? aiStyles.variants.unsuitable : 
+                aiStyles.variants.default
+              }`}>
                 <div className={aiStyles.titleWrapper}>
-                  <Bot className={aiStyles.icon} />
-                  AI 분석 결과
+                  {suitable === true ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  ) : suitable === false ? (
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                  ) : (
+                    <Bot className="w-5 h-5 text-purple-600" />
+                  )}
+                  AI 인증 분석 결과
+                  {suitable === true && (
+                    <Badge className="ml-2 bg-green-500 hover:bg-green-600">적합</Badge>
+                  )}
+                  {suitable === false && (
+                    <Badge variant="destructive" className="ml-2">부적합</Badge>
+                  )}
+                  {isAuthor && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="ml-auto h-6 px-2 text-gray-500 hover:text-blue-600"
+                      onClick={() => reanalyzeMutation.mutate(certificationId)}
+                      disabled={reanalyzeMutation.isPending}
+                      title="AI 재분석 요청"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${reanalyzeMutation.isPending ? "animate-spin" : ""}`} />
+                      <span className="ml-1 text-xs">재분석</span>
+                    </Button>
+                  )}
                 </div>
                 <p className={aiStyles.content}>
-                  {data.analysisResult}
+                  {reason}
                 </p>
               </div>
             )}

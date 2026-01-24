@@ -143,10 +143,15 @@ export const themeStyles = {
 // AI Analysis & Recommendations
 export const aiStyles = {
   // Analysis Result
-  container: "bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-100 shadow-sm",
-  titleWrapper: "flex items-center gap-2 mb-3 text-purple-900 font-bold",
-  icon: "w-5 h-5 text-purple-600",
-  content: "text-purple-800 leading-relaxed font-medium whitespace-pre-wrap",
+  container: "rounded-xl p-5 border shadow-sm",
+  variants: {
+    suitable: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-100 text-green-900",
+    unsuitable: "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-100 text-amber-900",
+    default: "bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-100 text-purple-900"
+  },
+  titleWrapper: "flex items-center gap-2 mb-3 font-bold",
+  icon: "w-5 h-5",
+  content: "leading-relaxed font-medium whitespace-pre-wrap",
 
   // Recommendations List Header
   header: "flex items-center justify-between",
