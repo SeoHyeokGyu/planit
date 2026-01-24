@@ -62,6 +62,21 @@ class CertificationController(
   }
 
   /**
+   * 특정 인증의 사진을 AI로 재분석합니다.
+   * @param id 재분석할 인증의 ID
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 분석 결과가 업데이트된 인증 정보
+   */
+  @PostMapping("/{id}/analyze")
+  fun reanalyzeCertification(
+    @PathVariable id: Long,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.reanalyzeCertification(id, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
    * 특정 인증의 사진을 삭제합니다.
    * @param id 사진을 삭제할 인증의 ID
    * @param userDetails 현재 로그인한 사용자 정보

@@ -159,6 +159,36 @@ class FileStorageService(
   }
 
   /**
+   * 주어진 URL에 해당하는 파일 객체를 반환합니다.
+   *
+   * @param fileUrl 파일 URL (예: /images/2026/01/13/filename.jpg)
+   * @return File 객체
+   * @throws IllegalArgumentException 잘못된 경로이거나 파일이 존재하지 않는 경우
+   */
+  fun getFile(fileUrl: String): File {
+    if (fileUrl.isBlank()) throw IllegalArgumentException("파일 URL이 비어있습니다.")
+
+    val relativePathStr = if (fileUrl.startsWith(uploadUrlPath)) {
+      fileUrl.substring(uploadUrlPath.length).trimStart('/')
+    } else {
+      throw IllegalArgumentException("잘못된 파일 URL 형식입니다.")
+    }
+
+    val filePath = uploadDir.resolve(relativePathStr).normalize().toAbsolutePath()
+
+    if (!filePath.startsWith(uploadDir.toAbsolutePath())) {
+      throw IllegalArgumentException("잘못된 파일 경로입니다.")
+    }
+
+    val file = filePath.toFile()
+    if (!file.exists() || !file.isFile) {
+      throw IllegalArgumentException("파일을 찾을 수 없습니다.")
+    }
+
+    return file
+  }
+
+  /**
    * DB에 존재하지 않는 고아 파일들을 정리합니다.
    * 생성된 지 24시간이 지난 파일 중 validFileUrls에 없는 파일을 삭제합니다.
    *

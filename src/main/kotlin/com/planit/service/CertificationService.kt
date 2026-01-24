@@ -39,6 +39,29 @@ class CertificationService(
 
   private val logger = LoggerFactory.getLogger(CertificationService::class.java)
 
+  private fun buildAnalysisPrompt(challengeTitle: String): String {
+    return """
+        이 사진이 다음 챌린지 주제에 적합한지 판단해줘.
+        챌린지 제목: $challengeTitle
+
+        답변은 다음 JSON 형식으로만 해줘. 마크다운 태그 없이 순수 JSON 문자열만 반환해:
+        {
+          "isSuitable": boolean,
+          "reason": "string"
+        }
+        """.trimIndent()
+  }
+
+  private fun parseAnalysisResponse(jsonStringRaw: String): CertificationAnalysisResponse {
+    return try {
+      val jsonString = jsonStringRaw.replace("```json", "").replace("```", "").trim()
+      objectMapper.readValue(jsonString, CertificationAnalysisResponse::class.java)
+    } catch (e: Exception) {
+      logger.error("Gemini 이미지 분석 결과 파싱 실패", e)
+      CertificationAnalysisResponse(isSuitable = false, reason = "이미지 분석 결과를 처리할 수 없습니다.")
+    }
+  }
+
   /** Gemini를 사용하여 인증 사진을 분석합니다. (별도 메소드로 분리) */
   fun analyzeCertificationPhoto(
     certificationId: Long,
@@ -49,27 +72,52 @@ class CertificationService(
         CertificationNotFoundException()
       }
 
-    val prompt =
-      """
-        이 사진이 다음 챌린지 주제에 적합한지 판단해줘.
-        챌린지 제목: ${certification.challenge.title}
-
-        답변은 다음 JSON 형식으로만 해줘. 마크다운 태그 없이 순수 JSON 문자열만 반환해:
-        {
-          "isSuitable": boolean,
-          "reason": "string"
-        }
-        """
-        .trimIndent()
+    val prompt = buildAnalysisPrompt(certification.challenge.title)
 
     return try {
       val response = geminiService.analyzeImage(prompt, file)
-      val jsonString = response.replace("```json", "").replace("```", "").trim()
-      objectMapper.readValue(jsonString, CertificationAnalysisResponse::class.java)
+      parseAnalysisResponse(response)
     } catch (e: Exception) {
       logger.error("Gemini 이미지 분석 실패", e)
       CertificationAnalysisResponse(isSuitable = false, reason = "이미지 분석을 완료할 수 없습니다.")
     }
+  }
+
+  /**
+   * 기존에 업로드된 인증 사진을 다시 분석합니다.
+   *
+   * @param certificationId 인증 ID
+   * @param userLoginId 요청자 ID
+   * @return 업데이트된 인증 정보
+   */
+  @Transactional
+  fun reanalyzeCertification(certificationId: Long, userLoginId: String): CertificationResponse {
+    val certification = certificationRepository.findById(certificationId).orElseThrow {
+      CertificationNotFoundException()
+    }
+
+    if (certification.user.loginId != userLoginId) {
+      throw CertificationUpdateForbiddenException("이 인증을 재분석할 권한이 없습니다.")
+    }
+
+    val photoUrl = certification.photoUrl ?: throw IllegalArgumentException("분석할 사진이 없습니다.")
+    val file = fileStorageService.getFile(photoUrl)
+    val prompt = buildAnalysisPrompt(certification.challenge.title)
+
+    try {
+      val response = geminiService.analyzeImage(prompt, file)
+      val analysisResult = parseAnalysisResponse(response)
+
+      certification.isSuitable = analysisResult.isSuitable
+      certification.analysisResult = analysisResult.reason
+    } catch (e: Exception) {
+      logger.error("재분석 실패", e)
+      // 재분석 실패 시 기존 결과를 유지하거나 에러 메시지로 덮어쓸지 결정 필요.
+      // 여기서는 에러 발생 시 예외를 던져서 사용자에게 알림.
+      throw RuntimeException("이미지 재분석 중 오류가 발생했습니다.", e)
+    }
+
+    return CertificationResponse.from(certification)
   }
 
   /**
@@ -335,7 +383,8 @@ class CertificationService(
     }
 
     certification.photoUrl = photoUrl
-    certification.analysisResult = analysisResult?.let { objectMapper.writeValueAsString(it) }
+    certification.isSuitable = analysisResult?.isSuitable
+    certification.analysisResult = analysisResult?.reason
     val updatedCertification = certificationRepository.save(certification)
     return CertificationResponse.from(updatedCertification)
   }

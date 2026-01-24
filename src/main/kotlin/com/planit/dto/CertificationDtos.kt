@@ -53,6 +53,7 @@ data class CertificationResponse(
     val title: String,
     val content: String,
     val photoUrl: String?,
+    val isSuitable: Boolean?,
     val analysisResult: String?,
     val authorNickname: String,
     val senderNickname: String? = null,
@@ -74,6 +75,7 @@ data class CertificationResponse(
                 title = certification.title,
                 content = certification.content,
                 photoUrl = certification.photoUrl,
+                isSuitable = certification.isSuitable,
                 analysisResult = certification.analysisResult,
                 // 작성자 닉네임이 없을 경우 로그인 ID 사용
                 authorNickname = certification.user.nickname ?: certification.user.loginId,
