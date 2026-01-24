@@ -151,7 +151,7 @@ class ChallengeServiceTest {
         // Given
         val searchRequest = ChallengeSearchRequest()
         val challenges = listOf(challenge)
-        every { challengeRepository.findAll() } returns challenges
+        every { challengeRepository.findAllOrderByCreatedAtDesc() } returns challenges
 
         // When
         val result = challengeService.getChallenges(searchRequest)
@@ -160,7 +160,7 @@ class ChallengeServiceTest {
         assertNotNull(result)
         assertEquals(1, result.size)
         assertEquals("30일 운동 챌린지", result[0].title)
-        verify(exactly = 1) { challengeRepository.findAll() }
+        verify(exactly = 1) { challengeRepository.findAllOrderByCreatedAtDesc() }
     }
 
     @Test
@@ -169,7 +169,7 @@ class ChallengeServiceTest {
         // Given
         val searchRequest = ChallengeSearchRequest(category = "EXERCISE")
         val challenges = listOf(challenge)
-        every { challengeRepository.findByCategory("EXERCISE") } returns challenges
+        every { challengeRepository.findByCategoryOrderByCreatedAtDesc("EXERCISE") } returns challenges
 
         // When
         val result = challengeService.getChallenges(searchRequest)
@@ -178,7 +178,7 @@ class ChallengeServiceTest {
         assertNotNull(result)
         assertEquals(1, result.size)
         assertEquals("EXERCISE", result[0].category)
-        verify(exactly = 1) { challengeRepository.findByCategory("EXERCISE") }
+        verify(exactly = 1) { challengeRepository.findByCategoryOrderByCreatedAtDesc("EXERCISE") }
     }
 
     @Test

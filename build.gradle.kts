@@ -18,6 +18,9 @@ java { sourceCompatibility = JavaVersion.VERSION_17 }
 repositories { mavenCentral() }
 
 dependencies {
+  // Google GenAI SDK
+  implementation("com.google.genai:google-genai:1.0.0")
+
   // Spring Boot Starters
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-aop")
@@ -66,4 +69,18 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
   jvmArgs("-XX:+EnableDynamicAgentLoading")
   useJUnitPlatform()
+}
+
+// Kover 테스트 커버리지 리포트 설정
+koverReport {
+  defaults {
+    xml {
+      // ./gradlew check 실행 시 XML 리포트를 자동으로 생성합니다. (CI/CD 연동용)
+      onCheck = true
+    }
+    html {
+      // ./gradlew check 실행 시 HTML 리포트를 자동으로 생성합니다. (로컬 개발 확인용)
+      onCheck = true
+    }
+  }
 }

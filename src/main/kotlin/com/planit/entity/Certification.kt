@@ -48,6 +48,18 @@ class Certification(
   var photoUrl: String? = null,
 
   /**
+   * AI 분석 결과 (선택 사항)
+   */
+  @Column(nullable = true, length = 2000)
+  var analysisResult: String? = null,
+
+  /**
+   * AI 분석 주제 적합 여부 (선택 사항)
+   */
+  @Column(nullable = true)
+  var isSuitable: Boolean? = null,
+
+  /**
    * 인증의 삭제 여부 (Soft Delete에 사용)
    */
   @Column(nullable = false)

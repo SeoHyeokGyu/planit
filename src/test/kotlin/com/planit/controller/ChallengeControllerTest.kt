@@ -6,6 +6,7 @@ import com.planit.config.JwtTokenProvider
 import com.planit.dto.*
 import com.planit.entity.User
 import com.planit.enums.ParticipantStatusEnum
+import com.planit.service.ChallengeRecommendService
 import com.planit.service.ChallengeService
 import com.planit.util.setPrivateProperty
 import io.mockk.every
@@ -25,7 +26,7 @@ import org.springframework.test.web.servlet.*
 import java.time.LocalDateTime
 import java.util.NoSuchElementException
 
-@WebMvcTest(ChallengeController::class)
+@WebMvcTest(ChallengeController::class, properties = ["file.upload-url-path=/uploads"])
 @AutoConfigureMockMvc(addFilters = false)
 class ChallengeControllerTest {
     @Autowired
@@ -36,6 +37,9 @@ class ChallengeControllerTest {
 
     @MockkBean
     private lateinit var challengeService: ChallengeService
+
+    @MockkBean
+    private lateinit var recommendService: ChallengeRecommendService
 
     @MockkBean
     private lateinit var jwtTokenProvider: JwtTokenProvider

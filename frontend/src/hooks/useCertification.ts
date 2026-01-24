@@ -100,6 +100,20 @@ export const useUploadCertificationPhoto = () => {
   });
 };
 
+export const useReanalyzeCertification = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => certificationService.reanalyze(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ["certification", id] });
+      toast.success("AI 분석이 완료되었습니다.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "AI 분석 재시도 실패");
+    },
+  });
+};
+
 export const useDeleteCertificationPhoto = () => {
   const queryClient = useQueryClient();
   return useMutation({

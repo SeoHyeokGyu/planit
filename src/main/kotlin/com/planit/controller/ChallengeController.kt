@@ -1,24 +1,34 @@
 package com.planit.controller
 
 import com.planit.dto.*
+import com.planit.service.ChallengeRecommendService
 import com.planit.service.ChallengeService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/challenge")
-@Validated
 class ChallengeController(
-    private val challengeService: ChallengeService
+    private val challengeService: ChallengeService,
+    private val recommendService: ChallengeRecommendService
 ) {
 
     /**
+     * 사용자 맞춤형 챌린지 추천
+     */
+    @GetMapping("/recommend")
+    fun recommendChallenges(
+        @AuthenticationPrincipal userDetails: CustomUserDetails
+    ): ResponseEntity<ApiResponse<List<ChallengeRecommendationResponse>>> {
+        val response = recommendService.recommendChallenges(userDetails.username)
+        return ResponseEntity.ok(ApiResponse.success(response))
+    }
+
+    /**
      * 챌린지 생성
-     * POST /api/challenge
      */
     @PostMapping
     fun createChallenge(

@@ -18,7 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 
-@WebMvcTest(AuthController::class)
+@WebMvcTest(AuthController::class, properties = ["file.upload-url-path=/uploads"])
 @AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
   @Autowired private lateinit var mockMvc: MockMvc

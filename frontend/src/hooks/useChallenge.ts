@@ -59,6 +59,16 @@ export const useMyChallenges = () => {
   });
 };
 
+export const useChallengeRecommendations = () => {
+  return useQuery({
+    queryKey: ["challengeRecommendations"],
+    queryFn: () => challengeService.getRecommendations(),
+    select: (data) => data.data,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    retry: 1,
+  });
+};
+
 // --- Mutations ---
 
 export const useCreateChallenge = () => {

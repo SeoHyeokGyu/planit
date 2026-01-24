@@ -158,3 +158,47 @@ export const themeStyles = {
     headerBg: "bg-gradient-to-r from-blue-50 to-indigo-50",
   },
 };
+
+// AI Analysis & Recommendations
+export const aiStyles = {
+  // Analysis Result
+  container: "rounded-xl p-5 border shadow-sm",
+  variants: {
+    suitable: "bg-gradient-to-r from-green-50 to-emerald-50 border-green-100 text-green-900",
+    unsuitable: "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-100 text-amber-900",
+    default: "bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-100 text-purple-900"
+  },
+  titleWrapper: "flex items-center gap-2 mb-3 font-bold",
+  icon: "w-5 h-5",
+  content: "leading-relaxed font-medium whitespace-pre-wrap",
+
+  // Recommendations List Header
+  header: "flex items-center justify-between",
+  titleGroup: "flex items-center gap-2",
+  iconWrapper: "p-1.5 rounded-lg text-white", // Usage: `${aiStyles.iconWrapper} ${themeStyles.info.bg}`
+  title: "text-lg font-bold text-gray-900",
+  refreshBtn: "text-gray-500 hover:text-blue-600",
+  
+  // States (Empty / Error)
+  emptyCard: "border-dashed bg-gray-50",
+  centerContent: "p-8 flex flex-col justify-center items-center text-center",
+  errorCard: "border-red-100 bg-red-50",
+  errorContent: "p-4 text-center",
+  errorText: "text-sm text-red-600 font-medium",
+  retryLink: "text-red-700 underline",
+  
+  // Item Card
+  card: "hover:shadow-md transition-shadow border-l-4 border-l-indigo-500 cursor-pointer group",
+  cardContent: "p-4",
+  badgeGroup: "flex gap-2",
+  cardTitle: "font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors",
+  cardDesc: "text-sm text-gray-600 mb-3 line-clamp-2",
+  
+  // Tips & Reasons
+  tipBox: "bg-gray-50 rounded p-2 mb-3",
+  tipText: "text-xs text-gray-500",
+  tipLabel: "font-bold text-indigo-600",
+  
+  // Actions
+  actionBtn: "w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800",
+};
