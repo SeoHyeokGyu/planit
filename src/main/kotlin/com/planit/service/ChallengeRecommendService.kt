@@ -16,35 +16,45 @@ import java.time.LocalDateTime
 @Service
 @Transactional(readOnly = true)
 class ChallengeRecommendService(
-    private val challengeRepository: ChallengeRepository,
-    private val participantRepository: ChallengeParticipantRepository,
-    private val userRepository: UserRepository,
-    private val geminiService: GeminiService,
-    private val objectMapper: ObjectMapper
+  private val challengeRepository: ChallengeRepository,
+  private val participantRepository: ChallengeParticipantRepository,
+  private val userRepository: UserRepository,
+  private val geminiService: GeminiService,
+  private val objectMapper: ObjectMapper,
 ) {
-    private val logger = LoggerFactory.getLogger(ChallengeRecommendService::class.java)
+  private val log = LoggerFactory.getLogger(javaClass)
 
-    fun recommendChallenges(loginId: String): List<ChallengeRecommendationResponse> {
-        val user = userRepository.findByLoginId(loginId) ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
-        
-        // 1. 사용자 컨텍스트 수집
-        val participants = participantRepository.findByLoginId(loginId)
-        val recentCategories = participants.take(10).mapNotNull { 
-            // 실무에서는 challengeRepository.findById를 쓰거나 Fetch Join을 씁니다. 
-            // 여기서는 간단하게 enum으로 변환 가능한 형태라고 가정합니다.
-            try { ChallengeCategoryEnum.valueOf(it.challenge.category) } catch(e: Exception) { null }
-        }.distinct()
+  fun recommendChallenges(loginId: String): List<ChallengeRecommendationResponse> {
+    val user =
+      userRepository.findByLoginId(loginId) ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
 
-        val ongoingChallenges = participants
-            .filter { it.status == ParticipantStatusEnum.ACTIVE }
-            .map { it.challenge.title }
+    // 1. 사용자 컨텍스트 수집
+    val participants = participantRepository.findByLoginId(loginId)
+    val recentCategories =
+      participants
+        .take(10)
+        .mapNotNull {
+          // 실무에서는 challengeRepository.findById를 쓰거나 Fetch Join을 씁니다.
+          // 여기서는 간단하게 enum으로 변환 가능한 형태라고 가정합니다.
+          try {
+            ChallengeCategoryEnum.valueOf(it.challenge.category)
+          } catch (e: Exception) {
+            null
+          }
+        }
+        .distinct()
 
-        val popularChallenges = challengeRepository.findAllOrderByParticipantCntDesc()
-            .take(5)
-            .map { "${it.title}(${it.category})" }
+    val ongoingChallenges =
+      participants.filter { it.status == ParticipantStatusEnum.ACTIVE }.map { it.challenge.title }
 
-        // 2. Gemini 프롬프트 작성
-        val prompt = """
+    val popularChallenges =
+      challengeRepository.findAllOrderByParticipantCntDesc().take(5).map {
+        "${it.title}(${it.category})"
+      }
+
+    // 2. Gemini 프롬프트 작성
+    val prompt =
+      """
             사용자 맞춤형 챌린지를 3개 추천해줘.
             
             사용자 정보:
@@ -70,17 +80,21 @@ class ChallengeRecommendService(
                 "reason": "최근 운동 챌린지에 참여하셨는데, 수분 보충 습관을 더하면 시너지가 날 것 같습니다."
               }
             ]
-        """.trimIndent()
+        """
+        .trimIndent()
 
-        // 3. Gemini 호출 및 파싱
-        return try {
-            val responseText = geminiService.generateContent(prompt)
-            // JSON 응답에서 불필요한 마크다운 코드 블록(```json ... ```) 제거
-            val cleanJson = responseText.replace("```json", "").replace("```", "").trim()
-            objectMapper.readValue(cleanJson, objectMapper.typeFactory.constructCollectionType(List::class.java, ChallengeRecommendationResponse::class.java))
-        } catch (e: Exception) {
-            logger.error("챌린지 추천 생성 실패", e)
-            emptyList()
-        }
-    }
+    // 3. Gemini 호출 및 파싱
+    val responseText = geminiService.generateContent(prompt)
+    log.debug("response text: $responseText")
+
+    // JSON 응답에서 불필요한 마크다운 코드 블록(```json ... ```) 제거
+    val cleanJson = responseText.replace("```json", "").replace("```", "").trim()
+    return objectMapper.readValue(
+      cleanJson,
+      objectMapper.typeFactory.constructCollectionType(
+        List::class.java,
+        ChallengeRecommendationResponse::class.java,
+      ),
+    )
+  }
 }

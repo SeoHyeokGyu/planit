@@ -33,13 +33,14 @@ import {
   Save,
   X,
   Camera,
+  Bot,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { FallbackImage } from "@/components/ui/fallback-image";
 import { ALLOWED_IMAGE_EXTENSIONS_STRING } from "@/lib/imageUtils";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { layoutStyles, headerStyles, cardStyles, buttonStyles, themeStyles } from "@/styles/common";
+import { layoutStyles, headerStyles, cardStyles, buttonStyles, themeStyles, aiStyles } from "@/styles/common";
 import { useConfirm } from "@/hooks/useConfirm";
 
 export default function CertificationDetailPage() {
@@ -342,6 +343,18 @@ export default function CertificationDetailPage() {
                   />
                 </div>
               )
+            )}
+
+            {data.analysisResult && (
+              <div className={aiStyles.container}>
+                <div className={aiStyles.titleWrapper}>
+                  <Bot className={aiStyles.icon} />
+                  AI 분석 결과
+                </div>
+                <p className={aiStyles.content}>
+                  {data.analysisResult}
+                </p>
+              </div>
             )}
 
             <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
