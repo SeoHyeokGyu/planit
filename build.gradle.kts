@@ -18,6 +18,9 @@ java { sourceCompatibility = JavaVersion.VERSION_17 }
 repositories { mavenCentral() }
 
 dependencies {
+  // Google GenAI SDK
+  implementation("com.google.genai:google-genai:1.0.0")
+
   // Spring Boot Starters
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-aop")

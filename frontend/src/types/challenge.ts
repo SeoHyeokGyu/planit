@@ -75,3 +75,12 @@ export interface ChallengeStatisticsResponse {
   completionRate: number;
   averageProgress: number;
 }
+
+// 챌린지 추천 응답
+export interface ChallengeRecommendationResponse {
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  reason: string; // 추천 사유
+}

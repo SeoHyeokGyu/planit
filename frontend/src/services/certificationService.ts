@@ -20,6 +20,10 @@ export const certificationService = {
     return api.post(`/api/certifications/${id}/photo`, formData);
   },
 
+  reanalyze: async (id: number): Promise<ApiResponse<CertificationResponse>> => {
+    return api.post(`/api/certifications/${id}/analyze`);
+  },
+
   deletePhoto: async (id: number): Promise<ApiResponse<CertificationResponse>> => {
     return api.delete(`/api/certifications/${id}/photo`);
   },

@@ -26,6 +26,16 @@ data class CertificationUpdateRequest(
 )
 
 /**
+ * AI 인증 사진 분석 결과 DTO
+ * @property isSuitable 챌린지 주제 적합 여부
+ * @property reason 판단 근거 또는 실패 사유
+ */
+data class CertificationAnalysisResponse(
+    val isSuitable: Boolean,
+    val reason: String
+)
+
+/**
  * 인증 정보 응답 DTO
  * @property id 인증 ID
  * @property title 인증 제목
@@ -43,6 +53,8 @@ data class CertificationResponse(
     val title: String,
     val content: String,
     val photoUrl: String?,
+    val isSuitable: Boolean?,
+    val analysisResult: String?,
     val authorNickname: String,
     val senderNickname: String? = null,
     val senderLoginId: String? = null,
@@ -63,6 +75,8 @@ data class CertificationResponse(
                 title = certification.title,
                 content = certification.content,
                 photoUrl = certification.photoUrl,
+                isSuitable = certification.isSuitable,
+                analysisResult = certification.analysisResult,
                 // 작성자 닉네임이 없을 경우 로그인 ID 사용
                 authorNickname = certification.user.nickname ?: certification.user.loginId,
                 senderNickname = certification.user.nickname ?: certification.user.loginId,

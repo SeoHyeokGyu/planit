@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 /** 배지 관련 API 엔드포인트의 동작을 검증하는 테스트 클래스입니다. */
-@WebMvcTest(BadgeController::class)
+@WebMvcTest(BadgeController::class, properties = ["file.upload-url-path=/uploads"])
 @AutoConfigureMockMvc(addFilters = false)
 class BadgeControllerTest {
   @Autowired private lateinit var mockMvc: MockMvc

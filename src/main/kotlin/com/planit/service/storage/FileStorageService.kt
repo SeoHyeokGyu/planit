@@ -75,7 +75,7 @@ class FileStorageService(
       // 2. 고유한 파일명 생성
       val originalFilename = file.originalFilename ?: "unknown"
       val extension = getExtension(originalFilename)
-      val filename = "${UUID.randomUUID()}_${originalFilename.replace("\\s".toRegex(), "_")}"
+      val filename = "${UUID.randomUUID()}.$extension"
 
       // 3. 저장될 절대 경로 계산
       val targetLocation = targetDir.resolve(filename).normalize().toAbsolutePath()
@@ -156,6 +156,36 @@ class FileStorageService(
       // 여기서는 로그만 남기고 진행
       System.err.println("파일 삭제 실패: $fileUrl, ${e.message}")
     }
+  }
+
+  /**
+   * 주어진 URL에 해당하는 파일 객체를 반환합니다.
+   *
+   * @param fileUrl 파일 URL (예: /images/2026/01/13/filename.jpg)
+   * @return File 객체
+   * @throws IllegalArgumentException 잘못된 경로이거나 파일이 존재하지 않는 경우
+   */
+  fun getFile(fileUrl: String): File {
+    if (fileUrl.isBlank()) throw IllegalArgumentException("파일 URL이 비어있습니다.")
+
+    val relativePathStr = if (fileUrl.startsWith(uploadUrlPath)) {
+      fileUrl.substring(uploadUrlPath.length).trimStart('/')
+    } else {
+      throw IllegalArgumentException("잘못된 파일 URL 형식입니다.")
+    }
+
+    val filePath = uploadDir.resolve(relativePathStr).normalize().toAbsolutePath()
+
+    if (!filePath.startsWith(uploadDir.toAbsolutePath())) {
+      throw IllegalArgumentException("잘못된 파일 경로입니다.")
+    }
+
+    val file = filePath.toFile()
+    if (!file.exists() || !file.isFile) {
+      throw IllegalArgumentException("파일을 찾을 수 없습니다.")
+    }
+
+    return file
   }
 
   /**

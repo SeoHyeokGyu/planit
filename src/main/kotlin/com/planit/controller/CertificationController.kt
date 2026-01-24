@@ -43,7 +43,8 @@ class CertificationController(
    * [동작 과정]
    * 1. 클라이언트가 전송한 사진 파일(MultipartFile)을 받습니다.
    * 2. FileStorageService를 통해 파일을 물리적 저장소에 저장하고, 웹 접근 URL을 반환받습니다.
-   * 3. 반환받은 URL을 CertificationService를 통해 해당 인증 데이터의 photoUrl 필드에 업데이트합니다.
+   * 3. CertificationService를 통해 Gemini 분석을 수행합니다.
+   * 4. 반환받은 URL과 분석 결과를 CertificationService를 통해 해당 인증 데이터에 업데이트합니다.
    * 
    * @param id 사진을 추가할 인증의 ID
    * @param file 업로드할 사진 파일 (form-data key: "file")
@@ -56,12 +57,22 @@ class CertificationController(
     @RequestParam("file") file: MultipartFile,
     @AuthenticationPrincipal userDetails: CustomUserDetails
   ): ResponseEntity<ApiResponse<CertificationResponse>> {
-    // 파일을 서버(로컬 또는 볼륨)에 저장하고 접근 URL을 받음
-    val photoUrl = fileStorageService.storeFile(file)
-    
-    // 인증 정보(DB)에 사진 URL을 업데이트
-    val response = certificationService.uploadCertificationPhoto(id, photoUrl, userDetails.username)
-    
+    val response = certificationService.processCertificationPhoto(id, file, userDetails.username)
+    return ResponseEntity.ok(ApiResponse.success(response))
+  }
+
+  /**
+   * 특정 인증의 사진을 AI로 재분석합니다.
+   * @param id 재분석할 인증의 ID
+   * @param userDetails 현재 로그인한 사용자 정보
+   * @return 분석 결과가 업데이트된 인증 정보
+   */
+  @PostMapping("/{id}/analyze")
+  fun reanalyzeCertification(
+    @PathVariable id: Long,
+    @AuthenticationPrincipal userDetails: CustomUserDetails
+  ): ResponseEntity<ApiResponse<CertificationResponse>> {
+    val response = certificationService.reanalyzeCertification(id, userDetails.username)
     return ResponseEntity.ok(ApiResponse.success(response))
   }
 

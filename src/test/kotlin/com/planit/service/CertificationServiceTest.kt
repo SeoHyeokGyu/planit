@@ -2,11 +2,13 @@ package com.planit.service
 
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationUpdateRequest
+import com.planit.dto.CertificationAnalysisResponse
 import com.planit.entity.Certification
 import com.planit.entity.Challenge
 import com.planit.entity.User
 import com.planit.exception.CertificationUpdateForbiddenException
 import com.planit.exception.CertificationUpdatePeriodExpiredException
+import com.planit.exception.CertificationNotFoundException
 import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
@@ -15,6 +17,7 @@ import com.planit.enums.BadgeType
 import com.planit.service.badge.BadgeService
 import com.planit.service.storage.FileStorageService
 import com.planit.util.setPrivateProperty
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -24,6 +27,7 @@ import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 import java.util.*
 
@@ -39,6 +43,8 @@ class CertificationServiceTest {
   @MockK private lateinit var badgeService: BadgeService
   @MockK private lateinit var streakService: StreakService
   @MockK private lateinit var fileStorageService: FileStorageService
+  @MockK private lateinit var geminiService: GeminiService
+  @MockK private lateinit var objectMapper: ObjectMapper
   @InjectMockKs private lateinit var certificationService: CertificationService
 
   private lateinit var user: User
@@ -62,6 +68,213 @@ class CertificationServiceTest {
         certificationCnt = 0,
       )
     challenge.setPrivateProperty("id", challengeId)
+  }
+
+  @Nested
+  @DisplayName("analyzeCertificationPhoto 메서드는")
+  inner class DescribeAnalyzeCertificationPhoto {
+    private lateinit var certification: Certification
+    @MockK private lateinit var file: MultipartFile
+
+    @BeforeEach
+    fun setup() {
+      certification = Certification(
+        user = user,
+        challenge = challenge,
+        title = "Title",
+        content = "Content"
+      )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("Gemini를 호출하여 사진 분석 결과를 반환한다")
+    fun `calls Gemini and returns analysis result`() {
+      // Given
+      val expectedDto = CertificationAnalysisResponse(isSuitable = true, reason = "운동 중입니다.")
+      
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } returns expectedDto
+
+      // When
+      val result = certificationService.analyzeCertificationPhoto(1L, file)
+
+      // Then
+      assertThat(result.isSuitable).isTrue()
+      assertThat(result.reason).isEqualTo("운동 중입니다.")
+      verify(exactly = 1) { 
+        geminiService.analyzeImage(any(), file, eq(CertificationAnalysisResponse::class.java)) 
+      }
+    }
+
+    @Test
+    @DisplayName("Gemini 분석 실패 시 기본 메시지를 반환한다")
+    fun `returns default message when Gemini analysis fails`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } throws RuntimeException("API Error")
+
+      // When
+      val result = certificationService.analyzeCertificationPhoto(1L, file)
+
+      // Then
+      assertThat(result.isSuitable).isFalse()
+      assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
+    }
+
+    @Test
+    @DisplayName("인증 정보가 없으면 CertificationNotFoundException을 던진다")
+    fun `throws CertificationNotFoundException when certification not found`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.empty()
+
+      // When & Then
+      assertThrows<CertificationNotFoundException> {
+        certificationService.analyzeCertificationPhoto(1L, file)
+      }
+    }
+
+    @Test
+    @DisplayName("JSON 파싱 실패 시 기본 메시지를 반환한다")
+    fun `returns default message when JSON parsing fails`() {
+      // Given
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } throws RuntimeException("Parsing Error")
+      
+      // When
+      val result = certificationService.analyzeCertificationPhoto(1L, file)
+
+      // Then
+      assertThat(result.isSuitable).isFalse()
+      assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
+    }
+  }
+
+  @Nested
+  @DisplayName("uploadCertificationPhoto 메서드는")
+  inner class DescribeUploadCertificationPhoto {
+    private lateinit var certification: Certification
+
+    @BeforeEach
+    fun setup() {
+      certification = Certification(
+        user = user,
+        challenge = challenge,
+        title = "Title",
+        content = "Content"
+      )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("사진 URL과 분석 결과를 저장한다")
+    fun `saves photo url and analysis result`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      val analysisDto = CertificationAnalysisResponse(isSuitable = true, reason = "AI 분석 결과")
+      
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { certificationRepository.save(any()) } answers { firstArg() }
+
+      // When
+      val response = certificationService.uploadCertificationPhoto(1L, photoUrl, analysisDto, user.loginId)
+
+      // Then
+      assertThat(response.photoUrl).isEqualTo(photoUrl)
+      assertThat(response.isSuitable).isTrue()
+      assertThat(response.analysisResult).isEqualTo("AI 분석 결과")
+      verify(exactly = 1) { certificationRepository.save(any()) }
+    }
+  }
+
+  @Nested
+  @DisplayName("processCertificationPhoto 메서드는")
+  inner class DescribeProcessCertificationPhoto {
+    private lateinit var certification: Certification
+    @MockK private lateinit var file: MultipartFile
+
+    @BeforeEach
+    fun setup() {
+      certification = Certification(
+        user = user,
+        challenge = challenge,
+        title = "Title",
+        content = "Content"
+      )
+      certification.setPrivateProperty("id", 1L)
+    }
+
+    @Test
+    @DisplayName("파일 저장, AI 분석, DB 업데이트를 순차적으로 수행한다")
+    fun `executes file upload, ai analysis and db update sequentially`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      val analysisDto = CertificationAnalysisResponse(isSuitable = true, reason = "OK")
+
+      every { fileStorageService.storeFile(any()) } returns photoUrl
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      // analyzeCertificationPhoto 내부에서 호출하는 geminiService 모킹
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } returns analysisDto
+      
+      // uploadCertificationPhoto 내부 모킹
+      every { certificationRepository.save(any()) } answers { firstArg() }
+
+      // When
+      val response = certificationService.processCertificationPhoto(1L, file, user.loginId)
+
+      // Then
+      assertThat(response.photoUrl).isEqualTo(photoUrl)
+      assertThat(response.isSuitable).isTrue()
+      assertThat(response.analysisResult).isEqualTo("OK")
+      verify(exactly = 1) { fileStorageService.storeFile(file) }
+      verify(exactly = 1) { 
+        geminiService.analyzeImage(any(), file, eq(CertificationAnalysisResponse::class.java)) 
+      }
+      verify(exactly = 1) { certificationRepository.save(any()) }
+    }
+
+    @Test
+    @DisplayName("처리 중 예외가 발생하면 업로드된 파일을 삭제하고 예외를 던진다")
+    fun `deletes uploaded file and throws exception when error occurs`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      every { fileStorageService.storeFile(any()) } returns photoUrl
+      every { certificationRepository.findById(1L) } throws RuntimeException("DB Error")
+      justRun { fileStorageService.deleteFile(any()) }
+
+      // When & Then
+      assertThrows<RuntimeException> {
+        certificationService.processCertificationPhoto(1L, file, user.loginId)
+      }
+
+      verify(exactly = 1) { fileStorageService.deleteFile(photoUrl) }
+    }
+
+    @Test
+    @DisplayName("롤백 삭제 실패 시에도 원래 예외를 던진다")
+    fun `throws original exception even if rollback deletion fails`() {
+      // Given
+      val photoUrl = "/images/test.jpg"
+      every { fileStorageService.storeFile(any()) } returns photoUrl
+      every { certificationRepository.findById(1L) } throws RuntimeException("Original DB Error")
+      every { fileStorageService.deleteFile(any()) } throws RuntimeException("Delete Error")
+
+      // When & Then
+      val exception = assertThrows<RuntimeException> {
+        certificationService.processCertificationPhoto(1L, file, user.loginId)
+      }
+
+      assertThat(exception.message).isEqualTo("Original DB Error")
+      verify(exactly = 1) { fileStorageService.deleteFile(photoUrl) }
+    }
   }
 
   @Nested
