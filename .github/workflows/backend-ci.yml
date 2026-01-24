@@ -17,6 +17,9 @@ jobs:
   # Build and Test Backend
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
     - name: Checkout code
@@ -35,9 +38,27 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build -x test
 
-    # TODO: Fix failing tests
-    # - name: Run tests
-    #   run: ./gradlew test
+    - name: Run Tests with Kover
+      # 테스트를 실행하고 Kover XML 리포트를 생성합니다.
+      run: ./gradlew koverXmlReport
+
+    - name: Add Coverage PR Comment
+      # 생성된 XML 리포트를 분석하여 Pull Request에 커버리지 지표를 댓글로 남깁니다.
+      uses: madrapps/jacoco-report@v1.6.1
+      if: github.event_name == 'pull_request'
+      with:
+        # Kover가 생성한 XML 리포트 파일 경로 (build.gradle.kts 설정과 일치해야 함)
+        paths: build/reports/kover/report.xml
+        # PR에 댓글을 달기 위해 필요한 GitHub 토큰 (Actions가 자동으로 제공)
+        token: ${{ secrets.GITHUB_TOKEN }}
+        # 전체 프로젝트의 최소 커버리지 기준 (0이면 실패시키지 않음)
+        min-coverage-overall: 0
+        # 변경된 파일의 최소 커버리지 기준 (0이면 실패시키지 않음)
+        min-coverage-changed-files: 0
+        # PR 댓글에 표시될 리포트 제목
+        title: Code Coverage
+        # 기존 댓글이 있다면 새로 달지 않고 업데이트함 (true: 업데이트, false: 매번 새 댓글)
+        update-comment: true
 
     - name: Upload build artifacts
       if: success()

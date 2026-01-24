@@ -70,3 +70,17 @@ tasks.withType<Test> {
   jvmArgs("-XX:+EnableDynamicAgentLoading")
   useJUnitPlatform()
 }
+
+// Kover 테스트 커버리지 리포트 설정
+koverReport {
+  defaults {
+    xml {
+      // ./gradlew check 실행 시 XML 리포트를 자동으로 생성합니다. (CI/CD 연동용)
+      onCheck = true
+    }
+    html {
+      // ./gradlew check 실행 시 HTML 리포트를 자동으로 생성합니다. (로컬 개발 확인용)
+      onCheck = true
+    }
+  }
+}
