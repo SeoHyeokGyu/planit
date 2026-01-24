@@ -80,7 +80,7 @@ export default function StatsPage() {
                 <Zap className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold text-blue-900">
                   {pointStats.summary.totalPointsEarned.toLocaleString()}
                 </div>
                 <p className="text-xs text-blue-600 mt-1">
@@ -95,7 +95,7 @@ export default function StatsPage() {
                 <Calendar className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{pointStats.summary.totalTransactions}</div>
+                <div className="text-2xl font-bold text-blue-900">{pointStats.summary.totalTransactions}</div>
                 <p className="text-xs text-blue-600 mt-1">포인트 거래 수</p>
               </CardContent>
             </Card>
