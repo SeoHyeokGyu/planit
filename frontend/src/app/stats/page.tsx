@@ -76,14 +76,14 @@ export default function StatsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">총 포인트 획득</CardTitle>
+                <CardTitle className="text-sm font-medium">총 포인트 획득</CardTitle>
                 <Zap className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {pointStats.summary.totalPointsEarned.toLocaleString()}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-blue-600 mt-1">
                   일평균 {pointStats.summary.averagePointsPerDay.toFixed(1)}
                 </p>
               </CardContent>
@@ -91,12 +91,12 @@ export default function StatsPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">총 활동</CardTitle>
+                <CardTitle className="text-sm font-medium">총 활동</CardTitle>
                 <Calendar className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{pointStats.summary.totalTransactions}</div>
-                <p className="text-xs text-gray-500 mt-1">포인트 거래 수</p>
+                <p className="text-xs text-blue-600 mt-1">포인트 거래 수</p>
               </CardContent>
             </Card>
           </div>
@@ -114,7 +114,7 @@ export default function StatsPage() {
             <CardContent>
               {pointLoading ? (
                 <div className="h-[300px] flex items-center justify-center">
-                  <p className="text-gray-500">로딩 중...</p>
+                  <p className="text-blue-600">로딩 중...</p>
                 </div>
               ) : pointStats ? (
                 <ResponsiveContainer width="100%" height={300}>
@@ -148,7 +148,7 @@ export default function StatsPage() {
             <CardContent>
               {pointLoading ? (
                 <div className="h-[300px] flex items-center justify-center">
-                  <p className="text-gray-500">로딩 중...</p>
+                  <p className="text-blue-600">로딩 중...</p>
                 </div>
               ) : pointStats ? (
                 <ResponsiveContainer width="100%" height={300}>

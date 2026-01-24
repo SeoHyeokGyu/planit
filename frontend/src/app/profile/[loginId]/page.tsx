@@ -169,15 +169,15 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500">이름</p>
+                  <p className="text-sm text-blue-600">이름</p>
                   <p className="font-semibold text-gray-900">{user.nickname}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">아이디</p>
+                  <p className="text-sm text-blue-600">아이디</p>
                   <p className="font-semibold text-gray-900">@{user.loginId}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">가입일</p>
+                  <p className="text-sm text-blue-600">가입일</p>
                   <p className="font-semibold text-gray-900">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </p>

@@ -113,14 +113,14 @@ export default function FollowListModal({
                       onClick={() => handleNavigateToProfile(user.loginId)}
                     >
                       <p className="font-semibold text-gray-900">{user.nickname}</p>
-                      <p className="text-sm text-gray-500">@{user.loginId}</p>
+                      <p className="text-sm text-blue-600">@{user.loginId}</p>
                     </div>
                     <FollowButton targetLoginId={user.loginId} variant="outline" size="sm" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-blue-600">
                 팔로워가 없습니다.
               </div>
             )}
@@ -146,14 +146,14 @@ export default function FollowListModal({
                       onClick={() => handleNavigateToProfile(user.loginId)}
                     >
                       <p className="font-semibold text-gray-900">{user.nickname}</p>
-                      <p className="text-sm text-gray-500">@{user.loginId}</p>
+                      <p className="text-sm text-blue-600">@{user.loginId}</p>
                     </div>
                     <FollowButton targetLoginId={user.loginId} variant="outline" size="sm" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-blue-600">
                 팔로잉이 없습니다.
               </div>
             )}
