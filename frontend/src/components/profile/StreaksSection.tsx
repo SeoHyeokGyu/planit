@@ -23,7 +23,10 @@ interface StreaksSectionProps {
 
 export default function StreaksSection({ userLoginId, isOwnProfile = false }: StreaksSectionProps) {
   const [selectedTab, setSelectedTab] = useState<"overview" | "calendar">("overview");
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1; // 1-12
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
 
   // 스트릭 요약 조회
   const {
@@ -32,7 +35,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
     error: summaryError,
   } = useAllStreaks(userLoginId);
 
-  // 활동 캘린더 조회 (연도별)
+  // 활동 캘린더 조회 (연도별 - 통계용)
   const {
     data: calendar,
     isLoading: isLoadingCalendar,
@@ -100,7 +103,7 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
                         : pageHeaderStyles.tabButton.inactive
                 )}
             >
-              활동 잔디
+              캘린더
             </Button>
           </div>
         </CardHeader>
@@ -167,7 +170,9 @@ export default function StreaksSection({ userLoginId, isOwnProfile = false }: St
                   calendar={calendar}
                   isLoading={isLoadingCalendar}
                   selectedYear={selectedYear}
+                  selectedMonth={selectedMonth}
                   onYearChange={setSelectedYear}
+                  onMonthChange={setSelectedMonth}
               />
           )}
         </CardContent>
@@ -249,17 +254,21 @@ function StreakOverview({ streaks }: { streaks: StreakResponse[] }) {
   );
 }
 
-// GitHub 스타일 활동 잔디 (1년치 - 주 단위 세로 배치)
+// 월별 캘린더 뷰
 function ActivityCalendarView({
                                 calendar,
                                 isLoading,
                                 selectedYear,
+                                selectedMonth,
                                 onYearChange,
+                                onMonthChange,
                               }: {
   calendar?: ActivityCalendarResponse;
   isLoading: boolean;
   selectedYear: number;
+  selectedMonth: number;
   onYearChange: (year: number) => void;
+  onMonthChange: (month: number) => void;
 }) {
   if (isLoading) {
     return <Skeleton className="h-64 w-full" />;
@@ -270,8 +279,29 @@ function ActivityCalendarView({
   }
 
   const currentYear = new Date().getFullYear();
-  const canGoNext = selectedYear < currentYear;
+  const currentMonth = new Date().getMonth() + 1;
+
+  const canGoNext = selectedYear < currentYear || (selectedYear === currentYear && selectedMonth < currentMonth);
   const canGoPrev = selectedYear > currentYear - 10; // 최대 10년 전까지
+
+  // 이전/다음 월 이동
+  const handlePrevMonth = () => {
+    if (selectedMonth === 1) {
+      onYearChange(selectedYear - 1);
+      onMonthChange(12);
+    } else {
+      onMonthChange(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 12) {
+      onYearChange(selectedYear + 1);
+      onMonthChange(1);
+    } else {
+      onMonthChange(selectedMonth + 1);
+    }
+  };
 
   // 활동 데이터를 Map으로 변환
   const activityMap = new Map<string, DailyActivityResponse>();
@@ -279,94 +309,75 @@ function ActivityCalendarView({
     activityMap.set(activity.date, activity);
   });
 
-  // 52주 전체 생성 (항상 52주)
-  const startDate = new Date(selectedYear, 0, 1); // 1월 1일
-  const firstDayOfWeek = startDate.getDay(); // 첫 날의 요일
+  // 해당 월의 캘린더 생성
+  const firstDayOfMonth = new Date(selectedYear, selectedMonth - 1, 1);
+  const lastDayOfMonth = new Date(selectedYear, selectedMonth, 0);
+  const daysInMonth = lastDayOfMonth.getDate();
+  const startDayOfWeek = firstDayOfMonth.getDay(); // 0: 일요일
 
-  // 주별로 그룹화 (일요일 시작, 항상 52주)
+  // 캘린더 주 배열 생성
   const weeks: (DailyActivityResponse | null)[][] = [];
+  let currentWeek: (DailyActivityResponse | null)[] = [];
 
-  for (let weekIndex = 0; weekIndex < 52; weekIndex++) {
-    const week: (DailyActivityResponse | null)[] = [];
-
-    for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-      // 첫 주의 경우 시작 요일 이전은 null
-      if (weekIndex === 0 && dayIndex < firstDayOfWeek) {
-        week.push(null);
-        continue;
-      }
-
-      // 날짜 계산
-      const dayOffset = weekIndex * 7 + dayIndex - firstDayOfWeek;
-      const currentDate = new Date(selectedYear, 0, 1);
-      currentDate.setDate(currentDate.getDate() + dayOffset);
-
-      // 해당 연도를 벗어나면 null
-      if (currentDate.getFullYear() !== selectedYear) {
-        week.push(null);
-        continue;
-      }
-
-      const dateStr = currentDate.toISOString().split('T')[0];
-      const activity = activityMap.get(dateStr) || {
-        date: dateStr,
-        certificationCount: 0,
-        challengeCount: 0,
-        activityLevel: 0,
-      };
-
-      week.push(activity);
-    }
-
-    weeks.push(week);
+  // 첫 주 빈 칸 채우기
+  for (let i = 0; i < startDayOfWeek; i++) {
+    currentWeek.push(null);
   }
 
+  // 날짜 채우기
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const activity = activityMap.get(dateStr) || {
+      date: dateStr,
+      certificationCount: 0,
+      challengeCount: 0,
+      activityLevel: 0,
+    };
+
+    currentWeek.push(activity);
+
+    // 토요일이면 주 완성하고 새 주 시작
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  }
+
+  // 마지막 주 빈 칸 채우기
+  if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) {
+      currentWeek.push(null);
+    }
+    weeks.push(currentWeek);
+  }
+
+  // 파란색 계열 색상 (0: 활동 없음, 1-4: 점점 진해짐)
   const getActivityColor = (level: number) => {
     switch (level) {
       case 0:
         return "bg-gray-100 hover:bg-gray-200";
       case 1:
-        return "bg-green-200 hover:bg-green-300";
+        return "bg-blue-100 hover:bg-blue-200";
       case 2:
-        return "bg-green-400 hover:bg-green-500";
+        return "bg-blue-300 hover:bg-blue-400";
       case 3:
-        return "bg-green-600 hover:bg-green-700";
+        return "bg-blue-500 hover:bg-blue-600";
       case 4:
-        return "bg-green-800 hover:bg-green-900";
+        return "bg-blue-700 hover:bg-blue-800";
       default:
         return "bg-gray-100";
     }
   };
 
-  // 월 레이블 표시 위치 계산
-  const getMonthLabels = () => {
-    const labels: { month: string; weekIndex: number }[] = [];
-    const monthNames = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];
+  // 해당 월의 통계 계산
+  const monthActivities = calendar.activities.filter(activity => {
+    const activityDate = new Date(activity.date);
+    return activityDate.getFullYear() === selectedYear &&
+        activityDate.getMonth() + 1 === selectedMonth;
+  });
 
-    // 1월부터 12월까지 각 월의 시작 주 찾기
-    for (let month = 0; month < 12; month++) {
-      const monthStart = new Date(selectedYear, month, 1);
-
-      // 해당 월의 1일이 속한 주 찾기
-      const daysSinceYearStart = Math.floor((monthStart.getTime() - new Date(selectedYear, 0, 1).getTime()) / (1000 * 60 * 60 * 24));
-      const weekIndex = Math.floor((daysSinceYearStart + firstDayOfWeek) / 7);
-
-      // 첫 월(1월)이거나 이전 월과 다른 주인 경우에만 추가
-      if (month === 0 || weekIndex > (labels[labels.length - 1]?.weekIndex || -1)) {
-        labels.push({
-          month: monthNames[month],
-          weekIndex,
-        });
-      }
-    }
-
-    return labels;
-  };
-
-  const monthLabels = getMonthLabels();
-
-  // 월별 구분선 위치 (weekIndex 배열)
-  const monthDividers = monthLabels.map(label => label.weekIndex);
+  const monthActiveDays = monthActivities.filter(a => a.certificationCount > 0).length;
+  const monthTotalCertifications = monthActivities.reduce((sum, a) => sum + a.certificationCount, 0);
 
   return (
       <Card className="border-2">
@@ -374,34 +385,34 @@ function ActivityCalendarView({
           <div className="flex items-center justify-between mb-4">
             <div>
               <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                <Activity className="w-5 h-5 text-green-600" />
-                <span className="text-gray-900">{calendar.totalCertifications}개 인증</span>
+                <Activity className="w-5 h-5 text-blue-600" />
+                <span className="text-gray-900">{monthTotalCertifications}개 인증</span>
                 <span className="text-blue-500">·</span>
-                <span className="text-gray-900">{selectedYear}년</span>
+                <span className="text-gray-900">{selectedYear}년 {selectedMonth}월</span>
               </CardTitle>
               <CardDescription className="text-sm font-medium text-gray-900 mt-1">
-                {calendar.activeDays}일 활동 / {calendar.totalDays}일
+                {monthActiveDays}일 활동 / {daysInMonth}일
               </CardDescription>
             </div>
 
-            {/* 연도 선택 */}
+            {/* 월 선택 */}
             <div className="flex items-center gap-2">
               <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onYearChange(selectedYear - 1)}
+                  onClick={handlePrevMonth}
                   disabled={!canGoPrev}
                   className="h-8 w-8 p-0"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="text-xl font-bold text-gray-900 min-w-[70px] text-center">
-              {selectedYear}
-            </span>
+              <span className="text-xl font-bold text-gray-900 min-w-[100px] text-center">
+                {selectedYear}.{String(selectedMonth).padStart(2, '0')}
+              </span>
               <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onYearChange(selectedYear + 1)}
+                  onClick={handleNextMonth}
                   disabled={!canGoNext}
                   className="h-8 w-8 p-0"
               >
@@ -411,83 +422,73 @@ function ActivityCalendarView({
           </div>
         </CardHeader>
 
-        <CardContent className="overflow-x-auto">
-          <div className="inline-block min-w-full">
-            <div className="flex gap-[3px]">
-              {/* 요일 레이블 */}
-              <div className="flex flex-col gap-[3px] w-[27px]">
-                <div className="h-[16px]" /> {/* 월 레이블 공간 */}
-                {["월", "", "수", "", "금", "", ""].map((day, i) => (
-                    <div key={i} className="h-[10px] text-xs text-blue-700 font-medium flex items-center justify-end pr-1">
-                      {day}
-                    </div>
-                ))}
-              </div>
+        <CardContent>
+          <div className="space-y-2">
+            {/* 요일 헤더 */}
+            <div className="grid grid-cols-7 gap-2 mb-2">
+              {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => (
+                  <div
+                      key={day}
+                      className={cn(
+                          "text-center text-sm font-semibold",
+                          index === 0 ? "text-red-600" : index === 6 ? "text-blue-600" : "text-gray-700"
+                      )}
+                  >
+                    {day}
+                  </div>
+              ))}
+            </div>
 
-              {/* 잔디 그리드와 월 레이블 */}
-              <div className="flex-1 relative">
-                {/* 월 레이블 */}
-                <div className="flex gap-[3px] mb-[3px] h-[16px] relative">
-                  {monthLabels.map((label, index) => (
-                      <div
-                          key={index}
-                          className="text-xs text-blue-800 font-semibold"
-                          style={{
-                            position: 'absolute',
-                            left: `${label.weekIndex * 13 + 15}px`,
-                          }}
-                      >
-                        {label.month}
-                      </div>
-                  ))}
-                </div>
+            {/* 캘린더 그리드 */}
+            <div className="space-y-2">
+              {weeks.map((week, weekIndex) => (
+                  <div key={weekIndex} className="grid grid-cols-7 gap-2">
+                    {week.map((activity, dayIndex) => {
+                      if (!activity) {
+                        return <div key={dayIndex} className="aspect-square" />;
+                      }
 
-                {/* 잔디 그리드 */}
-                <div className="flex gap-[3px] relative">
-                  {/* 월별 구분선 */}
-                  {monthDividers.map((weekIndex, index) => (
-                      index > 0 && (
+                      const day = new Date(activity.date).getDate();
+                      const isToday = activity.date === new Date().toISOString().split('T')[0];
+
+                      return (
                           <div
-                              key={index}
-                              className="absolute top-0 bottom-0 w-[2px] bg-gray-400"
-                              style={{
-                                left: `${weekIndex * 13 - 15}px`,
-                              }}
-                          />
-                      )
-                  ))}
-
-                  {weeks.map((week, weekIndex) => (
-                      <div key={weekIndex} className="flex flex-col gap-[3px]">
-                        {week.map((activity, dayIndex) => (
-                            <div
-                                key={dayIndex}
-                                className={cn(
-                                    "w-[10px] h-[10px] rounded-sm transition-all cursor-pointer",
-                                    activity
-                                        ? getActivityColor(activity.activityLevel)
-                                        : "bg-transparent"
-                                )}
-                                title={
-                                  activity
-                                      ? `${activity.date}: ${activity.certificationCount}개 인증`
-                                      : ""
-                                }
-                            />
-                        ))}
-                      </div>
-                  ))}
-                </div>
-              </div>
+                              key={dayIndex}
+                              className={cn(
+                                  "aspect-square rounded-lg transition-all relative flex flex-col items-center justify-center",
+                                  getActivityColor(activity.activityLevel),
+                                  isToday && "ring-2 ring-orange-500 ring-offset-2"
+                              )}
+                              title={`${activity.date}: ${activity.certificationCount}개 인증`}
+                          >
+                            <span className={cn(
+                                "text-base font-bold",
+                                activity.activityLevel >= 3 ? "text-white" : "text-gray-700"
+                            )}>
+                              {day}
+                            </span>
+                            {activity.certificationCount > 0 && (
+                                <span className={cn(
+                                    "text-[10px] font-bold",
+                                    activity.activityLevel >= 3 ? "text-white" : "text-blue-600"
+                                )}>
+                                  {activity.certificationCount}
+                                </span>
+                            )}
+                          </div>
+                      );
+                    })}
+                  </div>
+              ))}
             </div>
 
             {/* 범례 */}
-            <div className="flex items-center justify-end gap-2 text-xs text-blue-600 mt-4">
+            <div className="flex items-center justify-end gap-2 text-xs text-blue-600 mt-6 pt-4 border-t">
               <span>적음</span>
               {[0, 1, 2, 3, 4].map((level) => (
                   <div
                       key={level}
-                      className={cn("w-[10px] h-[10px] rounded-sm", getActivityColor(level))}
+                      className={cn("w-6 h-6 rounded", getActivityColor(level))}
                   />
               ))}
               <span>많음</span>
