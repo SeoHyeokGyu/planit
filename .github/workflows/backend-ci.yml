@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'backend/**'
+      - 'src/**'
       - 'gradlew'
       - 'gradlew.bat'
       - 'build.gradle'
