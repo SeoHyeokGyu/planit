@@ -91,12 +91,12 @@ class CertificationServiceTest {
     @DisplayName("Gemini를 호출하여 사진 분석 결과를 반환한다")
     fun `calls Gemini and returns analysis result`() {
       // Given
-      val jsonResponse = "{\"isSuitable\": true, \"reason\": \"운동 중입니다.\"}"
       val expectedDto = CertificationAnalysisResponse(isSuitable = true, reason = "운동 중입니다.")
       
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } returns jsonResponse
-      every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } returns expectedDto
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } returns expectedDto
 
       // When
       val result = certificationService.analyzeCertificationPhoto(1L, file)
@@ -104,7 +104,9 @@ class CertificationServiceTest {
       // Then
       assertThat(result.isSuitable).isTrue()
       assertThat(result.reason).isEqualTo("운동 중입니다.")
-      verify(exactly = 1) { geminiService.analyzeImage(any(), file) }
+      verify(exactly = 1) { 
+        geminiService.analyzeImage(any(), file, eq(CertificationAnalysisResponse::class.java)) 
+      }
     }
 
     @Test
@@ -112,7 +114,9 @@ class CertificationServiceTest {
     fun `returns default message when Gemini analysis fails`() {
       // Given
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } throws RuntimeException("API Error")
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } throws RuntimeException("API Error")
 
       // When
       val result = certificationService.analyzeCertificationPhoto(1L, file)
@@ -139,16 +143,16 @@ class CertificationServiceTest {
     fun `returns default message when JSON parsing fails`() {
       // Given
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } returns "Invalid JSON"
-      // parseAnalysisResponse 내부에서 예외 발생 시 반환하는 객체
-      // reason = "이미지 분석 결과를 처리할 수 없습니다."
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } throws RuntimeException("Parsing Error")
       
       // When
       val result = certificationService.analyzeCertificationPhoto(1L, file)
 
       // Then
       assertThat(result.isSuitable).isFalse()
-      assertThat(result.reason).contains("이미지 분석 결과를 처리할 수 없습니다")
+      assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
     }
   }
 
@@ -215,9 +219,10 @@ class CertificationServiceTest {
 
       every { fileStorageService.storeFile(any()) } returns photoUrl
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      // analyzeCertificationPhoto 내부 모킹
-      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } returns "{\"isSuitable\":true,\"reason\":\"OK\"}"
-      every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } returns analysisDto
+      // analyzeCertificationPhoto 내부에서 호출하는 geminiService 모킹
+      every { 
+        geminiService.analyzeImage(any(), any<MultipartFile>(), eq(CertificationAnalysisResponse::class.java)) 
+      } returns analysisDto
       
       // uploadCertificationPhoto 내부 모킹
       every { certificationRepository.save(any()) } answers { firstArg() }
@@ -230,7 +235,9 @@ class CertificationServiceTest {
       assertThat(response.isSuitable).isTrue()
       assertThat(response.analysisResult).isEqualTo("OK")
       verify(exactly = 1) { fileStorageService.storeFile(file) }
-      verify(exactly = 1) { geminiService.analyzeImage(any(), file) }
+      verify(exactly = 1) { 
+        geminiService.analyzeImage(any(), file, eq(CertificationAnalysisResponse::class.java)) 
+      }
       verify(exactly = 1) { certificationRepository.save(any()) }
     }
 

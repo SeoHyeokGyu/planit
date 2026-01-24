@@ -1,6 +1,6 @@
 package com.planit.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.type.TypeReference
 import com.planit.dto.ChallengeRecommendationResponse
 import com.planit.enums.ChallengeCategoryEnum
 import com.planit.enums.ChallengeDifficultyEnum
@@ -20,7 +20,6 @@ class ChallengeRecommendService(
   private val participantRepository: ChallengeParticipantRepository,
   private val userRepository: UserRepository,
   private val geminiService: GeminiService,
-  private val objectMapper: ObjectMapper,
 ) {
   private val log = LoggerFactory.getLogger(javaClass)
 
@@ -84,17 +83,9 @@ class ChallengeRecommendService(
         .trimIndent()
 
     // 3. Gemini 호출 및 파싱
-    val responseText = geminiService.generateContent(prompt)
-    log.debug("response text: $responseText")
-
-    // JSON 응답에서 불필요한 마크다운 코드 블록(```json ... ```) 제거
-    val cleanJson = responseText.replace("```json", "").replace("```", "").trim()
-    return objectMapper.readValue(
-      cleanJson,
-      objectMapper.typeFactory.constructCollectionType(
-        List::class.java,
-        ChallengeRecommendationResponse::class.java,
-      ),
+    return geminiService.generateContent(
+      prompt,
+      object : TypeReference<List<ChallengeRecommendationResponse>>() {},
     )
   }
 }

@@ -1,6 +1,5 @@
 package com.planit.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.planit.dto.CertificationAnalysisResponse
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationResponse
@@ -34,7 +33,6 @@ class CertificationService(
   private val streakService: StreakService,
   private val fileStorageService: FileStorageService,
   private val geminiService: GeminiService,
-  private val objectMapper: ObjectMapper,
 ) {
 
   private val logger = LoggerFactory.getLogger(CertificationService::class.java)
@@ -53,16 +51,6 @@ class CertificationService(
       .trimIndent()
   }
 
-  private fun parseAnalysisResponse(jsonStringRaw: String): CertificationAnalysisResponse {
-    return try {
-      val jsonString = jsonStringRaw.replace("```json", "").replace("```", "").trim()
-      objectMapper.readValue(jsonString, CertificationAnalysisResponse::class.java)
-    } catch (e: Exception) {
-      logger.error("Gemini 이미지 분석 결과 파싱 실패", e)
-      CertificationAnalysisResponse(isSuitable = false, reason = "이미지 분석 결과를 처리할 수 없습니다.")
-    }
-  }
-
   /** Gemini를 사용하여 인증 사진을 분석합니다. (별도 메소드로 분리) */
   fun analyzeCertificationPhoto(
     certificationId: Long,
@@ -76,8 +64,7 @@ class CertificationService(
     val prompt = buildAnalysisPrompt(certification.challenge.title)
 
     return try {
-      val response = geminiService.analyzeImage(prompt, file)
-      parseAnalysisResponse(response)
+      geminiService.analyzeImage(prompt, file, CertificationAnalysisResponse::class.java)
     } catch (e: Exception) {
       logger.error("Gemini 이미지 분석 실패", e)
       CertificationAnalysisResponse(isSuitable = false, reason = "이미지 분석을 완료할 수 없습니다.")
@@ -107,8 +94,8 @@ class CertificationService(
     val prompt = buildAnalysisPrompt(certification.challenge.title)
 
     try {
-      val response = geminiService.analyzeImage(prompt, file)
-      val analysisResult = parseAnalysisResponse(response)
+      val analysisResult =
+        geminiService.analyzeImage(prompt, file, CertificationAnalysisResponse::class.java)
 
       certification.isSuitable = analysisResult.isSuitable
       certification.analysisResult = analysisResult.reason

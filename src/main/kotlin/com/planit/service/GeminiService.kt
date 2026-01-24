@@ -1,5 +1,7 @@
 package com.planit.service
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.genai.Client
 import com.google.genai.types.Content
 import com.google.genai.types.Part
@@ -7,7 +9,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-
 import java.io.File
 import java.nio.file.Files
 
@@ -15,11 +16,22 @@ import java.nio.file.Files
 class GeminiService(
   private val client: Client,
   @Value("\${gemini.models}") private val models: List<String>,
+  private val objectMapper: ObjectMapper,
 ) {
   private val logger = LoggerFactory.getLogger(GeminiService::class.java)
 
   fun analyzeImage(prompt: String, image: MultipartFile): String {
     return analyzeImageBytes(prompt, image.bytes, image.contentType ?: "image/jpeg")
+  }
+
+  fun <T> analyzeImage(prompt: String, image: MultipartFile, clazz: Class<T>): T {
+    val response = analyzeImage(prompt, image)
+    return parseResponse(response, clazz)
+  }
+
+  fun <T> analyzeImage(prompt: String, image: MultipartFile, typeReference: TypeReference<T>): T {
+    val response = analyzeImage(prompt, image)
+    return parseResponse(response, typeReference)
   }
 
   fun analyzeImage(prompt: String, image: File): String {
@@ -32,6 +44,16 @@ class GeminiService(
       else -> "image/jpeg"
     }
     return analyzeImageBytes(prompt, bytes, contentType)
+  }
+
+  fun <T> analyzeImage(prompt: String, image: File, clazz: Class<T>): T {
+    val response = analyzeImage(prompt, image)
+    return parseResponse(response, clazz)
+  }
+
+  fun <T> analyzeImage(prompt: String, image: File, typeReference: TypeReference<T>): T {
+    val response = analyzeImage(prompt, image)
+    return parseResponse(response, typeReference)
   }
 
   private fun analyzeImageBytes(prompt: String, bytes: ByteArray, mimeType: String): String {
@@ -50,6 +72,40 @@ class GeminiService(
     return executeWithModelFallback { modelId ->
       client.models.generateContent(modelId, prompt, null).text()
     } ?: "추천 결과를 생성할 수 없습니다."
+  }
+
+  fun <T> generateContent(prompt: String, clazz: Class<T>): T {
+    val response = generateContent(prompt)
+    return parseResponse(response, clazz)
+  }
+
+  fun <T> generateContent(prompt: String, typeReference: TypeReference<T>): T {
+    val response = generateContent(prompt)
+    return parseResponse(response, typeReference)
+  }
+
+  private fun <T> parseResponse(response: String, clazz: Class<T>): T {
+    return try {
+      val jsonString = cleanJson(response)
+      objectMapper.readValue(jsonString, clazz)
+    } catch (e: Exception) {
+      logger.error("Gemini 응답 파싱 실패. 원본 응답: $response", e)
+      throw RuntimeException("AI 응답을 처리하는 중 오류가 발생했습니다.", e)
+    }
+  }
+
+  private fun <T> parseResponse(response: String, typeReference: TypeReference<T>): T {
+    return try {
+      val jsonString = cleanJson(response)
+      objectMapper.readValue(jsonString, typeReference)
+    } catch (e: Exception) {
+      logger.error("Gemini 응답 파싱 실패. 원본 응답: $response", e)
+      throw RuntimeException("AI 응답을 처리하는 중 오류가 발생했습니다.", e)
+    }
+  }
+
+  private fun cleanJson(response: String): String {
+    return response.replace("```json", "").replace("```", "").trim()
   }
 
   /**
