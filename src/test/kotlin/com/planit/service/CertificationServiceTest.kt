@@ -95,7 +95,7 @@ class CertificationServiceTest {
       val expectedDto = CertificationAnalysisResponse(isSuitable = true, reason = "운동 중입니다.")
       
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any()) } returns jsonResponse
+      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } returns jsonResponse
       every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } returns expectedDto
 
       // When
@@ -112,7 +112,7 @@ class CertificationServiceTest {
     fun `returns default message when Gemini analysis fails`() {
       // Given
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any()) } throws RuntimeException("API Error")
+      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } throws RuntimeException("API Error")
 
       // When
       val result = certificationService.analyzeCertificationPhoto(1L, file)
@@ -139,15 +139,16 @@ class CertificationServiceTest {
     fun `returns default message when JSON parsing fails`() {
       // Given
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
-      every { geminiService.analyzeImage(any(), any()) } returns "Invalid JSON"
-      every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } throws RuntimeException("JSON Error")
-
+      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } returns "Invalid JSON"
+      // parseAnalysisResponse 내부에서 예외 발생 시 반환하는 객체
+      // reason = "이미지 분석 결과를 처리할 수 없습니다."
+      
       // When
       val result = certificationService.analyzeCertificationPhoto(1L, file)
 
       // Then
       assertThat(result.isSuitable).isFalse()
-      assertThat(result.reason).contains("이미지 분석을 완료할 수 없습니다")
+      assertThat(result.reason).contains("이미지 분석 결과를 처리할 수 없습니다")
     }
   }
 
@@ -173,18 +174,17 @@ class CertificationServiceTest {
       // Given
       val photoUrl = "/images/test.jpg"
       val analysisDto = CertificationAnalysisResponse(isSuitable = true, reason = "AI 분석 결과")
-      val jsonResult = "{\"isSuitable\":true,\"reason\":\"AI 분석 결과\"}"
       
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
       every { certificationRepository.save(any()) } answers { firstArg() }
-      every { objectMapper.writeValueAsString(analysisDto) } returns jsonResult
 
       // When
       val response = certificationService.uploadCertificationPhoto(1L, photoUrl, analysisDto, user.loginId)
 
       // Then
       assertThat(response.photoUrl).isEqualTo(photoUrl)
-      assertThat(response.analysisResult).isEqualTo(jsonResult)
+      assertThat(response.isSuitable).isTrue()
+      assertThat(response.analysisResult).isEqualTo("AI 분석 결과")
       verify(exactly = 1) { certificationRepository.save(any()) }
     }
   }
@@ -212,16 +212,14 @@ class CertificationServiceTest {
       // Given
       val photoUrl = "/images/test.jpg"
       val analysisDto = CertificationAnalysisResponse(isSuitable = true, reason = "OK")
-      val jsonResult = "{\"isSuitable\":true,\"reason\":\"OK\"}"
 
       every { fileStorageService.storeFile(any()) } returns photoUrl
       every { certificationRepository.findById(1L) } returns Optional.of(certification)
       // analyzeCertificationPhoto 내부 모킹
-      every { geminiService.analyzeImage(any(), any()) } returns "{\"isSuitable\":true,\"reason\":\"OK\"}"
+      every { geminiService.analyzeImage(any(), any<MultipartFile>()) } returns "{\"isSuitable\":true,\"reason\":\"OK\"}"
       every { objectMapper.readValue(any<String>(), eq(CertificationAnalysisResponse::class.java)) } returns analysisDto
       
       // uploadCertificationPhoto 내부 모킹
-      every { objectMapper.writeValueAsString(analysisDto) } returns jsonResult
       every { certificationRepository.save(any()) } answers { firstArg() }
 
       // When
@@ -229,7 +227,8 @@ class CertificationServiceTest {
 
       // Then
       assertThat(response.photoUrl).isEqualTo(photoUrl)
-      assertThat(response.analysisResult).isEqualTo(jsonResult)
+      assertThat(response.isSuitable).isTrue()
+      assertThat(response.analysisResult).isEqualTo("OK")
       verify(exactly = 1) { fileStorageService.storeFile(file) }
       verify(exactly = 1) { geminiService.analyzeImage(any(), file) }
       verify(exactly = 1) { certificationRepository.save(any()) }
