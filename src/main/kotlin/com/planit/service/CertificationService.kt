@@ -152,6 +152,7 @@ class CertificationService(
   ): List<CertificationResponse> {
     val certifications =
       certificationRepository.findByUser_LoginIdAndCreatedAtBetween(userLoginId, start, end)
+
     return certifications.map { CertificationResponse.from(it) }
   }
 
