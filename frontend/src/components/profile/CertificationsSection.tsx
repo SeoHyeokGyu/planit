@@ -94,7 +94,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-gray-900">나의 활동</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription className="text-blue-700">
               나의 모든 챌린지 인증 기록입니다.
             </CardDescription>
           </div>
@@ -152,7 +152,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
                   {selectedDate} 인증 ({selectedDateCertifications.length}개)
                 </h3>
                 {selectedDateCertifications.length === 0 ? (
-                  <p className="text-sm text-center text-gray-600 py-4">
+                  <p className="text-sm text-center text-blue-700 py-4">
                     이 날짜에는 인증 기록이 없습니다.
                   </p>
                 ) : (
@@ -166,7 +166,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="font-semibold text-md text-gray-900">{cert.title}</p>
-                            <p className="text-sm text-gray-600">{cert.challengeTitle}</p>
+                            <p className="text-sm text-blue-700">{cert.challengeTitle}</p>
                           </div>
                           {cert.photoUrl && (
                             <div className="w-12 h-12 relative rounded-md overflow-hidden">
@@ -190,7 +190,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
           <>
             {certificationsList.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">아직 작성된 인증이 없습니다.</p>
+                <p className="text-blue-700">아직 작성된 인증이 없습니다.</p>
                 <Button className="mt-4" onClick={() => router.push("/challenge")}>
                   챌린지 시작하기
                 </Button>
@@ -217,7 +217,7 @@ export default function CertificationsSection({ userLoginId }: CertificationsSec
                     <CardTitle className="text-lg font-semibold text-gray-900">
                       {cert.title}
                     </CardTitle>
-                    <CardDescription className="text-sm mt-1 text-gray-600">
+                    <CardDescription className="text-sm mt-1 text-blue-700">
                       {cert.challengeTitle} | {new Date(cert.createdAt).toLocaleDateString()}
                     </CardDescription>
                   </Card>

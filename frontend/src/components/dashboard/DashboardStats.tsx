@@ -36,7 +36,7 @@ export default function DashboardStats() {
           </div>
         )}
 
-        <p className="text-gray-500 text-sm mb-4">현재 진행 중인 챌린지</p>
+        <p className="text-blue-600 text-sm mb-4">현재 진행 중인 챌린지</p>
 
         <button
           onClick={() => router.push("/challenge")}
@@ -66,7 +66,7 @@ export default function DashboardStats() {
           </div>
         )}
 
-        <p className="text-gray-500 text-sm mb-4">총 인증 횟수</p>
+        <p className="text-blue-600 text-sm mb-4">총 인증 횟수</p>
 
         <button
           onClick={() => router.push("/certification/my")}
@@ -90,13 +90,13 @@ export default function DashboardStats() {
             <div>
               <div className="h-9 w-12 bg-gray-200 animate-pulse rounded-md mb-1"></div>
 
-              <p className="text-gray-500 text-sm">팔로워</p>
+              <p className="text-blue-600 text-sm">팔로워</p>
             </div>
 
             <div>
               <div className="h-9 w-12 bg-gray-200 animate-pulse rounded-md mb-1"></div>
 
-              <p className="text-gray-500 text-sm">팔로잉</p>
+              <p className="text-blue-600 text-sm">팔로잉</p>
             </div>
           </div>
         ) : (
@@ -106,7 +106,7 @@ export default function DashboardStats() {
                 {dashboardStats?.followerCount || 0}
               </div>
 
-              <p className="text-gray-500 text-sm">팔로워</p>
+              <p className="text-blue-600 text-sm">팔로워</p>
             </div>
 
             <div className="cursor-pointer group" onClick={() => router.push("/profile")}>
@@ -114,7 +114,7 @@ export default function DashboardStats() {
                 {dashboardStats?.followingCount || 0}
               </div>
 
-              <p className="text-gray-500 text-sm">팔로잉</p>
+              <p className="text-blue-600 text-sm">팔로잉</p>
             </div>
           </div>
         )}

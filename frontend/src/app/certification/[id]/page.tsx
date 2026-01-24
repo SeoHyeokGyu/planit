@@ -276,7 +276,7 @@ export default function CertificationDetailPage() {
                       <User className="w-3.5 h-3.5" />
                       {data.authorNickname}
                     </span>
-                    <span className="text-gray-300">|</span>
+                    <span className="border-l border-gray-300 h-4 mx-1" aria-hidden="true" />
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
                       {new Date(data.createdAt).toLocaleDateString()}

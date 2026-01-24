@@ -45,8 +45,8 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900">
-        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800 shadow-lg h-64">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg h-64">
           <Skeleton className="w-full h-full" />
         </div>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -58,7 +58,7 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
 
   if (isError || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-red-600">사용자를 찾을 수 없습니다</CardTitle>
@@ -75,13 +75,13 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
       {/* 페이지 헤더 */}
       <div className="mb-6 pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-4 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium"
+          className="mb-4 hover:bg-gray-100 text-gray-700 font-medium"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           돌아가기
@@ -112,7 +112,7 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
           {/* 왼쪽: 탭 컨텐츠 */}
           <div className="lg:col-span-2">
             {/* ← 탭 메뉴 추가 */}
-            <div className="flex flex-wrap gap-1 border-b-2 border-gray-200 dark:border-gray-700 mb-8">
+            <div className="flex flex-wrap gap-1 border-b-2 border-gray-200 mb-8">
               <button
                 onClick={() => setActiveTab("certifications")}
                 className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
@@ -162,23 +162,23 @@ export default function OtherUserProfilePage({ params }: ProfilePageProps) {
 
           {/* 오른쪽: 정보 */}
           <div>
-            <Card className="shadow-lg rounded-xl dark:bg-gray-800/50">
+            <Card className="shadow-lg rounded-xl">
               <CardHeader>
                 <CardTitle>사용자 정보</CardTitle>
                 <CardDescription>{user.nickname}님의 정보입니다.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">이름</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{user.nickname}</p>
+                  <p className="text-sm text-blue-600">이름</p>
+                  <p className="font-semibold text-gray-900">{user.nickname}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">아이디</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">@{user.loginId}</p>
+                  <p className="text-sm text-blue-600">아이디</p>
+                  <p className="font-semibold text-gray-900">@{user.loginId}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">가입일</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">
+                  <p className="text-sm text-blue-600">가입일</p>
+                  <p className="font-semibold text-gray-900">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </p>
                 </div>

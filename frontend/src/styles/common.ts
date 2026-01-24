@@ -12,7 +12,7 @@ export const headerStyles = {
   content: "flex items-center gap-3 mb-3",
   icon: "w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-md",
   title: "text-4xl font-bold bg-clip-text text-transparent",
-  description: "text-gray-600 font-medium ml-[3.25rem]",
+  description: "text-blue-700 font-medium ml-[3.25rem]",
 };
 
 export const pageHeaderStyles = {
@@ -22,7 +22,7 @@ export const pageHeaderStyles = {
   titleWrapper: "flex items-center gap-3 mb-3",
   iconBase: "w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-lg",
   title: "text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent",
-  description: "text-gray-600 font-medium",
+  description: "text-blue-700 font-medium",
   actionButton: "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all group font-semibold",
   standardButton: "h-11 bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-gray-700",
   tabButton: {
@@ -72,6 +72,25 @@ export const navStyles = {
   mobileLink: "flex items-center gap-3 px-3 py-3 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 font-medium transition-colors",
 };
 
+// Navigation Links Configuration
+export const navigationLinks = [
+  { href: "/dashboard", label: "대시보드", icon: "LayoutDashboard" },
+  { href: "/challenge", label: "챌린지", icon: "Trophy" },
+  { href: "/feed", label: "피드", icon: "Activity" },
+  { href: "/ranking", label: "랭킹", icon: "Crown", variant: "yellow" as const },
+] as const;
+
+export const activityLinks = [
+  { href: "/stats", label: "내 통계", icon: "BarChart3" },
+  { href: "/profile?tab=badges", label: "내 배지", icon: "Medal" },
+  { href: "/profile?tab=streaks", label: "내 스트릭", icon: "Flame" },
+  { href: "/users", label: "사용자 찾기", icon: "Users" },
+] as const;
+
+export const accountLinks = [
+  { href: "/settings", label: "설정", icon: "Settings" },
+] as const;
+
 // Dropdowns
 export const dropdownStyles = {
   wrapper:
@@ -79,7 +98,7 @@ export const dropdownStyles = {
   item: "flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 text-gray-700 hover:text-blue-600 font-medium transition-colors w-full text-left",
   itemBordered: "border-b border-gray-100 last:border-0",
   header: "px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50",
-  sectionHeader: "px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-50",
+  sectionHeader: "px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider bg-gray-50",
 };
 
 // Calendar
@@ -88,7 +107,7 @@ export const calendarStyles = {
   selected: "ring-2 ring-blue-500 ring-offset-2 z-10",
   hasEvent:
     "bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 font-bold text-green-700 dark:text-green-300 shadow-sm",
-  empty: "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400",
+  empty: "bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-blue-500",
 };
 
 // Typography & Common Components

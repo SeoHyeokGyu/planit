@@ -103,7 +103,7 @@ function ProfileContent() {
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* 탭 목록 - 개선된 가시성 */}
-          <div className="flex flex-wrap gap-1 border-b-2 border-gray-200 dark:border-gray-700 mb-8">
+          <div className="flex flex-wrap gap-1 border-b-2 border-gray-200 mb-8">
             <button
                 onClick={() => setActiveTab("certifications")}
                 className={`flex items-center gap-2 px-5 py-3 font-semibold text-base transition-all border-b-4 rounded-t-lg ${
@@ -239,7 +239,7 @@ function ProfileContent() {
                       </div>
                     </>
                 ) : (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-blue-600">
                       팔로워가 없습니다.
                     </div>
                 )}
@@ -302,7 +302,7 @@ function ProfileContent() {
                       </div>
                     </>
                 ) : (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="text-center py-12 text-blue-600">
                       팔로잉이 없습니다.
                     </div>
                 )}

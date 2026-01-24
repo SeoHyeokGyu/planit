@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
+import { useNotificationStore } from "@/stores/notificationStore";
 import FeedItem from "@/components/feed/FeedItem";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,11 +35,30 @@ export default function FeedPage() {
   const token = useAuthStore((state) => state.token);
   const { ref, inView } = useInView();
   const [sortBy, setSortBy] = useState<FeedSortType>("LATEST");
+  const queryClient = useQueryClient();
+  const clearNewFeedCount = useNotificationStore((state) => state.clearNewFeedCount);
+  const notifications = useNotificationStore((state) => state.notifications);
+  const prevNotificationCountRef = useRef(0);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useFeedInfinite(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useFeedInfinite(
     10,
     sortBy
   );
+
+  // 피드 페이지 진입 시 새 피드 카운트 초기화
+  useEffect(() => {
+    clearNewFeedCount();
+  }, [clearNewFeedCount]);
+
+  // NEW_FEED 알림 수신 시 피드 자동 갱신
+  useEffect(() => {
+    const newFeedNotifications = notifications.filter((n) => n.type === "NEW_FEED");
+    if (newFeedNotifications.length > prevNotificationCountRef.current) {
+      console.log("New feed notification received, refreshing feed...");
+      refetch();
+    }
+    prevNotificationCountRef.current = newFeedNotifications.length;
+  }, [notifications, refetch]);
 
   useEffect(() => {
     if (inView && hasNextPage) {

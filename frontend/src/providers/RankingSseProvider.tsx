@@ -20,6 +20,7 @@ export default function RankingSseProvider({
   enabled = true,
 }: RankingSseProviderProps) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const token = useAuthStore((state) => state.token);
   const currentLoginId = useAuthStore((state) => state.loginId);
   const updateFromSseEvent = useRankingStore(
     (state) => state.updateFromSseEvent
@@ -35,7 +36,7 @@ export default function RankingSseProvider({
   const maxReconnectAttempts = 5;
 
   const connect = useCallback(() => {
-    if (!enabled) return;
+    if (!enabled || !token) return;
 
     // 기존 연결 정리
     if (eventSourceRef.current) {
@@ -43,7 +44,7 @@ export default function RankingSseProvider({
     }
 
     console.log("Ranking SSE: Connecting...");
-    const url = `${API_BASE_URL}${SSE_ENDPOINT}`;
+    const url = `${API_BASE_URL}${SSE_ENDPOINT}?token=${token}`;
     const eventSource = new EventSource(url, { withCredentials: true });
     eventSourceRef.current = eventSource;
 
@@ -134,6 +135,7 @@ export default function RankingSseProvider({
     };
   }, [
     enabled,
+    token,
     currentLoginId,
     updateFromSseEvent,
     setConnectionStatus,

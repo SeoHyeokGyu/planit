@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AccountSettingsSection from "@/components/profile/AccountSettingsSection";
 import { Settings, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { layoutStyles } from "@/styles/common";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function SettingsPage() {
 
   if (isLoading || !isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className={layoutStyles.pageRoot}>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <Skeleton className="h-10 w-32 mb-6" />
           <div className="mb-8">
@@ -45,7 +46,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={layoutStyles.pageRoot}>
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* 뒤로가기 버튼 */}
         <Button

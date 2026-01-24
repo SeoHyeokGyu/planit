@@ -85,7 +85,7 @@ export function CertificationCalendar({
           <span>{i}</span>
 
           {hasCertification && (
-            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500 dark:bg-green-400" />
+            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500" />
           )}
           {hasCertification && count > 1 && (
             <span className="absolute top-0.5 right-1 text-[10px] text-green-600 opacity-70">
@@ -126,7 +126,7 @@ export function CertificationCalendar({
         {/* 날짜 그리드 */}
         <div className="grid grid-cols-7 gap-1">{generateCalendarDays()}</div>
         <div className="mt-4 flex items-center justify-end gap-2 text-xs text-gray-500">
-          <div className="w-3 h-3 bg-green-100 dark:bg-green-900 border border-green-300 rounded-sm"></div>
+          <div className="w-3 h-3 bg-green-100 border border-green-300 rounded-sm"></div>
           <span>인증 완료</span>
         </div>
       </CardContent>

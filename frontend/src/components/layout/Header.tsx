@@ -3,40 +3,42 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
 import { useLogout } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUser";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useNotificationStore } from "@/stores/notificationStore";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
-import { Users, LogOut, LayoutDashboard, Trophy, Activity, Settings, Flame, Medal, BarChart3, Crown, Target, Menu, X } from "lucide-react";
+import { Users, LogOut, LayoutDashboard, Trophy, Activity, Settings, Flame, Medal, BarChart3, Crown, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { navStyles, dropdownStyles, componentStyles } from "@/styles/common";
+import { navStyles, dropdownStyles, componentStyles, navigationLinks, activityLinks, accountLinks } from "@/styles/common";
+import { Badge } from "@/components/ui/badge";
+
+// Icon mapping helper
+const iconMap = {
+  LayoutDashboard,
+  Trophy,
+  Activity,
+  Crown,
+  BarChart3,
+  Medal,
+  Flame,
+  Users,
+  Settings,
+  LogOut,
+};
 
 export default function Header() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const logout = useLogout();
   const { data: currentUser } = useUserProfile();
+  const newFeedCount = useNotificationStore((state) => state.newFeedCount);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Click outside handler for dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    if (isDropdownOpen || isMobileMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isDropdownOpen, isMobileMenuOpen]);
+  // Close dropdowns when clicking outside
+  useClickOutside(dropdownRef, () => setIsDropdownOpen(false), isDropdownOpen);
+  useClickOutside(mobileMenuRef, () => setIsMobileMenuOpen(false), isMobileMenuOpen);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -66,28 +68,34 @@ export default function Header() {
           {token ? (
             <>
               {/* Desktop Navigation Links */}
-              <div className="hidden md:flex items-center gap-1">
-                <Link href="/dashboard" className={navStyles.link}>
-                  <LayoutDashboard className="w-4 h-4" />
-                  대시보드
-                </Link>
-                <Link href="/goals" className={navStyles.link}>
-                  <Target className="w-4 h-4" />
-                  목표
-                </Link>
-                <Link href="/challenge" className={navStyles.link}>
-                  <Trophy className="w-4 h-4" />
-                  챌린지
-                </Link>
-                <Link href="/feed" className={navStyles.link}>
-                  <Activity className="w-4 h-4" />
-                  피드
-                </Link>
-                <Link href="/ranking" className={navStyles.link.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")}>
-                  <Crown className="w-4 h-4" />
-                  랭킹
-                </Link>
-              </div>
+              <nav className="hidden md:block" aria-label="주요 메뉴">
+                <ul className="flex items-center gap-1">
+                  {navigationLinks.map((link) => {
+                    const Icon = iconMap[link.icon];
+                    const linkClass = "variant" in link && link.variant === "yellow"
+                      ? navStyles.link.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")
+                      : navStyles.link;
+                    const isFeedLink = link.href === "/feed";
+
+                    return (
+                      <li key={link.href}>
+                        <Link href={link.href} className={`${linkClass} relative`}>
+                          <Icon className="w-4 h-4" />
+                          {link.label}
+                          {isFeedLink && newFeedCount > 0 && (
+                            <Badge
+                              variant="destructive"
+                              className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[9px]"
+                            >
+                              {newFeedCount > 9 ? "9+" : newFeedCount}
+                            </Badge>
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
 
               <NotificationDropdown />
 
@@ -136,7 +144,7 @@ export default function Header() {
                             <p className="font-semibold text-gray-900 text-sm truncate">
                               {currentUser.nickname}
                             </p>
-                            <p className="text-xs text-gray-500 truncate">@{currentUser.loginId}</p>
+                            <p className="text-xs text-blue-600 truncate">@{currentUser.loginId}</p>
                           </div>
                         </button>
                       </div>
@@ -145,56 +153,41 @@ export default function Header() {
                       <div className={dropdownStyles.sectionHeader}>
                         활동
                       </div>
-                      <Link
-                        href="/stats"
-                        className={dropdownStyles.item}
-                        onClick={() => setIsDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        <BarChart3 className="w-4 h-4" />
-                        내 통계
-                      </Link>
-                      <Link
-                        href="/profile?tab=badges"
-                        className={dropdownStyles.item}
-                        onClick={() => setIsDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        <Medal className="w-4 h-4" />
-                        내 배지
-                      </Link>
-                      <Link
-                        href="/profile?tab=streaks"
-                        className={dropdownStyles.item}
-                        onClick={() => setIsDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        <Flame className="w-4 h-4" />
-                        내 스트릭
-                      </Link>
-                      <Link
-                        href="/users"
-                        className={dropdownStyles.item}
-                        onClick={() => setIsDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        <Users className="w-4 h-4" />
-                        사용자 찾기
-                      </Link>
+                      {activityLinks.map((link) => {
+                        const Icon = iconMap[link.icon];
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            className={dropdownStyles.item}
+                            onClick={() => setIsDropdownOpen(false)}
+                            role="menuitem"
+                          >
+                            <Icon className="w-4 h-4" />
+                            {link.label}
+                          </Link>
+                        );
+                      })}
 
                       {/* 계정 섹션 */}
                       <div className={`${dropdownStyles.sectionHeader} border-t border-gray-100`}>
                         계정
                       </div>
-                      <Link
-                        href="/settings"
-                        className={dropdownStyles.item}
-                        onClick={() => setIsDropdownOpen(false)}
-                        role="menuitem"
-                      >
-                        <Settings className="w-4 h-4" />
-                        설정
-                      </Link>
+                      {accountLinks.map((link) => {
+                        const Icon = iconMap[link.icon];
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            className={dropdownStyles.item}
+                            onClick={() => setIsDropdownOpen(false)}
+                            role="menuitem"
+                          >
+                            <Icon className="w-4 h-4" />
+                            {link.label}
+                          </Link>
+                        );
+                      })}
                       <button
                         onClick={() => {
                           setIsDropdownOpen(false);
@@ -283,132 +276,111 @@ export default function Header() {
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">{currentUser.nickname}</p>
-                        <p className="text-sm text-gray-500">@{currentUser.loginId}</p>
+                        <p className="text-sm text-blue-600">@{currentUser.loginId}</p>
                       </div>
                     </Link>
                   </div>
                 )}
 
                 {/* Navigation Section */}
-                <div className="px-2 py-3">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <nav className="px-2 py-3" aria-label="모바일 메뉴">
+                  <div className="px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider">
                     메뉴
                   </div>
-                  <Link
-                    href="/dashboard"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                    대시보드
-                  </Link>
-                  <Link
-                    href="/goals"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Target className="w-5 h-5" />
-                    목표
-                  </Link>
-                  <Link
-                    href="/challenge"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Trophy className="w-5 h-5" />
-                    챌린지
-                  </Link>
-                  <Link
-                    href="/feed"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Activity className="w-5 h-5" />
-                    피드
-                  </Link>
-                  <Link
-                    href="/ranking"
-                    className={navStyles.mobileLink.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Crown className="w-5 h-5" />
-                    랭킹
-                  </Link>
-                </div>
+                  <ul>
+                    {navigationLinks.map((link) => {
+                      const Icon = iconMap[link.icon];
+                      const linkClass = "variant" in link && link.variant === "yellow"
+                        ? navStyles.mobileLink.replace("text-blue-600 hover:bg-blue-50", "text-yellow-600 hover:bg-yellow-50")
+                        : navStyles.mobileLink;
+                      const isFeedLink = link.href === "/feed";
+
+                      return (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            className={`${linkClass} relative`}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            role="menuitem"
+                          >
+                            <Icon className="w-5 h-5" />
+                            {link.label}
+                            {isFeedLink && newFeedCount > 0 && (
+                              <Badge
+                                variant="destructive"
+                                className="ml-auto h-5 w-5 flex items-center justify-center p-0 text-[9px]"
+                              >
+                                {newFeedCount > 9 ? "9+" : newFeedCount}
+                              </Badge>
+                            )}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
 
                 {/* Activity Section */}
                 <div className="px-2 py-3 border-t border-gray-100">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  <div className="px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider">
                     활동
                   </div>
-                  <Link
-                    href="/stats"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <BarChart3 className="w-5 h-5" />
-                    내 통계
-                  </Link>
-                  <Link
-                    href="/profile?tab=badges"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Medal className="w-5 h-5" />
-                    내 배지
-                  </Link>
-                  <Link
-                    href="/profile?tab=streaks"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Flame className="w-5 h-5" />
-                    내 스트릭
-                  </Link>
-                  <Link
-                    href="/users"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Users className="w-5 h-5" />
-                    사용자 찾기
-                  </Link>
+                  <ul>
+                    {activityLinks.map((link) => {
+                      const Icon = iconMap[link.icon];
+                      return (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            className={navStyles.mobileLink}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            role="menuitem"
+                          >
+                            <Icon className="w-5 h-5" />
+                            {link.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
 
                 {/* Account Section */}
                 <div className="px-2 py-3 border-t border-gray-100">
-                  <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  <div className="px-3 py-2 text-xs font-semibold text-blue-500 uppercase tracking-wider">
                     계정
                   </div>
-                  <Link
-                    href="/settings"
-                    className={navStyles.mobileLink}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    role="menuitem"
-                  >
-                    <Settings className="w-5 h-5" />
-                    설정
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      logout();
-                    }}
-                    className={`${navStyles.mobileLink} w-full hover:bg-red-50 hover:text-red-600 text-left`}
-                    role="menuitem"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    로그아웃
-                  </button>
+                  <ul>
+                    {accountLinks.map((link) => {
+                      const Icon = iconMap[link.icon];
+                      return (
+                        <li key={link.href}>
+                          <Link
+                            href={link.href}
+                            className={navStyles.mobileLink}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            role="menuitem"
+                          >
+                            <Icon className="w-5 h-5" />
+                            {link.label}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                    <li>
+                      <button
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          logout();
+                        }}
+                        className={`${navStyles.mobileLink} w-full hover:bg-red-50 hover:text-red-600 text-left`}
+                        role="menuitem"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        로그아웃
+                      </button>
+                    </li>
+                  </ul>
                 </div>
               </>
             ) : (

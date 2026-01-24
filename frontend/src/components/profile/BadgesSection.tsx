@@ -54,7 +54,7 @@ export default function BadgesSection({ userLoginId, isOwnProfile }: BadgesSecti
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-gray-900">나의 배지</CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription className="text-blue-700">
               {acquiredCount} / {totalCount}개 획득
             </CardDescription>
           </div>
@@ -118,9 +118,9 @@ export default function BadgesSection({ userLoginId, isOwnProfile }: BadgesSecti
           </div>
         ) : !badges || badges.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <Trophy className="w-12 h-12 mb-4 text-gray-300" />
+            <Trophy className="w-12 h-12 mb-4 text-blue-500" />
             <p className="text-lg font-medium">아직 배지가 없습니다.</p>
-            <p className="text-sm text-gray-600">다양한 활동을 통해 배지를 획득해보세요!</p>
+            <p className="text-sm text-blue-700">다양한 활동을 통해 배지를 획득해보세요!</p>
             {isOwnProfile && (
               <Button
                 variant="outline"

@@ -31,11 +31,14 @@ export default function SseProvider({ children }: { children: React.ReactNode })
       console.log("SSE: Connection opened successfully.");
     };
 
-    // 'notification' 이름으로 오는 커스텀 이벤트를 리스닝
+    // 'notification' 이름으로 오는 커스텀 이벤트를 리스닝 (INFO, ERROR, SUCCESS, NEW_FEED 등)
     eventSource.addEventListener("notification", (event) => {
       console.log("SSE: Received 'notification' event", event.data);
       try {
         const newNotification = JSON.parse(event.data);
+        if (newNotification.type === "NEW_FEED") {
+          console.log("SSE: New feed notification received", newNotification);
+        }
         addNotification(newNotification);
       } catch (error) {
         console.error("SSE: Failed to parse event data.", error);

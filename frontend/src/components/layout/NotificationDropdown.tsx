@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNotificationStore } from "@/stores/notificationStore";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { Bell, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,18 +18,8 @@ export default function NotificationDropdown() {
   const markAsRead = useNotificationStore((state) => state.markAsRead);
   const markAllAsRead = useNotificationStore((state) => state.markAllAsRead);
 
-  // 외부 클릭 시 드롭다운 닫기
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // Close dropdown when clicking outside
+  useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleNotificationClick = (id: string | undefined) => {
     if (id) {
@@ -84,7 +75,7 @@ export default function NotificationDropdown() {
           <div className="overflow-y-auto flex-1 p-2 space-y-2 max-h-[400px]">
             {notifications.length === 0 ? (
               <div className="py-12 text-center flex flex-col items-center justify-center text-gray-500">
-                <Bell className="h-8 w-8 text-gray-300 mb-2" />
+                <Bell className="h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm">새로운 알림이 없습니다.</p>
               </div>
             ) : (
