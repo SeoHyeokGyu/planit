@@ -75,7 +75,7 @@ class FileStorageService(
       // 2. 고유한 파일명 생성
       val originalFilename = file.originalFilename ?: "unknown"
       val extension = getExtension(originalFilename)
-      val filename = "${UUID.randomUUID()}_${originalFilename.replace("\\s".toRegex(), "_")}"
+      val filename = "${UUID.randomUUID()}.$extension"
 
       // 3. 저장될 절대 경로 계산
       val targetLocation = targetDir.resolve(filename).normalize().toAbsolutePath()
