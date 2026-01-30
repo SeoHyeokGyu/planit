@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/providers/Providers";
 import ConditionalHeader from "@/components/layout/ConditionalHeader";
+import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "Planit - 여행 플래너",
@@ -15,10 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>
+      <body className="flex flex-col min-h-screen">
         <Providers>
           <ConditionalHeader />
-          {children}
+          <main className="flex-1">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>
