@@ -206,15 +206,15 @@
 - [ ] 검색어 자동완성 API
 - [ ] 인기 검색어 API (Redis Sorted Set)
 
-### 17. 개인 대시보드 (Personal Dashboard)
+### 17. 개인 대시보드 (Personal Dashboard) - 완료
 - [x] 대시보드 데이터 API (챌린지 수, 인증 수, 팔로워 수, 팔로잉 수)
 - [x] 참여 중인 챌린지 API (진행 중인 챌린지 목록)
 - [x] 최근 활동 피드 API (최근 3개 피드)
 - [x] 대시보드 추천 챌린지 API (AI 기반 5가지 알고리즘)
-- [ ] 대시보드 데이터 캐싱 (Redis, TTL 5분)
 - [x] 대시보드 프론트엔드 페이지 (통계 카드, 최근 피드)
 
 **참고**: 포인트, 배지, 스트릭은 각각의 전용 API 제공 (GET /api/points/me, /api/badges/my, /api/streaks)
+**캐싱**: 팔로워/팔로잉 수는 이미 Redis 캐싱, 나머지는 단순 COUNT 쿼리로 충분히 빠름
 
 ### 18. 에러 처리 (Error Handling) - 완료
 - [x] 전역 예외 처리 (@RestControllerAdvice)
