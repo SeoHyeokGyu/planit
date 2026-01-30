@@ -26,17 +26,17 @@
 ### 기술 스택
 
 **백엔드** (85% 비중)
-- Spring Boot 3.x + Java 17
+- Spring Boot 3.2 + Kotlin 1.9.20
 - PostgreSQL (주 데이터베이스)
 - Redis (캐싱 + Pub/Sub)
 - Spring Security + JWT
 - SSE (Server-Sent Events)
-- OpenAI GPT API
-- Google Cloud Vision API
+- Google GenAI SDK
+- Google Cloud Vision API (계획 중)
 
 **프론트엔드**
-- Next.js 14 + TypeScript
-- Tailwind CSS + Shadcn/ui
+- Next.js 16 + TypeScript
+- Tailwind CSS 4 + Shadcn/ui
 - Zustand (상태 관리)
 - React Query (데이터 페칭)
 - EventSource API (SSE 클라이언트)
@@ -44,12 +44,12 @@
 **인프라**
 - Docker + Docker Compose
 - GitHub Actions (CI/CD)
-- AWS S3 (이미지 저장)
+- 로컬 파일 스토리지 (이미지 저장, 날짜별 디렉토리, 리사이징/압축)
 - Render (배포)
 
 ---
 
-## 26개 기능 섹션 상세 목록
+## 25개 기능 섹션 상세 목록
 
 ### 1. 홈/랜딩 페이지 (Home/Landing Page)
 - [ ] 메인 랜딩 페이지 (비로그인 사용자용)
@@ -70,7 +70,7 @@
 - [x] 로그인/로그아웃 API
 - [x] 프로필 조회/수정 API
 - [x] 비밀번호 변경 API (기존 비밀번호 검증)
-- [ ] 회원 탈퇴 API (연관 데이터 처리)
+- [x] 회원 탈퇴 API (연관 데이터 처리)
 - [ ] 프로필 이미지 업로드 API (S3/CloudFront)
 
 ### 4. 챌린지 관리 (Challenge Management)
@@ -86,14 +86,17 @@
 
 ### 5. 인증 작성/관리 (Certification Management)
 - [x] 인증 생성 API (챌린지 ID, 제목, 내용)
-- [ ] 이미지 업로드 API (S3 멀티파트 업로드)
-- [ ] 이미지 검증 (서버 사이드: 파일 타입, 크기, MIME 타입)
-- [ ] 이미지 리사이징 (서버 사이드: 썸네일 생성)
+- [x] 이미지 업로드 API (로컬 파일 저장, 날짜별 디렉토리)
+- [x] 이미지 검증 (AI 분석으로 구현됨)
+- [x] 이미지 리사이징 (Thumbnailator: 최대 1600px, 품질 80%)
 - [x] 인증 조회 API (목록/상세, 페이징)
 - [x] 인증 수정 API (작성자 권한)
 - [x] 인증 삭제 API (작성자 권한, 소프트 삭제)
 - [x] 사용자별 인증 목록 API
 - [x] 챌린지별 인증 목록 API
+- [x] 기간별 인증 목록 API (date-range)
+- [x] AI 인증 재분석 API
+- [x] 인증 사진 삭제 API
 - [ ] 인증 통계 API (좋아요 수, 댓글 수)
 
 ### 6. 실시간 피드 - 핵심 기능 (Real-time Feed)
@@ -103,17 +106,17 @@
 - [x] SSE 연결 관리 (사용자별 세션 관리)
 - [x] 하트비트 (30초마다 keep-alive)
 - [x] 피드 조회 API (참여 중인 챌린지 기반, 페이징)
-- [ ] 피드 정렬 API (최신순, 좋아요순, 댓글순)
+- [x] 피드 정렬 API (최신순, 좋아요순, 댓글순, 인기순)
 - [x] 팔로잉 피드 API (팔로우한 사용자 인증)
 
 ### 7. AI 추천 엔진 - 핵심 기능 (AI Recommendation Engine)
-- [ ] 추천 API (5가지 추천 알고리즘)
-- [ ] 쿼리 기반 추천 (참가자 수 TOP, Redis 캐싱)
-- [ ] 콘텐츠 기반 추천 (태그 유사도 계산, 코사인 유사도)
-- [ ] 협업 필터링 (공통 참여 챌린지 분석, User-Based CF)
-- [ ] 개인화 추천 (사용자 행동 로그 분석, 난이도/카테고리 선호)
-- [ ] 트렌드 추천 (24시간 급상승 챌린지, Redis Sorted Set)
-- [ ] 추천 이유 생성 API (설명 텍스트)
+- [x] 추천 API (5가지 추천 알고리즘)
+- [x] 쿼리 기반 추천 (참가자 수 TOP, Redis 캐싱)
+- [x] 콘텐츠 기반 추천 (태그 유사도 계산, 코사인 유사도)
+- [x] 협업 필터링 (공통 참여 챌린지 분석, User-Based CF)
+- [x] 개인화 추천 (사용자 행동 로그 분석, 난이도/카테고리 선호)
+- [x] 트렌드 추천 (24시간 급상승 챌린지, Redis Sorted Set)
+- [x] 추천 이유 생성 API (설명 텍스트)
 - [ ] 사용자 행동 로그 수집 (조회, 참여, 완료)
 - [ ] 추천 결과 캐싱 (Redis, TTL 1시간)
 - [ ] 추천 성능 측정 (CTR, 참여율)
@@ -129,11 +132,11 @@
 
 ### 9. 댓글 & 좋아요 (Comments & Likes)
 - [x] 댓글 생성 API
-- [x] 댓글 조회 API (인증별, 페이징)
+- [x] 댓글 조회 API (인증별)
 - [x] 댓글 삭제 API (작성자 권한 검증)
-- [ ] 댓글 수 카운트 (Redis 캐싱)
+- [x] 댓글 수 카운트 (응답에 포함)
 - [x] 좋아요 생성/취소 API (토글)
-- [ ] 좋아요 카운트 API (Redis 캐싱)
+- [x] 좋아요 카운트 (응답에 포함)
 - [ ] 좋아요 목록 API (사용자 목록)
 - [x] 중복 좋아요 방지 (Unique 제약조건)
 - [x] 좋아요 알림 발송 (비동기)
@@ -143,7 +146,7 @@
 - [x] 알림 조회 API (목록, 페이징)
 - [x] 미읽음 알림 카운트 API (Redis 캐싱)
 - [x] 알림 읽음 처리 API (개별/일괄)
-- [x] 알림 삭제 API (소프트 삭제)
+- [x] 알림 삭제 API (개별/읽은 알림 일괄 삭제)
 - [ ] 알림 설정 API (타입별 수신 여부)
 - [x] SSE 기반 실시간 알림 푸시
 - [ ] 알림 만료 정책 (30일 후 자동 삭제)
@@ -179,12 +182,12 @@
 - [x] 일별 활동 기록 추적 (DailyActivity 엔티티)
 
 ### 14. 랭킹 (Ranking/Leaderboard)
-- [ ] 랭킹 계산 API (Redis Sorted Set 활용)
-- [ ] 랭킹 조회 API (주간/월간/전체, 페이징)
-- [ ] 랭킹 갱신 배치 작업 (1시간마다 실행)
-- [ ] 본인 순위 조회 API (특정 사용자 순위)
-- [ ] 순위 변동 추적 (이전 순위 저장)
-- [ ] SSE 기반 실시간 순위 업데이트
+- [x] 랭킹 계산 API (Redis Sorted Set 활용)
+- [x] 랭킹 조회 API (주간/월간/전체, 페이징)
+- [x] 랭킹 동기화 배치 작업 (전체: 매일 4시, 주간/월간: 아카이브)
+- [x] 본인 순위 조회 API (특정 사용자 순위)
+- [x] 순위 변동 추적 (SSE를 통한 실시간 추적)
+- [x] SSE 기반 실시간 순위 업데이트 (Top 10 변경 시 푸시)
 
 ### 15. 통계/분석 (Statistics & Analytics)
 - [x] 개인 통계 API (총 인증 수, 포인트, 배지, 스트릭)
@@ -197,7 +200,7 @@
 ### 16. 고급 검색 (Advanced Search)
 - [x] 챌린지 검색 API (키워드, Full-Text Search)
 - [x] 필터링 API (카테고리, 난이도, 기간, 상태)
-- [ ] 정렬 API (인기도, 신규순, 참여자순, 종료 예정)
+- [x] 정렬 API (LATEST, NAME, DIFFICULTY, POPULAR)
 - [ ] 검색 인덱싱 (PostgreSQL tsvector, GIN 인덱스)
 - [ ] 검색 결과 캐싱 (Redis, TTL 10분)
 - [ ] 검색어 자동완성 API
@@ -210,26 +213,14 @@
 - [ ] 대시보드 추천 챌린지 API (AI 기반)
 - [ ] 대시보드 데이터 캐싱 (Redis, TTL 5분)
 
-### 18. 관리자 기능 (Admin Features)
-- [ ] 관리자 대시보드 API
-- [ ] 사용자 관리 API (조회, 검색, 비활성화, 삭제)
-- [ ] 챌린지 관리 API (승인, 거부, 삭제, 수정)
-- [ ] 인증 관리 API (신고 처리, 삭제)
-- [ ] 댓글 관리 API (신고 처리, 삭제)
-- [ ] 통계 조회 API (전체 사용자 수, 챌린지 수, 인증 수)
-- [ ] 시스템 설정 API (포인트 규칙, 레벨 기준, 배지 조건)
-- [ ] 공지사항 관리 API (생성, 수정, 삭제)
-- [ ] 관리자 권한 검증 (ADMIN 역할)
-- [ ] 관리자 활동 로그 저장
-
-### 19. 에러 처리 (Error Handling) - 완료
+### 18. 에러 처리 (Error Handling) - 완료
 - [x] 전역 예외 처리 (@RestControllerAdvice)
 - [x] 커스텀 예외 클래스 정의
 - [x] HTTP 상태 코드 매핑 (4xx, 5xx)
 - [x] 에러 응답 표준화 (code, message, timestamp)
 - [x] 에러 로깅 (Logback)
 
-### 20. Redis 캐싱 전략 (Redis Caching Strategy)
+### 19. Redis 캐싱 전략 (Redis Caching Strategy)
 - [x] Redis 연결 설정 (Lettuce)
 - [x] 캐시 키 전략 정의 (네이밍 규칙)
 - [x] TTL 정책 설정 (데이터별)
@@ -237,7 +228,7 @@
 - [ ] 캐시 무효화 전략 (Write-Through, Write-Behind)
 - [ ] 캐시 히트율 모니터링
 
-### 21. 보안 시스템 (Security System)
+### 20. 보안 시스템 (Security System)
 - [x] JWT 토큰 검증 필터
 - [ ] Rate Limiting (Bucket4j)
   - API별 요청 제한 (분당 100회)
@@ -252,7 +243,7 @@
 - [x] 비밀번호 암호화 (BCrypt)
 - [ ] 민감 정보 암호화 (AES-256)
 
-### 22. API 성능 최적화 (API Performance Optimization)
+### 21. API 성능 최적화 (API Performance Optimization)
 - [ ] 쿼리 최적화 (N+1 문제 해결, Fetch Join)
 - [ ] 데이터베이스 인덱싱 (복합 인덱스, 부분 인덱스)
 - [ ] 페이징 최적화 (Cursor 기반)
@@ -262,23 +253,25 @@
 - [ ] 커넥션 풀 최적화 (HikariCP)
 - [ ] 트랜잭션 범위 최소화
 
-### 23. 배치 작업/스케줄링 (Batch Jobs & Scheduling) - 부분 완료
+### 22. 배치 작업/스케줄링 (Batch Jobs & Scheduling) - 부분 완료
 - [ ] Spring Batch 설정
 - [x] 스케줄러 설정 (@Scheduled)
 - [x] 배치 작업 목록:
   - [x] 스트릭 검증 (매일 자정) - StreakScheduler
   - [x] 스트릭 리마인더 (매일 저녁 8시) - StreakScheduler
-  - [ ] 랭킹 갱신 (1시간마다)
+  - [x] 랭킹 동기화 (매일 새벽 4시, 5시) - RankingScheduler
+  - [x] 랭킹 아카이브 (주간: 일요일 23:55, 월간: 월말 23:55) - RankingScheduler
+  - [x] 파일 정리 (매일 새벽 3시, 고아 파일 삭제) - FileCleanupTask
   - [ ] 통계 집계 (매일 새벽 2시)
   - [ ] 만료 알림 삭제 (매주 일요일)
-  - [x] 챌린지 종료 처리 - ChallengeReminderScheduler
+  - [x] 챌린지 종료 리마인더 (매일 9시: 1주일 전, 3일 전, 당일) - ChallengeReminderScheduler
   - [x] 조회수 동기화 (1시간마다) - ViewCountScheduler
   - [ ] 주간 리포트 이메일 발송 (매주 월요일)
 - [ ] 배치 실행 이력 저장
 - [ ] 배치 실패 알림 (Slack, Discord)
 - [ ] 배치 작업 모니터링 (실행 시간, 성공/실패)
 
-### 24. AI 인증 분석 (AI Certification Analysis)
+### 23. AI 인증 분석 (AI Certification Analysis)
 - [ ] Google Cloud Vision API 연동
 - [ ] 이미지 업로드 시 비동기 분석 (백그라운드 작업)
 - [ ] 라벨 탐지 (Label Detection) 분석
@@ -289,7 +282,7 @@
 - [ ] AI 인증 배지 자동 부여 (신뢰도 80% 이상)
 - [ ] 분석 실패 시 재시도 로직
 
-### 25. AI 동기부여 코치 (AI Motivational Coach)
+### 24. AI 동기부여 코치 (AI Motivational Coach)
 - [ ] AI 격려 메시지 생성 API (OpenAI GPT 연동)
 - [ ] 사용자 컨텍스트 수집 (레벨, 스트릭, 최근 활동)
 - [ ] 개인화 메시지 생성 (사용자 데이터 기반)
@@ -298,7 +291,7 @@
 - [ ] 메시지 조회 API (최근 10개)
 - [ ] 알림 시스템 연동 (자동 발송)
 
-### 26. AI 챌린지 생성기 (AI Challenge Generator)
+### 25. AI 챌린지 생성기 (AI Challenge Generator)
 - [ ] AI 챌린지 생성 API (OpenAI GPT 연동)
 - [ ] 키워드 기반 챌린지 자동 생성 (제목, 설명, 태그, 카테고리)
 - [ ] GPT 프롬프트 엔지니어링 (구조화된 출력)
@@ -312,7 +305,7 @@
 
 ---
 
-## 주요 API 엔드포인트 (35+)
+## 주요 API 엔드포인트 (50+)
 
 ### 인증 관리 (AuthController)
 - `POST /api/auth/signup` - 회원가입
@@ -358,10 +351,13 @@
 - `GET /api/feed/stream` - SSE 스트림
 
 ### 알림 (NotificationController)
-- `GET /api/notifications` - 알림 목록 조회 (페이징)
+- `GET /api/subscribe` - SSE 실시간 알림 구독
+- `GET /api/notifications` - 알림 목록 조회 (페이징, 필터링)
 - `GET /api/notifications/unread-count` - 미읽음 알림 수
-- `PUT /api/notifications/{notificationId}/read` - 알림 읽음 표시
+- `PATCH /api/notifications/{notificationId}/read` - 알림 읽음 표시
+- `PATCH /api/notifications/read-all` - 모든 알림 읽음 표시
 - `DELETE /api/notifications/{notificationId}` - 알림 삭제
+- `DELETE /api/notifications/read` - 읽은 알림 일괄 삭제
 
 ### 포인트 (PointController)
 - `GET /api/points/me` - 내 포인트 요약 조회
@@ -370,9 +366,27 @@
 - `GET /api/points/me/statistics` - 포인트 통계 (일별, 날짜 범위)
 
 ### 배지 (BadgeController)
+- `POST /api/badges/check-all` - 모든 배지 조건 체크
 - `GET /api/badges` - 전체 배지 목록 조회 (획득 여부 포함)
 - `GET /api/badges/my` - 내가 획득한 배지 목록
 - `GET /api/badges/user/{loginId}` - 특정 사용자의 배지 목록
+
+### 랭킹 (RankingController, RankingSseController)
+- `GET /api/rankings` - 랭킹 조회 (통합, type 파라미터)
+- `GET /api/rankings/weekly` - 주간 랭킹
+- `GET /api/rankings/monthly` - 월간 랭킹
+- `GET /api/rankings/alltime` - 전체 랭킹
+- `GET /api/rankings/me` - 내 랭킹 조회
+- `GET /api/rankings/stream` - 실시간 랭킹 SSE 스트림
+- `GET /api/rankings/stream/status` - SSE 연결 상태
+
+### 스트릭 (StreakController)
+- `GET /api/streaks/{challengeId}` - 특정 챌린지 스트릭 조회
+- `GET /api/streaks` - 사용자의 모든 스트릭 조회
+- `POST /api/streaks/{challengeId}/record` - 인증 기록
+- `GET /api/streaks/calendar` - 잔디 캘린더 데이터 (연도별)
+- `GET /api/streaks/statistics` - 스트릭 통계 (일별/주별/월별)
+- `GET /api/streaks/{challengeId}/leaderboard` - 스트릭 리더보드
 
 ---
 
@@ -435,23 +449,25 @@ Streak (연속 기록)
 
 ---
 
-## 배치 작업 (6개)
+## 배치 작업 (8개)
 
 | 작업 | 실행 주기 | 설명 |
 |------|-----------|------|
 | 스트릭 검증 | 매일 자정 | 연속 인증일 수 갱신 |
-| 랭킹 갱신 | 1시간마다 | Redis Sorted Set 갱신 |
-| 통계 집계 | 매일 새벽 2시 | 일별 통계 데이터 생성 |
-| 만료 알림 삭제 | 매주 일요일 | 30일 지난 알림 삭제 |
-| 챌린지 종료 처리 | 매시간 | 종료된 챌린지 상태 변경 |
-| 주간 리포트 발송 | 매주 월요일 | 이메일 발송 |
+| 스트릭 리마인더 | 매일 저녁 8시 | 오늘 미인증 시 알림 |
+| 랭킹 동기화 | 매일 새벽 4시, 5시 | Redis → DB 동기화 (전체/주간/월간) |
+| 랭킹 아카이브 | 주간: 일요일 23:55, 월간: 월말 23:55 | 기간별 랭킹 최종 결과 저장 |
+| 파일 정리 | 매일 새벽 3시 | 고아 파일(DB 미연결) 삭제 |
+| 챌린지 리마인더 | 매일 오전 9시 | 종료 1주일 전, 3일 전, 당일 알림 |
+| 조회수 동기화 | 1시간마다 | Redis → DB 동기화 |
+| 통계 집계 | 매일 새벽 2시 | 일별 통계 데이터 생성 (계획 중) |
 
 ---
 
 ## 개발 환경 설정
 
 ### 필수 요구사항
-- Java 17+
+- Java 17+ (Kotlin 1.9.20)
 - Node.js 18+
 - Docker & Docker Compose
 - PostgreSQL 15+
@@ -495,16 +511,20 @@ SPRING_REDIS_PORT=6379
 JWT_SECRET=your-secret-key
 JWT_EXPIRATION=86400000
 
-# AWS S3
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_S3_BUCKET=your-bucket-name
+# 파일 저장
+FILE_UPLOAD_DIR=./uploads
+FILE_UPLOAD_URL_PATH=/images
 
-# OpenAI
-OPENAI_API_KEY=your-openai-api-key
+# Google GenAI
+GOOGLE_GENAI_API_KEY=your-genai-api-key
 
-# Google Cloud Vision
+# Google Cloud Vision (계획 중)
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+
+# AWS S3 (선택 사항, 현재 미사용)
+# AWS_ACCESS_KEY_ID=your-access-key
+# AWS_SECRET_ACCESS_KEY=your-secret-key
+# AWS_S3_BUCKET=your-bucket-name
 ```
 
 ---
@@ -513,13 +533,14 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 
 | 항목 | 수치 |
 |------|------|
-| **구현된 API 엔드포인트** | 39+ |
+| **구현된 API 엔드포인트** | 50+ |
 | **구현된 프론트엔드 페이지** | 16+ |
-| **백엔드 기능 섹션** | 11개 (인증, 사용자, 챌린지, 인증, 피드, 팔로우, 알림, 포인트, 배지, 스트릭, 모니터링, 스케줄링) |
-| **구현된 기능** | 사용자 인증, 챌린지 관리, 인증 시스템, 팔로우, 실시간 피드, 알림, 포인트, 배지 시스템, 스트릭 시스템, 통계 |
-| **완료율** | ~55% (주요 핵심 기능 완료) |
-| **현재 기술 스택** | Spring Boot, Next.js, PostgreSQL, Redis, SSE, Recharts |
-| **외부 API 연동** | 0개 (계획 중: OpenAI GPT, Google Cloud Vision) |
+| **백엔드 컨트롤러** | 14개 (Auth, User, Challenge, Certification, Follow, Feed, Notification, LikeComment, Badge, Point, Ranking, RankingSse, Streak, Health) |
+| **스케줄러** | 5개 (Streak, Ranking, FileCleanup, ChallengeReminder, ViewCount) |
+| **구현된 기능** | 사용자 인증, 챌린지 관리, 인증 시스템, 팔로우, 실시간 피드, 알림, 포인트, 배지, 스트릭, 랭킹(실시간 SSE), AI 추천, 파일 관리 |
+| **완료율** | ~65% (주요 핵심 기능 완료, AI 추천 시스템 구현) |
+| **현재 기술 스택** | Spring Boot + Kotlin, Next.js 16, PostgreSQL, Redis, SSE, Recharts, Thumbnailator |
+| **외부 API 연동** | 1개 (Google GenAI SDK), 계획 중: Google Cloud Vision |
 
 ---
 
