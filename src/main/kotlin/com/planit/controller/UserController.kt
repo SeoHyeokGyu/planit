@@ -82,6 +82,10 @@ class UserController(val userService: UserService) {
     return ResponseEntity.ok(ApiResponse.pagedSuccess(usersPage.content, usersPage))
   }
 
+  /**
+   * 랜덤 사용자 목록 조회
+   * 피드 추천 사용자 기능에서 사용
+   */
   @GetMapping("/random")
   fun getRandomUsers(
       @RequestParam(defaultValue = "3") size: Int
