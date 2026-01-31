@@ -17,13 +17,24 @@ class ChallengeController(
 ) {
 
     /**
-     * 사용자 맞춤형 챌린지 추천
+     * 사용자 맞춤형 새로운 챌린지 제안 (생성 시 참고)
      */
     @GetMapping("/recommend")
-    fun recommendChallenges(
+    fun recommendNewChallenges(
         @AuthenticationPrincipal userDetails: CustomUserDetails
     ): ResponseEntity<ApiResponse<List<ChallengeRecommendationResponse>>> {
-        val response = recommendService.recommendChallenges(userDetails.username)
+        val response = recommendService.recommendNewChallenges(userDetails.username)
+        return ResponseEntity.ok(ApiResponse.success(response))
+    }
+
+    /**
+     * 기존 챌린지 중에서 추천 (참여 용도)
+     */
+    @GetMapping("/recommend-existing")
+    fun recommendExistingChallenges(
+        @AuthenticationPrincipal userDetails: CustomUserDetails
+    ): ResponseEntity<ApiResponse<List<ExistingChallengeRecommendationResponse>>> {
+        val response = recommendService.recommendExistingChallenges(userDetails.username)
         return ResponseEntity.ok(ApiResponse.success(response))
     }
 

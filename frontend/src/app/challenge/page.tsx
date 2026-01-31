@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useChallenges, useSearchChallenges } from "@/hooks/useChallenge";
+import { useChallenges, useSearchChallenges, useRecommendedExistingChallenges } from "@/hooks/useChallenge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,9 +22,16 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check } from "lucide-react";
+import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check, Sparkles, RefreshCw, Loader2 } from "lucide-react";
 import { ChallengeListResponse, ChallengeSortType } from "@/types/challenge";
-import { pageHeaderStyles, iconGradients, layoutStyles } from "@/styles/common";
+import {
+  pageHeaderStyles,
+  iconGradients,
+  layoutStyles,
+  aiRecommendationStyles,
+  filterStyles,
+  challengeStyles,
+} from "@/styles/common";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export default function ChallengesPage() {
@@ -33,6 +40,15 @@ export default function ChallengesPage() {
   const [category, setCategory] = useState<string | undefined>();
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<ChallengeSortType>("LATEST");
+
+  const {
+    data: recommendations,
+    isLoading: isRecQueryLoading,
+    refetch: refetchRecommendations,
+    isRefetching: isRecRefetching
+  } = useRecommendedExistingChallenges();
+
+  const isRecLoading = isRecQueryLoading || isRecRefetching;
 
   // 디버깅: sortBy 변경 시 확인
   useEffect(() => {
@@ -63,7 +79,7 @@ export default function ChallengesPage() {
       case "NAME":
         return [...challenges].sort((a, b) => a.title.localeCompare(b.title));
       case "DIFFICULTY":
-        const difficultyOrder = { EASY: 1, MEDIUM: 2, HARD: 3 };
+        const difficultyOrder = { EASY: 1, NORMAL: 2, MEDIUM: 2, HARD: 3 };
         return [...challenges].sort((a, b) => {
           const orderA = difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 99;
           const orderB = difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 99;
@@ -89,19 +105,19 @@ export default function ChallengesPage() {
       return (
           <Badge
               variant="secondary"
-              className="bg-blue-100 text-blue-800 border-blue-200 font-semibold"
+              className={challengeStyles.statusBadge.scheduled}
           >
             예정
           </Badge>
       );
     if (now > end)
       return (
-          <Badge variant="outline" className="border-gray-400 text-gray-700 font-semibold">
+          <Badge variant="outline" className={challengeStyles.statusBadge.ended}>
             종료
           </Badge>
       );
     return (
-        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 border-0 text-white font-semibold">
+        <Badge className={challengeStyles.statusBadge.ongoing}>
           진행중
         </Badge>
     );
@@ -111,16 +127,23 @@ export default function ChallengesPage() {
     const variants: Record<string, { label: string; className: string }> = {
       EASY: {
         label: "쉬움",
-        className: "bg-green-100 text-green-800 border-green-200 font-semibold",
+        className: challengeStyles.difficultyBadge.easy,
+      },
+      NORMAL: {
+        label: "보통",
+        className: challengeStyles.difficultyBadge.medium,
       },
       MEDIUM: {
         label: "보통",
-        className: "bg-yellow-100 text-yellow-800 border-yellow-200 font-semibold",
+        className: challengeStyles.difficultyBadge.medium,
       },
-      HARD: { label: "어려움", className: "bg-red-100 text-red-800 border-red-200 font-semibold" },
+      HARD: {
+        label: "어려움",
+        className: challengeStyles.difficultyBadge.hard
+      },
     };
 
-    const config = variants[difficulty] || variants.MEDIUM;
+    const config = variants[difficulty] || variants.NORMAL;
     return (
         <Badge variant="outline" className={config.className}>
           {config.label}
@@ -167,57 +190,120 @@ export default function ChallengesPage() {
             </div>
           </div>
 
+          {/* AI Recommendations */}
+          {isRecLoading && (!recommendations || recommendations.length === 0) ? (
+            <div className={aiRecommendationStyles.container}>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className={aiRecommendationStyles.icon} />
+                <h2 className={aiRecommendationStyles.title}>
+                  AI가 회원님을 위한 챌린지를 찾는 중...
+                </h2>
+              </div>
+              <Card className="border-2 border-dashed bg-white/50 p-12 flex flex-col items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-4" />
+                <p className="text-gray-600 font-semibold text-lg">AI가 맞춤형 챌린지를 분석하고 있습니다</p>
+                <p className="text-gray-500 text-sm mt-1">잠시만 기다려주세요...</p>
+              </Card>
+            </div>
+          ) : recommendations && recommendations.length > 0 && (
+            <div className={aiRecommendationStyles.container}>
+              <div className="flex items-center justify-between mb-4">
+                <div className={aiRecommendationStyles.header}>
+                  <Sparkles className={aiRecommendationStyles.icon} />
+                  <h2 className={aiRecommendationStyles.title}>
+                    AI가 회원님을 위해 골랐어요!
+                  </h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => refetchRecommendations()}
+                  disabled={isRecLoading}
+                  className="text-gray-500 hover:text-blue-600"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-1 ${isRecLoading ? "animate-spin" : ""}`} />
+                  새로고침
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendations.map((rec) => (
+                  <div key={`${rec.challenge.id}-rec`} className={aiRecommendationStyles.cardWrapper}>
+                    <div className={aiRecommendationStyles.glowEffect}></div>
+                    <div className={aiRecommendationStyles.cardInner}>
+                      <ChallengeCard
+                        challenge={rec.challenge}
+                        statusBadge={getStatusBadge(
+                          rec.challenge.startDate,
+                          rec.challenge.endDate
+                        )}
+                        difficultyBadge={getDifficultyBadge(rec.challenge.difficulty)}
+                        categoryLabel={getCategoryLabel(rec.challenge.category)}
+                        onClick={() => router.push(`/challenge/${rec.challenge.id}`)}
+                      />
+                      <div className={aiRecommendationStyles.reasonBox}>
+                        <p className={aiRecommendationStyles.reasonText}>
+                          <Sparkles className={aiRecommendationStyles.reasonIcon} />
+                          {rec.reason}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Filters */}
           <Card className="mb-8 border-2 shadow-lg bg-white">
             <CardContent className="pt-6 bg-white">
               <div className="flex flex-col gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className={filterStyles.searchWrapper}>
+                  <Search className={filterStyles.searchIcon} />
                   <Input
                       placeholder="챌린지 검색..."
                       value={searchKeyword}
                       onChange={(e) => setSearchKeyword(e.target.value)}
-                      className="pl-10 h-12 text-base border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-gray-400 font-medium"
+                      className={filterStyles.searchInput}
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className={filterStyles.filterGroup}>
                   <div className="flex items-center gap-2 flex-1">
                     <Filter className="w-4 h-4 text-gray-600" />
                     <Select
                         value={category}
                         onValueChange={(value) => setCategory(value === "all" ? undefined : value)}
                     >
-                      <SelectTrigger className="border-2 border-gray-300 bg-white text-gray-900 font-medium">
+                      <SelectTrigger className={filterStyles.selectTrigger}>
                         <SelectValue placeholder="카테고리" className="text-gray-900" />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
                         <SelectItem
                             value="all"
-                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                            className={filterStyles.selectItem}
                         >
                           전체
                         </SelectItem>
                         <SelectItem
                             value="HEALTH"
-                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                            className={filterStyles.selectItem}
                         >
                           🏃 건강
                         </SelectItem>
                         <SelectItem
                             value="STUDY"
-                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                            className={filterStyles.selectItem}
                         >
                           📚 학습
                         </SelectItem>
                         <SelectItem
                             value="HOBBY"
-                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                            className={filterStyles.selectItem}
                         >
                           🎨 취미
                         </SelectItem>
                         <SelectItem
                             value="LIFESTYLE"
-                            className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                            className={filterStyles.selectItem}
                         >
                           🌱 라이프스타일
                         </SelectItem>
@@ -228,31 +314,31 @@ export default function ChallengesPage() {
                       value={difficulty}
                       onValueChange={(value) => setDifficulty(value === "all" ? undefined : value)}
                   >
-                    <SelectTrigger className="flex-1 border-2 border-gray-300 bg-white text-gray-900 font-medium">
+                    <SelectTrigger className={filterStyles.selectTriggerFlex}>
                       <SelectValue placeholder="난이도" className="text-gray-900" />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       <SelectItem
                           value="all"
-                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          className={filterStyles.selectItem}
                       >
                         전체
                       </SelectItem>
                       <SelectItem
                           value="EASY"
-                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          className={filterStyles.selectItem}
                       >
                         ⭐ 쉬움
                       </SelectItem>
                       <SelectItem
-                          value="MEDIUM"
-                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          value="NORMAL"
+                          className={filterStyles.selectItem}
                       >
                         ⭐⭐ 보통
                       </SelectItem>
                       <SelectItem
                           value="HARD"
-                          className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
+                          className={filterStyles.selectItem}
                       >
                         ⭐⭐⭐ 어려움
                       </SelectItem>
@@ -358,17 +444,17 @@ function ChallengeCard({
 }) {
   return (
       <Card
-          className="cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 group bg-gradient-to-br from-white to-gray-50"
+          className={challengeStyles.card}
           onClick={onClick}
       >
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start gap-2 mb-2">
-            <CardTitle className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+            <CardTitle className={challengeStyles.cardTitle}>
               {challenge.title}
             </CardTitle>
             {statusBadge}
           </div>
-          <CardDescription className="flex items-center gap-1 text-xs text-gray-600 font-medium">
+          <CardDescription className={challengeStyles.cardDate}>
             <Calendar className="w-3 h-3" />
             {new Date(challenge.startDate).toLocaleDateString("ko-KR", {
               month: "short",
@@ -394,17 +480,17 @@ function ChallengeCard({
         </CardContent>
         <CardFooter className="pt-3 border-t">
           <div className="flex justify-between w-full text-sm text-gray-700">
-            <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+            <div className={`${challengeStyles.statItem} hover:text-blue-600`}>
               <Users className="w-4 h-4" />
-              <span className="font-bold">{challenge.participantCnt}</span>
+              <span className={challengeStyles.statValue}>{challenge.participantCnt}</span>
             </div>
-            <div className="flex items-center gap-1 hover:text-purple-600 transition-colors">
+            <div className={`${challengeStyles.statItem} hover:text-purple-600`}>
               <Award className="w-4 h-4" />
-              <span className="font-bold">{challenge.certificationCnt}</span>
+              <span className={challengeStyles.statValue}>{challenge.certificationCnt}</span>
             </div>
-            <div className="flex items-center gap-1 hover:text-gray-900 transition-colors">
+            <div className={`${challengeStyles.statItem} hover:text-gray-900`}>
               <Eye className="w-4 h-4" />
-              <span className="font-bold">{challenge.viewCnt}</span>
+              <span className={challengeStyles.statValue}>{challenge.viewCnt}</span>
             </div>
           </div>
         </CardFooter>

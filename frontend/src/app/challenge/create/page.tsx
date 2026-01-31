@@ -252,7 +252,7 @@ export default function CreateChallengePage() {
                             ⭐ 쉬움
                           </SelectItem>
                           <SelectItem
-                            value="MEDIUM"
+                            value="NORMAL"
                             className="text-gray-900 font-medium cursor-pointer hover:bg-gray-100"
                           >
                             ⭐⭐ 보통

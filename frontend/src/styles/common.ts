@@ -202,3 +202,47 @@ export const aiStyles = {
   // Actions
   actionBtn: "w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800",
 };
+
+// AI Recommendations (Special Section - Challenge Page)
+export const aiRecommendationStyles = {
+  container: "mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700",
+  header: "flex items-center gap-2 mb-4",
+  icon: "w-6 h-6 text-yellow-500 fill-yellow-500 animate-pulse",
+  title: "text-xl font-bold text-gray-900",
+  cardWrapper: "relative group",
+  glowEffect: "absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-60 transition duration-500",
+  cardInner: "relative h-full flex flex-col",
+  reasonBox: "mt-3 p-3 bg-indigo-50 border border-indigo-100 rounded-xl shadow-sm relative z-10",
+  reasonText: "text-sm text-indigo-900 font-medium flex gap-2 items-start leading-relaxed",
+  reasonIcon: "w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-600",
+};
+
+// Filters & Search
+export const filterStyles = {
+  searchWrapper: "relative",
+  searchIcon: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5",
+  searchInput: "pl-10 h-12 text-base border-2 border-gray-300 focus:border-blue-500 bg-white text-gray-900 placeholder:text-gray-400 font-medium",
+  filterGroup: "flex flex-col sm:flex-row gap-3",
+  selectTrigger: "border-2 border-gray-300 bg-white text-gray-900 font-medium",
+  selectTriggerFlex: "flex-1 border-2 border-gray-300 bg-white text-gray-900 font-medium",
+  selectItem: "text-gray-900 font-medium cursor-pointer hover:bg-gray-100",
+};
+
+// Challenge Specific Cards & Badges
+export const challengeStyles = {
+  card: "cursor-pointer hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 group bg-gradient-to-br from-white to-gray-50",
+  cardTitle: "text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors",
+  cardDate: "flex items-center gap-1 text-xs text-gray-600 font-medium",
+  statusBadge: {
+    scheduled: "bg-blue-100 text-blue-800 border-blue-200 font-semibold",
+    ended: "border-gray-400 text-gray-700 font-semibold",
+    ongoing: "bg-gradient-to-r from-green-500 to-emerald-500 border-0 text-white font-semibold",
+  },
+  difficultyBadge: {
+    easy: "bg-green-100 text-green-800 border-green-200 font-semibold",
+    medium: "bg-yellow-100 text-yellow-800 border-yellow-200 font-semibold",
+    hard: "bg-red-100 text-red-800 border-red-200 font-semibold",
+  },
+  statItem: "flex items-center gap-1 transition-colors",
+  statValue: "font-bold",
+};
