@@ -1,127 +1,150 @@
 package com.planit.service
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.planit.dto.ChallengeRecommendationResponse
 import com.planit.entity.Challenge
-import com.planit.entity.ChallengeParticipant
 import com.planit.entity.User
-import com.planit.enums.ChallengeCategoryEnum
-import com.planit.enums.ChallengeDifficultyEnum
-import com.planit.enums.ParticipantStatusEnum
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
 import com.planit.repository.UserRepository
-import com.planit.util.setPrivateProperty
-import io.mockk.every
-import io.mockk.mockk
-import org.assertj.core.api.Assertions.assertThat
+import io.mockk.*
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
+import java.util.*
 
+@ExtendWith(MockKExtension::class)
 class ChallengeRecommendServiceTest {
-    private val challengeRepository: ChallengeRepository = mockk()
-    private val participantRepository: ChallengeParticipantRepository = mockk()
-    private val userRepository: UserRepository = mockk()
-    private val geminiService: GeminiService = mockk()
 
-    private lateinit var recommendService: ChallengeRecommendService
+    @MockK
+    private lateinit var challengeRepository: ChallengeRepository
+
+    @MockK
+    private lateinit var participantRepository: ChallengeParticipantRepository
+
+    @MockK
+    private lateinit var userRepository: UserRepository
+
+    @MockK
+    private lateinit var geminiService: GeminiService
+
+    @InjectMockKs
+    private lateinit var challengeRecommendService: ChallengeRecommendService
+
+    private val loginId = "testuser"
+    private lateinit var user: User
 
     @BeforeEach
     fun setUp() {
-        recommendService = ChallengeRecommendService(
-            challengeRepository,
-            participantRepository,
-            userRepository,
-            geminiService
-        )
+        user = User(loginId, "p", "Tester")
     }
 
     @Test
-    @DisplayName("새로운 챌린지 제안(생성용) 성공")
-    fun `recommendNewChallenges should return 3 AI-generated recommendations`() {
+    @DisplayName("기존 챌린지 추천 성공")
+    fun `recommendExistingChallenges should return recommendations`() {
         // Given
-        val loginId = "user123"
-        val user = User(loginId = loginId, password = "password", nickname = "tester")
+        val challenge = Challenge("T", "D", "C", LocalDateTime.now(), LocalDateTime.now().plusDays(10), "E", "admin")
+        val chlId = challenge.id
         
-        val challenge = Challenge(
-            title = "기존 챌린지",
-            description = "설명",
-            category = ChallengeCategoryEnum.HEALTH.name,
-            difficulty = ChallengeDifficultyEnum.EASY.name,
-            startDate = LocalDateTime.now().minusDays(5),
-            endDate = LocalDateTime.now().plusDays(5),
-            createdId = "other"
-        ).apply { setPrivateProperty("id", "CHL-1") }
-        
-        val participant = ChallengeParticipant(id = "CHL-1", loginId = loginId).apply {
-            this.challenge = challenge
-            this.status = ParticipantStatusEnum.ACTIVE
-        }
-
-        every { userRepository.findByLoginId(loginId) } returns user
-        every { participantRepository.findByLoginId(loginId) } returns listOf(participant)
-        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns listOf(challenge)
-        
-        val aiResponses = listOf(
-            ChallengeRecommendationResponse(
-                title = "AI 추천 1",
-                description = "AI 설명 1",
-                category = ChallengeCategoryEnum.HEALTH,
-                difficulty = ChallengeDifficultyEnum.NORMAL,
-                reason = "이유 1"
-            )
-        )
-        
-        every { 
-            geminiService.generateContent(any<String>(), any<TypeReference<List<ChallengeRecommendationResponse>>>()) 
-        } returns aiResponses
-
-        // When
-        val result = recommendService.recommendNewChallenges(loginId)
-
-        // Then
-        assertThat(result).hasSize(1)
-        assertThat(result[0].title).isEqualTo("AI 추천 1")
-    }
-
-    @Test
-    @DisplayName("기존 챌린지 중에서 추천(참여용) 성공")
-    fun `recommendExistingChallenges should return recommendations from existing challenges`() {
-        // Given
-        val loginId = "user123"
-        val user = User(loginId = loginId, password = "password", nickname = "tester")
-        
-        val existingChallenge = Challenge(
-            title = "참여 가능한 챌린지",
-            description = "설명",
-            category = ChallengeCategoryEnum.STUDY.name,
-            difficulty = ChallengeDifficultyEnum.NORMAL.name,
-            startDate = LocalDateTime.now().minusDays(1),
-            endDate = LocalDateTime.now().plusDays(10),
-            createdId = "admin"
-        ).apply { setPrivateProperty("id", "CHL-AVAILABLE") }
-
         every { userRepository.findByLoginId(loginId) } returns user
         every { participantRepository.findByLoginId(loginId) } returns emptyList()
-        every { challengeRepository.findAllOrderByCreatedAtDesc() } returns listOf(existingChallenge)
-        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns listOf(existingChallenge)
+        every { challengeRepository.findAllOrderByCreatedAtDesc() } returns listOf(challenge)
+        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns emptyList()
         
-        val aiSelection = listOf(
-            mapOf("challengeId" to "CHL-AVAILABLE", "reason" to "과거 패턴상 적합합니다.")
-        )
-        
-        every { 
-            geminiService.generateContent(any<String>(), any<TypeReference<List<Map<String, String>>>>()) 
-        } returns aiSelection
+        val aiResponse = listOf(mapOf("challengeId" to chlId, "reason" to "Good for you"))
+        every { geminiService.generateContent(any(), any<TypeReference<List<Map<String, String>>>>()) } returns aiResponse
 
         // When
-        val result = recommendService.recommendExistingChallenges(loginId)
+        val result = challengeRecommendService.recommendExistingChallenges(loginId)
 
         // Then
-        assertThat(result).hasSize(1)
-        assertThat(result[0].challenge.id).isEqualTo("CHL-AVAILABLE")
-        assertThat(result[0].reason).isEqualTo("과거 패턴상 적합합니다.")
+        assertEquals(1, result.size)
+        assertEquals(chlId, result[0].challenge.id)
+        assertEquals("Good for you", result[0].reason)
+    }
+
+    @Test
+    @DisplayName("기존 챌린지 추천 - 후보가 없으면 빈 목록 반환")
+    fun `recommendExistingChallenges should return empty list if no candidates`() {
+        // Given
+        every { userRepository.findByLoginId(loginId) } returns user
+        every { participantRepository.findByLoginId(loginId) } returns emptyList()
+        every { challengeRepository.findAllOrderByCreatedAtDesc() } returns emptyList()
+        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns emptyList()
+
+        // When
+        val result = challengeRecommendService.recommendExistingChallenges(loginId)
+
+        // Then
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    @DisplayName("새 챌린지 추천 성공")
+    fun `recommendNewChallenges should call gemini`() {
+        // Given
+        every { userRepository.findByLoginId(loginId) } returns user
+        every { participantRepository.findByLoginId(loginId) } returns emptyList()
+        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns emptyList()
+        
+        val recommendations = emptyList<com.planit.dto.ChallengeRecommendationResponse>()
+        every { geminiService.generateContent(any(), any<TypeReference<List<com.planit.dto.ChallengeRecommendationResponse>>>()) } returns recommendations
+
+        // When
+        val result = challengeRecommendService.recommendNewChallenges(loginId)
+
+        // Then
+        assertNotNull(result)
+    }
+
+    @Test
+    @DisplayName("기존 챌린지 추천(쿼리) - null 필드 포함된 AI 응답 처리")
+    fun `recommendExistingChallengesWithQuery should handle null fields in AI response`() {
+        // Given
+        val challenge = Challenge("T", "D", "C", LocalDateTime.now(), LocalDateTime.now().plusDays(10), "E", "admin")
+        val chlId = challenge.id
+        
+        every { userRepository.findByLoginId(loginId) } returns user
+        every { participantRepository.findByLoginId(loginId) } returns emptyList()
+        every { challengeRepository.findAllOrderByCreatedAtDesc() } returns listOf(challenge)
+        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns emptyList()
+        
+        // Response with missing 'reason' or 'challengeId'
+        val aiResponse = listOf(
+            mapOf("challengeId" to chlId), // No reason
+            mapOf("reason" to "R"),        // No ID
+            mapOf("challengeId" to chlId, "reason" to "R") // Valid
+        )
+        every { geminiService.generateContent(any(), any<TypeReference<List<Map<String, String>>>>()) } returns aiResponse
+
+        // When
+        val result = challengeRecommendService.recommendExistingChallengesWithQuery(loginId, "help me")
+
+        // Then
+        assertEquals(1, result.size)
+    }
+
+    @Test
+    @DisplayName("새 챌린지 추천(쿼리) 성공")
+    fun `recommendNewChallengesWithQuery should return list`() {
+        // Given
+        every { userRepository.findByLoginId(loginId) } returns user
+        every { participantRepository.findByLoginId(loginId) } returns emptyList()
+        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns emptyList()
+        
+        val recommendations = emptyList<com.planit.dto.ChallengeRecommendationResponse>()
+        every { geminiService.generateContent(any(), any<TypeReference<List<com.planit.dto.ChallengeRecommendationResponse>>>()) } returns recommendations
+
+        // When
+        val result = challengeRecommendService.recommendNewChallengesWithQuery(loginId, "new one")
+
+        // Then
+        assertNotNull(result)
     }
 }

@@ -476,4 +476,176 @@ class ChallengeServiceTest {
         assertEquals(5.0, result.averageCertificationPerParticipant)
         assertEquals(1500L, result.viewCount)
     }
+
+    @Test
+    @DisplayName("참여중인 챌린지 목록 조회")
+    fun `getParticipatingChallenges should return list`() {
+        // Given
+        every { participantRepository.findByLoginIdAndStatus(loginId, ParticipantStatusEnum.ACTIVE) } returns listOf(participant)
+        // Reflection to set challenge in participant
+        val chlField = ChallengeParticipant::class.java.getDeclaredField("challenge")
+        chlField.isAccessible = true
+        chlField.set(participant, challenge)
+
+        // When
+        val result = challengeService.getParticipatingChallenges(loginId)
+
+        // Then
+        assertEquals(1, result.size)
+        assertEquals(challenge.title, result[0].title)
+    }
+
+    @Test
+    @DisplayName("챌린지 목록 조회 - 모든 정렬 및 필터 분기 커버")
+    fun `getChallenges should cover all branches`() {
+        // Given
+        every { challengeRepository.findByKeywordOrderByTitleAsc(any()) } returns listOf(challenge)
+        every { challengeRepository.findByKeywordOrderByDifficulty(any()) } returns listOf(challenge)
+        every { challengeRepository.findByKeywordOrderByParticipantCntDesc(any()) } returns listOf(challenge)
+        every { challengeRepository.findByKeywordOrderByCreatedAtDesc(any()) } returns listOf(challenge)
+        
+        every { challengeRepository.findByCategoryAndDifficultyOrderByTitleAsc(any(), any()) } returns listOf(challenge)
+        every { challengeRepository.findByCategoryAndDifficultyOrderByParticipantCntDesc(any(), any()) } returns listOf(challenge)
+        every { challengeRepository.findByCategoryAndDifficultyOrderByCreatedAtDesc(any(), any()) } returns listOf(challenge)
+        
+        every { challengeRepository.findByCategoryOrderByTitleAsc(any()) } returns listOf(challenge)
+        every { challengeRepository.findByCategoryOrderByDifficulty(any()) } returns listOf(challenge)
+        every { challengeRepository.findByCategoryOrderByParticipantCntDesc(any()) } returns listOf(challenge)
+        every { challengeRepository.findByCategoryOrderByCreatedAtDesc(any()) } returns listOf(challenge)
+        
+        every { challengeRepository.findByDifficultyOrderByTitleAsc(any()) } returns listOf(challenge)
+        every { challengeRepository.findByDifficultyOrderByParticipantCntDesc(any()) } returns listOf(challenge)
+        every { challengeRepository.findByDifficultyOrderByCreatedAtDesc(any()) } returns listOf(challenge)
+        
+        every { challengeRepository.findAllOrderByTitleAsc() } returns listOf(challenge)
+        every { challengeRepository.findAllOrderByDifficulty() } returns listOf(challenge)
+        every { challengeRepository.findAllOrderByParticipantCntDesc() } returns listOf(challenge)
+        every { challengeRepository.findAllOrderByCreatedAtDesc() } returns listOf(challenge)
+
+        // When & Then
+        // Keyword branches
+        challengeService.getChallenges(ChallengeSearchRequest(keyword = "k", sortBy = "NAME"))
+        challengeService.getChallenges(ChallengeSearchRequest(keyword = "k", sortBy = "DIFFICULTY"))
+        challengeService.getChallenges(ChallengeSearchRequest(keyword = "k", sortBy = "POPULAR"))
+        challengeService.getChallenges(ChallengeSearchRequest(keyword = "k", sortBy = "LATEST"))
+        
+        // Category + Difficulty branches
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", difficulty = "d", sortBy = "NAME"))
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", difficulty = "d", sortBy = "POPULAR"))
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", difficulty = "d", sortBy = "LATEST"))
+        
+        // Category branches
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", sortBy = "NAME"))
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", sortBy = "DIFFICULTY"))
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", sortBy = "POPULAR"))
+        challengeService.getChallenges(ChallengeSearchRequest(category = "c", sortBy = "LATEST"))
+        
+        // Difficulty branches
+        challengeService.getChallenges(ChallengeSearchRequest(difficulty = "d", sortBy = "NAME"))
+        challengeService.getChallenges(ChallengeSearchRequest(difficulty = "d", sortBy = "POPULAR"))
+        challengeService.getChallenges(ChallengeSearchRequest(difficulty = "d", sortBy = "LATEST"))
+        
+        // Default branches
+        challengeService.getChallenges(ChallengeSearchRequest(sortBy = "NAME"))
+        challengeService.getChallenges(ChallengeSearchRequest(sortBy = "DIFFICULTY"))
+        challengeService.getChallenges(ChallengeSearchRequest(sortBy = "POPULAR"))
+        challengeService.getChallenges(ChallengeSearchRequest(sortBy = "LATEST"))
+    }
+
+    @Test
+    @DisplayName("챌린지 삭제 - 참여자 알림 포함")
+    fun `deleteChallenge should notify participants`() {
+        // Given
+        val futureChallenge = Challenge(
+            title = "Future", description = "D", category = "C", difficulty = "E",
+            startDate = now.plusDays(10), endDate = now.plusDays(20), createdId = loginId
+        )
+        val p1 = ChallengeParticipant(id = "CHL-F", loginId = "user1")
+        val p2 = ChallengeParticipant(id = "CHL-F", loginId = "user2")
+        
+        val u = User("u", "p", "n")
+        val uField = User::class.java.getDeclaredField("id")
+        uField.isAccessible = true
+        uField.set(u, 100L)
+        
+        every { challengeRepository.findById(any()) } returns Optional.of(futureChallenge)
+        every { participantRepository.findByIdAndStatus(any(), any()) } returns listOf(p1, p2)
+        every { userRepository.findByLoginId(any()) } returns u
+        every { notificationService.sendNotification(any()) } just runs
+        every { participantRepository.deleteAllByChallengeId(any()) } returns 2
+        every { challengeRepository.delete(any()) } just runs
+
+        // When
+        challengeService.deleteChallenge("CHL-F", loginId)
+
+        // Then
+        verify(atLeast = 2) { notificationService.sendNotification(any()) }
+        verify { challengeRepository.delete(any()) }
+    }
+
+    @Test
+    @DisplayName("챌린지 참여 - 생성자가 아닌 경우 알림 발송")
+    fun `joinChallenge should notify creator if joiner is different`() {
+        // Given
+        val joinerLoginId = "joiner"
+        val creatorLoginId = "creator"
+        challenge.createdId = creatorLoginId
+        
+        val joiner = User(loginId = joinerLoginId, password = "p", nickname = "Joiner")
+        val joinerField = User::class.java.getDeclaredField("id")
+        joinerField.isAccessible = true
+        joinerField.set(joiner, 10L)
+        
+        val creator = User(loginId = creatorLoginId, password = "p", nickname = "Creator")
+        val creatorField = User::class.java.getDeclaredField("id")
+        creatorField.isAccessible = true
+        creatorField.set(creator, 20L)
+
+        every { challengeRepository.findById(any()) } returns Optional.of(challenge)
+        every { participantRepository.existsByIdAndLoginId(any(), any()) } returns false
+        every { participantRepository.save(any()) } returns participant
+        every { challengeRepository.save(any()) } returns challenge
+        every { userRepository.findByLoginId(joinerLoginId) } returns joiner
+        every { userRepository.findByLoginId(creatorLoginId) } returns creator
+        every { notificationService.sendNotification(any()) } just runs
+
+        // When
+        challengeService.joinChallenge(challengeId, joinerLoginId)
+
+        // Then
+        verify { notificationService.sendNotification(match { it.receiverLoginId == creatorLoginId }) }
+    }
+
+    @Test
+    @DisplayName("챌린지 탈퇴 - 생성자가 아닌 경우 알림 발송")
+    fun `withdrawChallenge should notify creator if withdrawer is different`() {
+        // Given
+        val withdrawerLoginId = "joiner"
+        val creatorLoginId = "creator"
+        challenge.createdId = creatorLoginId
+        
+        val withdrawer = User(loginId = withdrawerLoginId, password = "p", nickname = "Withdrawer")
+        val wField = User::class.java.getDeclaredField("id")
+        wField.isAccessible = true
+        wField.set(withdrawer, 10L)
+        
+        val creator = User(loginId = creatorLoginId, password = "p", nickname = "Creator")
+        val cField = User::class.java.getDeclaredField("id")
+        cField.isAccessible = true
+        cField.set(creator, 20L)
+
+        every { challengeRepository.findById(any()) } returns Optional.of(challenge)
+        every { participantRepository.findByIdAndLoginId(any(), any()) } returns Optional.of(participant)
+        every { participantRepository.save(any()) } returns participant
+        every { challengeRepository.save(any()) } returns challenge
+        every { userRepository.findByLoginId(withdrawerLoginId) } returns withdrawer
+        every { userRepository.findByLoginId(creatorLoginId) } returns creator
+        every { notificationService.sendNotification(any()) } just runs
+
+        // When
+        challengeService.withdrawChallenge(challengeId, withdrawerLoginId)
+
+        // Then
+        verify { notificationService.sendNotification(match { it.receiverLoginId == creatorLoginId }) }
+    }
 }
