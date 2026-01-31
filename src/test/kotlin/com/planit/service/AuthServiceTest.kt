@@ -5,12 +5,10 @@ import com.planit.dto.LoginRequest
 import com.planit.dto.SignUpRequest
 import com.planit.entity.User
 import com.planit.repository.UserRepository
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -94,5 +92,46 @@ class AuthServiceTest {
     assertEquals("accessToken", result.accessToken)
     verify(exactly = 1) { authenticationManager.authenticate(any()) }
     verify(exactly = 1) { jwtTokenProvider.createToken("testuser") }
+  }
+
+  @Test
+  @DisplayName("로그아웃 성공")
+  fun `logout success`() {
+    val request = mockk<jakarta.servlet.http.HttpServletRequest>()
+    val token = "token"
+    val valOps = mockk<org.springframework.data.redis.core.ValueOperations<String, Any>>()
+    
+    every { jwtTokenProvider.resolveToken(request) } returns token
+    every { jwtTokenProvider.getRemainingTime(token) } returns 1000L
+    every { redisTemplate.opsForValue() } returns valOps
+    every { valOps.set(any(), any(), any<java.time.Duration>()) } just io.mockk.Runs
+
+    authService.logout(request)
+
+    verify { valOps.set(any(), "logout", any<java.time.Duration>()) }
+  }
+
+  @Test
+  @DisplayName("로그아웃 실패 - 토큰 없음")
+  fun `logout fails when no token`() {
+    val request = mockk<jakarta.servlet.http.HttpServletRequest>()
+    every { jwtTokenProvider.resolveToken(request) } returns null
+
+    assertThrows<IllegalArgumentException> {
+      authService.logout(request)
+    }
+  }
+
+  @Test
+  @DisplayName("로그아웃 - 이미 만료된 토큰")
+  fun `logout handles expired token`() {
+    val request = mockk<jakarta.servlet.http.HttpServletRequest>()
+    val token = "token"
+    every { jwtTokenProvider.resolveToken(request) } returns token
+    every { jwtTokenProvider.getRemainingTime(token) } returns 0L
+
+    authService.logout(request)
+
+    verify(exactly = 0) { redisTemplate.opsForValue() }
   }
 }

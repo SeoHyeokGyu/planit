@@ -146,4 +146,50 @@ class FileStorageServiceTest {
     val relativePath = uploadDir.relativize(path)
     return "$uploadUrlPath/${relativePath.toString().replace("\\", "/")}"
   }
+
+  @Test
+  fun `storeFile_빈_파일_예외발생`() {
+    val file = MockMultipartFile("file", "empty.jpg", "image/jpeg", ByteArray(0))
+    assertThrows(IllegalArgumentException::class.java) {
+      fileStorageService.storeFile(file)
+    }
+  }
+
+  @Test
+  fun `storeFile_GIF_파일_원본_저장_분기`() {
+    val content = "GIF89a".toByteArray()
+    val file = MockMultipartFile("file", "test.gif", "image/gif", content)
+    val fileUrl = fileStorageService.storeFile(file)
+    assertThat(fileUrl).endsWith(".gif")
+  }
+
+  @Test
+  fun `getFile_성공`() {
+    val content = createTestImage()
+    val file = MockMultipartFile("file", "get.jpg", "image/jpeg", content)
+    val fileUrl = fileStorageService.storeFile(file)
+    
+    val retrieved = fileStorageService.getFile(fileUrl)
+    assertTrue(retrieved.exists())
+  }
+
+  @Test
+  fun `getFile_실패_케이스들`() {
+    assertThrows(IllegalArgumentException::class.java) { fileStorageService.getFile("") }
+    assertThrows(IllegalArgumentException::class.java) { fileStorageService.getFile("/invalid/path") }
+    assertThrows(IllegalArgumentException::class.java) { fileStorageService.getFile("/images/notexist.jpg") }
+  }
+
+  @Test
+  fun `deleteFile_잘못된_경로_조작_방지`() {
+    assertThrows(IllegalArgumentException::class.java) {
+      fileStorageService.deleteFile("/images/../etc/passwd")
+    }
+  }
+
+  @Test
+  fun `deleteFile_URL_형식_안맞으면_무시`() {
+    fileStorageService.deleteFile("/wrong/prefix/test.jpg")
+    // No exception
+  }
 }

@@ -23,9 +23,12 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
+import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
@@ -494,6 +497,97 @@ class CertificationServiceTest {
       
       // 파일 삭제가 호출되지 않아야 함
       verify(exactly = 0) { fileStorageService.deleteFile(any()) }
+    }
+  }
+
+  @Nested
+  @DisplayName("조회 및 기타 메서드 테스트")
+  inner class DescribeOtherMethods {
+    @Test
+    @DisplayName("reanalyzeCertification - 성공")
+    fun `reanalyzeCertification success`() {
+      // Given
+      val certification = Certification(user, challenge, "T", "C", photoUrl = "url")
+      certification.setPrivateProperty("id", 1L)
+      val analysisResult = CertificationAnalysisResponse(true, "R")
+      
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      every { fileStorageService.getFile("url") } returns mockk<java.io.File>()
+      every { geminiService.analyzeImage(any<String>(), any<java.io.File>(), any<Class<CertificationAnalysisResponse>>()) } returns analysisResult
+      
+      // When
+      val result = certificationService.reanalyzeCertification(1L, user.loginId)
+      
+      // Then
+      assertTrue(result.isSuitable!!)
+      assertEquals("R", result.analysisResult)
+    }
+
+    @Test
+    @DisplayName("getCertification - 성공")
+    fun `getCertification success`() {
+      val certification = Certification(user, challenge, "T", "C")
+      certification.setPrivateProperty("id", 1L)
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      val result = certificationService.getCertification(1L)
+      assertEquals("T", result.title)
+    }
+
+    @Test
+    @DisplayName("목록 조회 메서드들")
+    fun `list query methods`() {
+      val pageable = org.springframework.data.domain.PageRequest.of(0, 10)
+      every { certificationRepository.findByUser_LoginIdOrderByCreatedAtDesc(any(), any()) } returns org.springframework.data.domain.Page.empty()
+      every { certificationRepository.findByChallenge_Id(any(), any()) } returns org.springframework.data.domain.Page.empty()
+      every { certificationRepository.findByUser_LoginIdAndCreatedAtBetween(any(), any(), any()) } returns emptyList()
+
+      certificationService.getCertificationsByUser(user.loginId, pageable)
+      certificationService.getCertificationsByChallenge(challengeId, pageable)
+      certificationService.getCertificationsByDateRange(user.loginId, LocalDateTime.now(), LocalDateTime.now())
+
+      verify { certificationRepository.findByUser_LoginIdOrderByCreatedAtDesc(any(), any()) }
+      verify { certificationRepository.findByChallenge_Id(any(), any()) }
+      verify { certificationRepository.findByUser_LoginIdAndCreatedAtBetween(any(), any(), any()) }
+    }
+
+    @Test
+    @DisplayName("reanalyzeCertification - 사진 없음 예외")
+    fun `reanalyzeCertification throws exception when no photo`() {
+      val certification = Certification(user, challenge, "T", "C", photoUrl = null)
+      certification.setPrivateProperty("id", 1L)
+      every { certificationRepository.findById(1L) } returns Optional.of(certification)
+      
+      assertThrows<IllegalArgumentException> {
+        certificationService.reanalyzeCertification(1L, user.loginId)
+      }
+    }
+  }
+
+  @Nested
+  @DisplayName("createCertification 추가 분기 테스트")
+  inner class DescribeCreateCertificationExtra {
+    @Test
+    @DisplayName("시작 전 챌린지 인증 예외")
+    fun `throws exception when challenge not started`() {
+      challenge.startDate = LocalDateTime.now().plusDays(1)
+      every { userRepository.findByLoginId(any()) } returns user
+      every { challengeRepository.findById(any()) } returns Optional.of(challenge)
+      
+      assertThrows<com.planit.exception.CertificationNotStartedException> {
+        certificationService.createCertification(CertificationCreateRequest(challengeId, "T", "C"), "u")
+      }
+    }
+
+    @Test
+    @DisplayName("이미 종료된 챌린지 인증 예외")
+    fun `throws exception when challenge ended`() {
+      challenge.endDate = LocalDateTime.now().minusDays(1)
+      every { userRepository.findByLoginId(any()) } returns user
+      every { challengeRepository.findById(any()) } returns Optional.of(challenge)
+      
+      assertThrows<com.planit.exception.CertificationEndedException> {
+        certificationService.createCertification(CertificationCreateRequest(challengeId, "T", "C"), "u")
+      }
     }
   }
 }
