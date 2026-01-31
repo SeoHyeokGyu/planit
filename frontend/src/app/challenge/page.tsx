@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check, Sparkles } from "lucide-react";
+import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check, Sparkles, RefreshCw, Loader2 } from "lucide-react";
 import { ChallengeListResponse, ChallengeSortType } from "@/types/challenge";
 import {
   pageHeaderStyles,
@@ -41,7 +41,14 @@ export default function ChallengesPage() {
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<ChallengeSortType>("LATEST");
 
-  const { data: recommendations, isLoading: isRecLoading } = useRecommendedExistingChallenges();
+  const {
+    data: recommendations,
+    isLoading: isRecQueryLoading,
+    refetch: refetchRecommendations,
+    isRefetching: isRecRefetching
+  } = useRecommendedExistingChallenges();
+
+  const isRecLoading = isRecQueryLoading || isRecRefetching;
 
   // 디버깅: sortBy 변경 시 확인
   useEffect(() => {
@@ -184,13 +191,39 @@ export default function ChallengesPage() {
           </div>
 
           {/* AI Recommendations */}
-          {recommendations && recommendations.length > 0 && (
+          {isRecLoading && (!recommendations || recommendations.length === 0) ? (
             <div className={aiRecommendationStyles.container}>
-              <div className={aiRecommendationStyles.header}>
+              <div className="flex items-center gap-2 mb-4">
                 <Sparkles className={aiRecommendationStyles.icon} />
                 <h2 className={aiRecommendationStyles.title}>
-                  AI가 회원님을 위해 골랐어요!
+                  AI가 회원님을 위한 챌린지를 찾는 중...
                 </h2>
+              </div>
+              <Card className="border-2 border-dashed bg-white/50 p-12 flex flex-col items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-4" />
+                <p className="text-gray-600 font-semibold text-lg">AI가 맞춤형 챌린지를 분석하고 있습니다</p>
+                <p className="text-gray-500 text-sm mt-1">잠시만 기다려주세요...</p>
+              </Card>
+            </div>
+          ) : recommendations && recommendations.length > 0 && (
+            <div className={aiRecommendationStyles.container}>
+              <div className="flex items-center justify-between mb-4">
+                <div className={aiRecommendationStyles.header}>
+                  <Sparkles className={aiRecommendationStyles.icon} />
+                  <h2 className={aiRecommendationStyles.title}>
+                    AI가 회원님을 위해 골랐어요!
+                  </h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => refetchRecommendations()}
+                  disabled={isRecLoading}
+                  className="text-gray-500 hover:text-blue-600"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-1 ${isRecLoading ? "animate-spin" : ""}`} />
+                  새로고침
+                </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recommendations.map((rec) => (
