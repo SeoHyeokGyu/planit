@@ -6,7 +6,6 @@ import { useFeedInfinite } from "@/hooks/useFeed";
 import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import FeedItem from "@/components/feed/FeedItem";
-import { RecommendedUsers } from "@/components/feed/RecommendedUsers";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,7 +74,7 @@ export default function FeedPage() {
 
   return (
     <div className={layoutStyles.pageRoot}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className={layoutStyles.containerMd}>
         {/* Header */}
         <div className={pageHeaderStyles.container}>
           <div className={pageHeaderStyles.wrapper}>
@@ -95,61 +94,49 @@ export default function FeedPage() {
           </div>
         </div>
 
-        {/* Main Layout: Feed + Sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Feed List */}
-          <div className="lg:col-span-2">
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <FeedItemSkeleton key={i} />
-                ))}
-              </div>
-            ) : feedItems.length > 0 ? (
-              <>
-                <div className="space-y-4">
-                  {feedItems.map((cert: FeedResponse) => (
-                    <FeedItem
-                      key={cert.id}
-                      certification={cert}
-                      onClick={() => router.push(`/certification/${cert.id}`)}
-                    />
-                  ))}
-                </div>
-
-                {/* Infinite Scroll Loader & Trigger */}
-                <div ref={ref} className="mt-8 flex justify-center py-4">
-                  {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-                      불러오는 중...
-                    </div>
-                  ) : hasNextPage ? (
-                    <div className="h-4" /> // Invisible trigger area
-                  ) : (
-                    <p className="text-gray-400 text-sm">모든 피드를 확인했습니다.</p>
-                  )}
-                </div>
-              </>
-            ) : (
-              <EmptyState
-                icon={MessageCircle}
-                title="아직 피드가 없습니다"
-                description="팔로우하는 사람의 인증 활동이 여기에 표시됩니다"
-                actionLabel="사람 팔로우하기"
-                onAction={() => router.push("/profile")}
-                variant="bordered"
-              />
-            )}
+        {/* Feed List */}
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <FeedItemSkeleton key={i} />
+            ))}
           </div>
-
-          {/* Sidebar: Recommended Users */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-6">
-              <RecommendedUsers />
+        ) : feedItems.length > 0 ? (
+          <>
+            <div className="space-y-4">
+              {feedItems.map((cert: FeedResponse) => (
+                <FeedItem
+                  key={cert.id}
+                  certification={cert}
+                  onClick={() => router.push(`/certification/${cert.id}`)}
+                />
+              ))}
             </div>
-          </div>
-        </div>
+
+            {/* Infinite Scroll Loader & Trigger */}
+            <div ref={ref} className="mt-8 flex justify-center py-4">
+              {isFetchingNextPage ? (
+                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                  불러오는 중...
+                </div>
+              ) : hasNextPage ? (
+                <div className="h-4" /> // Invisible trigger area
+              ) : (
+                <p className="text-gray-400 text-sm">모든 피드를 확인했습니다.</p>
+              )}
+            </div>
+          </>
+        ) : (
+          <EmptyState
+            icon={MessageCircle}
+            title="아직 피드가 없습니다"
+            description="팔로우하는 사람의 인증 활동이 여기에 표시됩니다"
+            actionLabel="사람 팔로우하기"
+            onAction={() => router.push("/users")}
+            variant="bordered"
+          />
+        )}
       </div>
     </div>
   );

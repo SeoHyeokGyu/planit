@@ -8,6 +8,7 @@ import { UserProfile } from "@/types/user";
 import { useFollowings } from "@/hooks/useFollow";
 import { useAuthStore } from "@/stores/authStore";
 import FollowButton from "@/components/follow/FollowButton";
+import { RecommendedUsers } from "@/components/user/RecommendedUsers";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -195,14 +196,21 @@ export default function UsersPage() {
         )}
 
         {!hasSearched && !isLoading && users.length === 0 && (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <Search className="w-8 h-8 text-blue-400" />
+          <div>
+            <div className="text-center py-12 mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <Search className="w-8 h-8 text-blue-400" />
+              </div>
+              <p className="text-gray-700 text-lg font-semibold">사용자를 검색하세요.</p>
+              <p className="text-blue-600 text-sm mt-2">
+                위에 사용자 이름 또는 아이디를 입력하여 검색해주세요.
+              </p>
             </div>
-            <p className="text-gray-700 text-lg font-semibold">사용자를 검색하세요.</p>
-            <p className="text-blue-600 text-sm mt-2">
-              위에 사용자 이름 또는 아이디를 입력하여 검색해주세요.
-            </p>
+
+            {/* 추천 사용자 */}
+            <div className="max-w-2xl mx-auto">
+              <RecommendedUsers />
+            </div>
           </div>
         )}
       </div>
