@@ -59,12 +59,24 @@ export const useMyChallenges = () => {
   });
 };
 
-export const useNewChallengeRecommendations = () => {
+export const useNewChallengeRecommendations = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["challengeRecommendations", "new"],
     queryFn: () => challengeService.getNewChallengeRecommendations(),
     select: (data) => data.data,
     staleTime: 1000 * 60 * 5, // 5 minutes cache
+    retry: 1,
+    enabled: options?.enabled ?? true,
+  });
+};
+
+export const useNewChallengeRecommendationsWithQuery = (query: string) => {
+  return useQuery({
+    queryKey: ["challengeRecommendations", "new", query],
+    queryFn: () => challengeService.getNewChallengeRecommendationsWithQuery(query),
+    select: (data) => data.data,
+    enabled: !!query,
+    staleTime: 1000 * 60 * 5,
     retry: 1,
   });
 };
