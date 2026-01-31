@@ -81,6 +81,13 @@ class UserService(
     return usersPage.map { UserProfileResponse.of(it) }
   }
 
+  @Transactional(readOnly = true)
+  fun getRandomUsers(size: Int): List<UserProfileResponse> {
+    val pageable = Pageable.ofSize(size)
+    val usersPage = userRepository.findRandomUsers(pageable)
+    return usersPage.content.map { UserProfileResponse.of(it) }
+  }
+
   @Transactional
   fun deleteUser(loginId: String, request: UserDeleteRequest) {
     // 1. 사용자 조회 및 비밀번호 확인

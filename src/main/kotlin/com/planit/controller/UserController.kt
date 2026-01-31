@@ -82,6 +82,14 @@ class UserController(val userService: UserService) {
     return ResponseEntity.ok(ApiResponse.pagedSuccess(usersPage.content, usersPage))
   }
 
+  @GetMapping("/random")
+  fun getRandomUsers(
+      @RequestParam(defaultValue = "3") size: Int
+  ): ResponseEntity<ApiResponse<List<UserProfileResponse>>> {
+    val users = userService.getRandomUsers(size)
+    return ResponseEntity.ok(ApiResponse.success(users))
+  }
+
   @DeleteMapping("/me")
   fun deleteMyAccount(
       @AuthenticationPrincipal userDetails: CustomUserDetails,
