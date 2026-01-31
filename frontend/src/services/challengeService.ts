@@ -19,6 +19,12 @@ export const challengeService = {
   getRecommendedExistingChallenges: () =>
     api.get<ApiResponse<ExistingChallengeRecommendationResponse[]>>("/api/challenge/recommend-existing"),
 
+  // 기존 챌린지 추천 (쿼리 기반)
+  getRecommendedExistingChallengesWithQuery: (query: string) =>
+    api.get<ApiResponse<ExistingChallengeRecommendationResponse[]>>(
+      `/api/challenge/recommend-existing/query?query=${encodeURIComponent(query)}`
+    ),
+
   // 목록 조회
   getChallenges: (params?: ChallengeSearchRequest) => {
     const searchParams = new URLSearchParams();

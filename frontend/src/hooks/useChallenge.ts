@@ -69,12 +69,24 @@ export const useNewChallengeRecommendations = () => {
   });
 };
 
-export const useRecommendedExistingChallenges = () => {
+export const useRecommendedExistingChallenges = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["challengeRecommendations", "existing"],
     queryFn: () => challengeService.getRecommendedExistingChallenges(),
     select: (data) => data.data,
     staleTime: 1000 * 60 * 5, // 5 minutes cache
+    retry: 1,
+    enabled: options?.enabled ?? true,
+  });
+};
+
+export const useRecommendedExistingChallengesWithQuery = (query: string) => {
+  return useQuery({
+    queryKey: ["challengeRecommendations", "existing", query],
+    queryFn: () => challengeService.getRecommendedExistingChallengesWithQuery(query),
+    select: (data) => data.data,
+    enabled: !!query, // 쿼리가 있을 때만 실행
+    staleTime: 1000 * 60 * 5,
     retry: 1,
   });
 };

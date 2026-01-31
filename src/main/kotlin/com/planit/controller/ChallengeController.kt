@@ -39,6 +39,18 @@ class ChallengeController(
     }
 
     /**
+     * 사용자의 기분/상황에 따른 기존 챌린지 추천
+     */
+    @GetMapping("/recommend-existing/query")
+    fun recommendExistingChallengesWithQuery(
+        @AuthenticationPrincipal userDetails: CustomUserDetails,
+        @RequestParam query: String
+    ): ResponseEntity<ApiResponse<List<ExistingChallengeRecommendationResponse>>> {
+        val response = recommendService.recommendExistingChallengesWithQuery(userDetails.username, query)
+        return ResponseEntity.ok(ApiResponse.success(response))
+    }
+
+    /**
      * 챌린지 생성
      */
     @PostMapping
