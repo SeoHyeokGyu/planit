@@ -15,9 +15,21 @@ export const challengeService = {
   // 추천 챌린지 (생성용)
   getNewChallengeRecommendations: () => api.get<ApiResponse<ChallengeRecommendationResponse[]>>("/api/challenge/recommend"),
 
+  // 추천 챌린지 (생성용 - 쿼리 기반)
+  getNewChallengeRecommendationsWithQuery: (query: string) =>
+    api.get<ApiResponse<ChallengeRecommendationResponse[]>>(
+      `/api/challenge/recommend/query?query=${encodeURIComponent(query)}`
+    ),
+
   // 기존 챌린지 추천 (참여용)
   getRecommendedExistingChallenges: () =>
     api.get<ApiResponse<ExistingChallengeRecommendationResponse[]>>("/api/challenge/recommend-existing"),
+
+  // 기존 챌린지 추천 (쿼리 기반)
+  getRecommendedExistingChallengesWithQuery: (query: string) =>
+    api.get<ApiResponse<ExistingChallengeRecommendationResponse[]>>(
+      `/api/challenge/recommend-existing/query?query=${encodeURIComponent(query)}`
+    ),
 
   // 목록 조회
   getChallenges: (params?: ChallengeSearchRequest) => {

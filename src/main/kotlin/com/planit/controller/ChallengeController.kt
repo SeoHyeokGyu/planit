@@ -28,6 +28,18 @@ class ChallengeController(
     }
 
     /**
+     * 사용자의 기분/상황에 따른 새로운 챌린지 제안 (생성 시 참고)
+     */
+    @GetMapping("/recommend/query")
+    fun recommendNewChallengesWithQuery(
+        @AuthenticationPrincipal userDetails: CustomUserDetails,
+        @RequestParam query: String
+    ): ResponseEntity<ApiResponse<List<ChallengeRecommendationResponse>>> {
+        val response = recommendService.recommendNewChallengesWithQuery(userDetails.username, query)
+        return ResponseEntity.ok(ApiResponse.success(response))
+    }
+
+    /**
      * 기존 챌린지 중에서 추천 (참여 용도)
      */
     @GetMapping("/recommend-existing")
@@ -35,6 +47,18 @@ class ChallengeController(
         @AuthenticationPrincipal userDetails: CustomUserDetails
     ): ResponseEntity<ApiResponse<List<ExistingChallengeRecommendationResponse>>> {
         val response = recommendService.recommendExistingChallenges(userDetails.username)
+        return ResponseEntity.ok(ApiResponse.success(response))
+    }
+
+    /**
+     * 사용자의 기분/상황에 따른 기존 챌린지 추천
+     */
+    @GetMapping("/recommend-existing/query")
+    fun recommendExistingChallengesWithQuery(
+        @AuthenticationPrincipal userDetails: CustomUserDetails,
+        @RequestParam query: String
+    ): ResponseEntity<ApiResponse<List<ExistingChallengeRecommendationResponse>>> {
+        val response = recommendService.recommendExistingChallengesWithQuery(userDetails.username, query)
         return ResponseEntity.ok(ApiResponse.success(response))
     }
 

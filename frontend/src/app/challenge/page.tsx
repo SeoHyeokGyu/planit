@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useChallenges, useSearchChallenges, useRecommendedExistingChallenges } from "@/hooks/useChallenge";
+import { useChallenges, useSearchChallenges, useRecommendedExistingChallenges, useRecommendedExistingChallengesWithQuery } from "@/hooks/useChallenge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,14 +41,48 @@ export default function ChallengesPage() {
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<ChallengeSortType>("LATEST");
 
-  const {
-    data: recommendations,
-    isLoading: isRecQueryLoading,
-    refetch: refetchRecommendations,
-    isRefetching: isRecRefetching
-  } = useRecommendedExistingChallenges();
+  // AI Recommendation States
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [activeAiQuery, setActiveAiQuery] = useState<string>("");
+  const [showRecommendations, setShowRecommendations] = useState(false);
 
-  const isRecLoading = isRecQueryLoading || isRecRefetching;
+  const {
+    data: defaultRecommendations,
+    isLoading: isDefaultRecLoading,
+    refetch: refetchDefaultRec,
+    isRefetching: isDefaultRecRefetching
+  } = useRecommendedExistingChallenges({ enabled: showRecommendations });
+
+  const {
+    data: queryRecommendations,
+    isLoading: isQueryRecLoading,
+    refetch: refetchQueryRec,
+    isRefetching: isQueryRecRefetching
+  } = useRecommendedExistingChallengesWithQuery(activeAiQuery);
+
+  const isRecLoading = activeAiQuery
+    ? isQueryRecLoading || isQueryRecRefetching
+    : isDefaultRecLoading || isDefaultRecRefetching;
+
+  const recommendations = activeAiQuery ? queryRecommendations : defaultRecommendations;
+
+  const handleAiSearch = () => {
+    if (!aiPrompt.trim()) return;
+    setActiveAiQuery(aiPrompt);
+    setShowRecommendations(true); // 검색 시 추천 섹션 활성화
+  };
+
+  const handleRefreshRecommendations = () => {
+    if (activeAiQuery) {
+      refetchQueryRec();
+    } else {
+      refetchDefaultRec();
+    }
+  };
+
+  const handleStartRecommendations = () => {
+    setShowRecommendations(true);
+  };
 
   // 디버깅: sortBy 변경 시 확인
   useEffect(() => {
@@ -191,40 +225,77 @@ export default function ChallengesPage() {
           </div>
 
           {/* AI Recommendations */}
-          {isRecLoading && (!recommendations || recommendations.length === 0) ? (
-            <div className={aiRecommendationStyles.container}>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className={aiRecommendationStyles.icon} />
-                <h2 className={aiRecommendationStyles.title}>
-                  AI가 회원님을 위한 챌린지를 찾는 중...
-                </h2>
-              </div>
-              <Card className="border-2 border-dashed bg-white/50 p-12 flex flex-col items-center justify-center">
-                <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-4" />
-                <p className="text-gray-600 font-semibold text-lg">AI가 맞춤형 챌린지를 분석하고 있습니다</p>
-                <p className="text-gray-500 text-sm mt-1">잠시만 기다려주세요...</p>
-              </Card>
-            </div>
-          ) : recommendations && recommendations.length > 0 && (
-            <div className={aiRecommendationStyles.container}>
-              <div className="flex items-center justify-between mb-4">
+          <div className={aiRecommendationStyles.container}>
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex items-center justify-between">
                 <div className={aiRecommendationStyles.header}>
                   <Sparkles className={aiRecommendationStyles.icon} />
                   <h2 className={aiRecommendationStyles.title}>
-                    AI가 회원님을 위해 골랐어요!
+                    {activeAiQuery ? "요청하신 분위기의 챌린지예요!" : "AI가 회원님을 위해 골랐어요!"}
                   </h2>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => refetchRecommendations()}
+                  onClick={handleRefreshRecommendations}
                   disabled={isRecLoading}
                   className="text-gray-500 hover:text-blue-600"
                 >
                   <RefreshCw className={`w-4 h-4 mr-1 ${isRecLoading ? "animate-spin" : ""}`} />
-                  새로고침
+                  다른 추천 보기
                 </Button>
               </div>
+              
+              {/* AI Query Input */}
+              <div className="relative">
+                <Input
+                  placeholder="예: 요즘 무기력해서 활력이 필요해 (비워두면 내 이력 기반 추천)"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (aiPrompt.trim()) handleAiSearch();
+                      else handleStartRecommendations();
+                    }
+                  }}
+                  className="pr-32 border-indigo-200 focus:border-indigo-500 focus:ring-indigo-200 h-12 text-base shadow-sm"
+                />
+                <Button 
+                  className={`absolute right-1 top-1 h-10 ${
+                    aiPrompt.trim() ? "bg-indigo-600 hover:bg-indigo-700" : "bg-purple-600 hover:bg-purple-700"
+                  } text-white transition-colors duration-200`}
+                  onClick={() => {
+                    if (aiPrompt.trim()) handleAiSearch();
+                    else handleStartRecommendations();
+                  }}
+                  disabled={isRecLoading}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {aiPrompt.trim() ? "AI 검색" : "내 취향 추천"}
+                </Button>
+              </div>
+            </div>
+
+            {!showRecommendations && !activeAiQuery ? (
+               <div className="text-center py-8 bg-gradient-to-b from-indigo-50/30 to-transparent rounded-xl border-2 border-dashed border-indigo-100">
+                 <div className="bg-white p-3 rounded-full shadow-sm inline-block mb-3">
+                   <Sparkles className="w-6 h-6 text-indigo-500 animate-pulse" />
+                 </div>
+                 <h3 className="text-base font-bold text-gray-900 mb-1">어떤 챌린지를 찾고 계신가요?</h3>
+                 <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
+                   위 입력창에 <span className="font-bold text-indigo-600">현재 기분</span>을 적거나,<br/>
+                   그냥 <span className="font-bold text-purple-600">내 취향 추천</span> 버튼을 눌러보세요!
+                 </p>
+               </div>
+            ) : isRecLoading ? (
+              <Card className="border-2 border-dashed bg-white/50 p-12 flex flex-col items-center justify-center">
+                <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-4" />
+                <p className="text-gray-600 font-semibold text-lg">AI가 맞춤형 챌린지를 분석하고 있습니다</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  {activeAiQuery ? `"${activeAiQuery}"에 맞는 챌린지를 찾는 중...` : "잠시만 기다려주세요..."}
+                </p>
+              </Card>
+            ) : recommendations && recommendations.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recommendations.map((rec) => (
                   <div key={`${rec.challenge.id}-rec`} className={aiRecommendationStyles.cardWrapper}>
@@ -250,8 +321,15 @@ export default function ChallengesPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <Card className="border-2 border-dashed bg-gray-50 p-8 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-500 font-medium">추천할 챌린지가 없습니다.</p>
+                <Button variant="link" onClick={handleRefreshRecommendations} className="text-blue-600 mt-2">
+                  다시 시도하기
+                </Button>
+              </Card>
+            )}
+          </div>
 
           {/* Filters */}
           <Card className="mb-8 border-2 shadow-lg bg-white">
