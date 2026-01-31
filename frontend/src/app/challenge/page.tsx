@@ -249,41 +249,44 @@ export default function ChallengesPage() {
               {/* AI Query Input */}
               <div className="relative">
                 <Input
-                  placeholder="예: 요즘 무기력해서 활력이 필요해, 작심삼일 탈출하고 싶어"
+                  placeholder="예: 요즘 무기력해서 활력이 필요해 (비워두면 내 이력 기반 추천)"
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAiSearch();
+                    if (e.key === "Enter") {
+                      if (aiPrompt.trim()) handleAiSearch();
+                      else handleStartRecommendations();
+                    }
                   }}
-                  className="pr-24 border-indigo-200 focus:border-indigo-500 focus:ring-indigo-200"
+                  className="pr-32 border-indigo-200 focus:border-indigo-500 focus:ring-indigo-200 h-12 text-base shadow-sm"
                 />
                 <Button 
-                  className="absolute right-1 top-1 h-8 bg-indigo-600 hover:bg-indigo-700 text-white"
-                  onClick={handleAiSearch}
-                  disabled={isRecLoading || !aiPrompt.trim()}
+                  className={`absolute right-1 top-1 h-10 ${
+                    aiPrompt.trim() ? "bg-indigo-600 hover:bg-indigo-700" : "bg-purple-600 hover:bg-purple-700"
+                  } text-white transition-colors duration-200`}
+                  onClick={() => {
+                    if (aiPrompt.trim()) handleAiSearch();
+                    else handleStartRecommendations();
+                  }}
+                  disabled={isRecLoading}
                 >
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  AI 찾기
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  {aiPrompt.trim() ? "AI 검색" : "내 취향 추천"}
                 </Button>
               </div>
             </div>
 
             {!showRecommendations && !activeAiQuery ? (
-              <div className="flex flex-col items-center justify-center py-10 bg-indigo-50/50 rounded-xl border-2 border-dashed border-indigo-100">
-                <Sparkles className="w-12 h-12 text-indigo-300 mb-3" />
-                <h3 className="text-lg font-bold text-gray-900 mb-1">나에게 딱 맞는 챌린지를 찾아볼까요?</h3>
-                <p className="text-gray-500 mb-6 text-center max-w-md">
-                  AI가 회원님의 활동 이력을 분석하여<br />
-                  가장 적합한 챌린지를 3가지 추천해드립니다.
-                </p>
-                <Button
-                  onClick={handleStartRecommendations}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg transition-all"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  AI 추천 받기
-                </Button>
-              </div>
+               <div className="text-center py-12 bg-gradient-to-b from-indigo-50/30 to-transparent rounded-xl border-2 border-dashed border-indigo-100">
+                 <div className="bg-white p-4 rounded-full shadow-md inline-block mb-4">
+                   <Sparkles className="w-8 h-8 text-indigo-500 animate-pulse" />
+                 </div>
+                 <h3 className="text-lg font-bold text-gray-900 mb-2">어떤 챌린지를 찾고 계신가요?</h3>
+                 <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+                   위 입력창에 <span className="font-bold text-indigo-600">현재 기분</span>을 적거나,<br/>
+                   그냥 <span className="font-bold text-purple-600">내 취향 추천</span> 버튼을 눌러보세요!
+                 </p>
+               </div>
             ) : isRecLoading ? (
               <Card className="border-2 border-dashed bg-white/50 p-12 flex flex-col items-center justify-center">
                 <Loader2 className="w-10 h-10 animate-spin text-blue-500 mb-4" />
