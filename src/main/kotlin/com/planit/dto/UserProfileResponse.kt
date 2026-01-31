@@ -8,6 +8,7 @@ data class UserProfileResponse(
   val id: Long,
   val loginId: String,
   val nickname: String?,
+  val totalPoint: Long,
   val createdAt: LocalDateTime?
 ) {
   companion object {
@@ -16,6 +17,7 @@ data class UserProfileResponse(
           id = user.id!!,
           loginId = user.loginId,
           nickname = user.nickname,
+          totalPoint = user.totalPoint,
           createdAt = user.createdAt
       )
     }

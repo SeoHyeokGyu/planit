@@ -2,6 +2,7 @@ export interface UserProfile {
   id: number;
   loginId: string;
   nickname: string;
+  totalPoint: number;
   createdAt: string;
   updatedAt: string;
 }
