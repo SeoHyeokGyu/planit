@@ -28,6 +28,17 @@ class ChallengeController(
     }
 
     /**
+     * 기존 챌린지 중에서 추천 (참여 용도)
+     */
+    @GetMapping("/recommend-existing")
+    fun recommendExistingChallenges(
+        @AuthenticationPrincipal userDetails: CustomUserDetails
+    ): ResponseEntity<ApiResponse<List<ExistingChallengeRecommendationResponse>>> {
+        val response = recommendService.recommendExistingChallenges(userDetails.username)
+        return ResponseEntity.ok(ApiResponse.success(response))
+    }
+
+    /**
      * 챌린지 생성
      */
     @PostMapping

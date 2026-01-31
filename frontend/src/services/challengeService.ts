@@ -7,12 +7,17 @@ import {
   ParticipateResponse,
   ChallengeStatisticsResponse,
   ChallengeRecommendationResponse,
+  ExistingChallengeRecommendationResponse,
 } from "@/types/challenge";
 import { ApiResponse } from "@/types/api";
 
 export const challengeService = {
   // 추천 챌린지
   getRecommendations: () => api.get<ApiResponse<ChallengeRecommendationResponse[]>>("/api/challenge/recommend"),
+
+  // 기존 챌린지 추천 (참여용)
+  getRecommendedExistingChallenges: () =>
+    api.get<ApiResponse<ExistingChallengeRecommendationResponse[]>>("/api/challenge/recommend-existing"),
 
   // 목록 조회
   getChallenges: (params?: ChallengeSearchRequest) => {

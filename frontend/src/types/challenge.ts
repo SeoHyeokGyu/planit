@@ -84,3 +84,9 @@ export interface ChallengeRecommendationResponse {
   difficulty: string;
   reason: string; // 추천 사유
 }
+
+// 기존 챌린지 추천 응답
+export interface ExistingChallengeRecommendationResponse {
+  challenge: ChallengeListResponse;
+  reason: string;
+}

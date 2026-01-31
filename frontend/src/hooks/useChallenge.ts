@@ -69,6 +69,16 @@ export const useChallengeRecommendations = () => {
   });
 };
 
+export const useRecommendedExistingChallenges = () => {
+  return useQuery({
+    queryKey: ["challengeRecommendations", "existing"],
+    queryFn: () => challengeService.getRecommendedExistingChallenges(),
+    select: (data) => data.data,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    retry: 1,
+  });
+};
+
 // --- Mutations ---
 
 export const useCreateChallenge = () => {

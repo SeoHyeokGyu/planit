@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useChallenges, useSearchChallenges } from "@/hooks/useChallenge";
+import { useChallenges, useSearchChallenges, useRecommendedExistingChallenges } from "@/hooks/useChallenge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check } from "lucide-react";
+import { Search, Plus, Users, Eye, Calendar, Award, Filter, Trophy, ArrowUpDown, Check, Sparkles } from "lucide-react";
 import { ChallengeListResponse, ChallengeSortType } from "@/types/challenge";
 import { pageHeaderStyles, iconGradients, layoutStyles } from "@/styles/common";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -33,6 +33,8 @@ export default function ChallengesPage() {
   const [category, setCategory] = useState<string | undefined>();
   const [difficulty, setDifficulty] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<ChallengeSortType>("LATEST");
+
+  const { data: recommendations, isLoading: isRecLoading } = useRecommendedExistingChallenges();
 
   // 디버깅: sortBy 변경 시 확인
   useEffect(() => {
@@ -166,6 +168,43 @@ export default function ChallengesPage() {
               </Button>
             </div>
           </div>
+
+          {/* AI Recommendations */}
+          {recommendations && recommendations.length > 0 && (
+            <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-yellow-500 fill-yellow-500 animate-pulse" />
+                <h2 className="text-xl font-bold text-gray-900">
+                  AI가 회원님을 위해 골랐어요!
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendations.map((rec) => (
+                  <div key={`${rec.challenge.id}-rec`} className="relative group">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
+                    <div className="relative h-full flex flex-col">
+                      <ChallengeCard
+                        challenge={rec.challenge}
+                        statusBadge={getStatusBadge(
+                          rec.challenge.startDate,
+                          rec.challenge.endDate
+                        )}
+                        difficultyBadge={getDifficultyBadge(rec.challenge.difficulty)}
+                        categoryLabel={getCategoryLabel(rec.challenge.category)}
+                        onClick={() => router.push(`/challenge/${rec.challenge.id}`)}
+                      />
+                      <div className="mt-3 p-3 bg-indigo-50 border border-indigo-100 rounded-xl shadow-sm relative z-10">
+                        <p className="text-sm text-indigo-900 font-medium flex gap-2 items-start leading-relaxed">
+                          <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-600" />
+                          {rec.reason}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Filters */}
           <Card className="mb-8 border-2 shadow-lg bg-white">
