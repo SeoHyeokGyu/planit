@@ -277,12 +277,12 @@ export default function ChallengesPage() {
             </div>
 
             {!showRecommendations && !activeAiQuery ? (
-               <div className="text-center py-12 bg-gradient-to-b from-indigo-50/30 to-transparent rounded-xl border-2 border-dashed border-indigo-100">
-                 <div className="bg-white p-4 rounded-full shadow-md inline-block mb-4">
-                   <Sparkles className="w-8 h-8 text-indigo-500 animate-pulse" />
+               <div className="text-center py-8 bg-gradient-to-b from-indigo-50/30 to-transparent rounded-xl border-2 border-dashed border-indigo-100">
+                 <div className="bg-white p-3 rounded-full shadow-sm inline-block mb-3">
+                   <Sparkles className="w-6 h-6 text-indigo-500 animate-pulse" />
                  </div>
-                 <h3 className="text-lg font-bold text-gray-900 mb-2">어떤 챌린지를 찾고 계신가요?</h3>
-                 <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
+                 <h3 className="text-base font-bold text-gray-900 mb-1">어떤 챌린지를 찾고 계신가요?</h3>
+                 <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
                    위 입력창에 <span className="font-bold text-indigo-600">현재 기분</span>을 적거나,<br/>
                    그냥 <span className="font-bold text-purple-600">내 취향 추천</span> 버튼을 눌러보세요!
                  </p>
