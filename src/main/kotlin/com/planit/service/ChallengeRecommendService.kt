@@ -101,7 +101,7 @@ class ChallengeRecommendService(
     }
   }
 
-  fun recommendChallenges(loginId: String): List<ChallengeRecommendationResponse> {
+  fun recommendNewChallenges(loginId: String): List<ChallengeRecommendationResponse> {
     val user =
       userRepository.findByLoginId(loginId) ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
 

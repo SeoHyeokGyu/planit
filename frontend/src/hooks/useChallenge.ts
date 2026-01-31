@@ -59,10 +59,10 @@ export const useMyChallenges = () => {
   });
 };
 
-export const useChallengeRecommendations = () => {
+export const useNewChallengeRecommendations = () => {
   return useQuery({
-    queryKey: ["challengeRecommendations"],
-    queryFn: () => challengeService.getRecommendations(),
+    queryKey: ["challengeRecommendations", "new"],
+    queryFn: () => challengeService.getNewChallengeRecommendations(),
     select: (data) => data.data,
     staleTime: 1000 * 60 * 5, // 5 minutes cache
     retry: 1,

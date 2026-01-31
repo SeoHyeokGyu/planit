@@ -5,6 +5,8 @@ import com.ninjasquad.springmockk.MockkBean
 import com.planit.config.JwtTokenProvider
 import com.planit.dto.*
 import com.planit.entity.User
+import com.planit.enums.ChallengeCategoryEnum
+import com.planit.enums.ChallengeDifficultyEnum
 import com.planit.enums.ParticipantStatusEnum
 import com.planit.service.ChallengeRecommendService
 import com.planit.service.ChallengeService
@@ -433,6 +435,69 @@ class ChallengeControllerTest {
                 jsonPath("$.data.totalParticipants") { value(100) }
                 jsonPath("$.data.completionRate") { value(15.0) }
                 jsonPath("$.data.viewCount") { value(1500) }
+            }
+    }
+
+    @Test
+    @DisplayName("새로운 챌린지 추천 성공")
+    fun `recommendNewChallenges should return 200 OK with list`() {
+        // Given
+        setAuthentication()
+        val response = listOf(
+            ChallengeRecommendationResponse(
+                title = "추천 챌린지",
+                description = "설명",
+                category = ChallengeCategoryEnum.HEALTH,
+                difficulty = ChallengeDifficultyEnum.EASY,
+                reason = "이유"
+            )
+        )
+
+        every { recommendService.recommendNewChallenges("user123") } returns response
+
+        // When & Then
+        mockMvc.get("/api/challenge/recommend")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.success") { value(true) }
+                jsonPath("$.data[0].title") { value("추천 챌린지") }
+            }
+    }
+
+    @Test
+    @DisplayName("기존 챌린지 추천 성공")
+    fun `recommendExistingChallenges should return 200 OK with list`() {
+        // Given
+        setAuthentication()
+        val challenge = ChallengeListResponse(
+            id = "CHL-1234",
+            title = "기존 챌린지",
+            description = "설명",
+            category = "STUDY",
+            difficulty = "MEDIUM",
+            startDate = LocalDateTime.now(),
+            endDate = LocalDateTime.now().plusDays(7),
+            createdId = "admin",
+            viewCnt = 0,
+            participantCnt = 0,
+            certificationCnt = 0
+        )
+        val response = listOf(
+            ExistingChallengeRecommendationResponse(
+                challenge = challenge,
+                reason = "기존 참여 이력 기반 추천"
+            )
+        )
+
+        every { recommendService.recommendExistingChallenges("user123") } returns response
+
+        // When & Then
+        mockMvc.get("/api/challenge/recommend-existing")
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.success") { value(true) }
+                jsonPath("$.data[0].challenge.id") { value("CHL-1234") }
+                jsonPath("$.data[0].reason") { value("기존 참여 이력 기반 추천") }
             }
     }
 }

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Plus, Loader2, RefreshCw } from "lucide-react";
 import { themeStyles, badgeGradeColors, aiStyles } from "@/styles/common";
-import { useChallengeRecommendations } from "@/hooks/useChallenge";
+import { useNewChallengeRecommendations } from "@/hooks/useChallenge";
 import { ChallengeRecommendationResponse } from "@/types/challenge";
 
 interface ChallengeRecommendationsProps {
@@ -22,7 +22,7 @@ export default function ChallengeRecommendations({ onSelect }: ChallengeRecommen
     error, 
     refetch, 
     isRefetching 
-  } = useChallengeRecommendations();
+  } = useNewChallengeRecommendations();
 
   const handleRefresh = () => {
     refetch();
@@ -93,7 +93,7 @@ export default function ChallengeRecommendations({ onSelect }: ChallengeRecommen
                     </Badge>
                     <Badge variant="outline" className={`text-xs ${
                       challenge.difficulty === "HARD" ? badgeGradeColors.GOLD :
-                      challenge.difficulty === "MEDIUM" ? badgeGradeColors.SILVER :
+                      (challenge.difficulty === "MEDIUM" || challenge.difficulty === "NORMAL") ? badgeGradeColors.SILVER :
                       badgeGradeColors.BRONZE
                     }`}>
                       {challenge.difficulty}

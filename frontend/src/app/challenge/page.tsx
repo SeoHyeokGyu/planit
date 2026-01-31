@@ -72,7 +72,7 @@ export default function ChallengesPage() {
       case "NAME":
         return [...challenges].sort((a, b) => a.title.localeCompare(b.title));
       case "DIFFICULTY":
-        const difficultyOrder = { EASY: 1, MEDIUM: 2, HARD: 3 };
+        const difficultyOrder = { EASY: 1, NORMAL: 2, MEDIUM: 2, HARD: 3 };
         return [...challenges].sort((a, b) => {
           const orderA = difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 99;
           const orderB = difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 99;
@@ -122,6 +122,10 @@ export default function ChallengesPage() {
         label: "쉬움",
         className: challengeStyles.difficultyBadge.easy,
       },
+      NORMAL: {
+        label: "보통",
+        className: challengeStyles.difficultyBadge.medium,
+      },
       MEDIUM: {
         label: "보통",
         className: challengeStyles.difficultyBadge.medium,
@@ -132,7 +136,7 @@ export default function ChallengesPage() {
       },
     };
 
-    const config = variants[difficulty] || variants.MEDIUM;
+    const config = variants[difficulty] || variants.NORMAL;
     return (
         <Badge variant="outline" className={config.className}>
           {config.label}
@@ -294,7 +298,7 @@ export default function ChallengesPage() {
                         ⭐ 쉬움
                       </SelectItem>
                       <SelectItem
-                          value="MEDIUM"
+                          value="NORMAL"
                           className={filterStyles.selectItem}
                       >
                         ⭐⭐ 보통
