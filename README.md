@@ -15,13 +15,14 @@
 - **팔로우 시스템**: 사용자 팔로우/언팔로우 및 팔로잉 피드
 - **알림 시스템**: DB 기반 알림 및 SSE 실시간 푸시
 - **프로필 시스템**: 사용자 프로필 조회 및 수정
+- **AI 추천 엔진**: Gemini AI 기반 챌린지 추천 (기존 챌린지 참여 시)
+- **AI 챌린지 생성기**: 키워드/자연어 기반 Gemini AI 챌린지 자동 생성
+- **AI 인증 분석**: Gemini AI로 인증 사진 자동 검증 및 적합성 판단
+- **게임화**: 포인트 시스템, 배지 시스템, 스트릭 시스템
+- **랭킹**: Redis Sorted Set 기반 실시간 SSE 랭킹
 
 ### 향후 계획
-- **AI 추천 엔진**: 5가지 알고리즘으로 맞춤 챌린지 추천 (계획 중)
-- **AI 챌린지 생성기**: 키워드만 입력하면 GPT가 챌린지 자동 생성 (계획 중)
-- **AI 인증 분석**: Google Cloud Vision으로 인증 사진 자동 검증 (계획 중)
-- **AI 동기부여 코치**: 개인화된 격려 메시지 생성 (계획 중)
-- **게임화**: 포인트 시스템 (완료), 배지 시스템 (완료), 스트릭 시스템 (완료)
+- **AI 동기부여 코치**: Gemini AI 기반 개인화 격려 메시지 생성 (계획 중)
 
 ### 기술 스택
 
@@ -31,8 +32,7 @@
 - Redis (캐싱 + Pub/Sub)
 - Spring Security + JWT
 - SSE (Server-Sent Events)
-- Google GenAI SDK
-- Google Cloud Vision API (계획 중)
+- Google GenAI SDK (Gemini AI)
 
 **프론트엔드**
 - Next.js 16 + TypeScript
@@ -93,7 +93,7 @@
 ### 5. 인증 작성/관리 (Certification Management)
 - [x] 인증 생성 API (챌린지 ID, 제목, 내용)
 - [x] 이미지 업로드 API (로컬 파일 저장, 날짜별 디렉토리)
-- [x] 이미지 검증 (AI 분석으로 구현됨)
+- [x] 이미지 검증 (Gemini AI 기반 적합성 분석)
 - [x] 이미지 리사이징 (Thumbnailator: 최대 1600px, 품질 80%)
 - [x] 인증 조회 API (목록/상세, 페이징)
 - [x] 인증 수정 API (작성자 권한)
@@ -116,13 +116,10 @@
 - [x] 팔로잉 피드 API (팔로우한 사용자 인증)
 
 ### 7. AI 추천 엔진 - 핵심 기능 (AI Recommendation Engine)
-- [x] 추천 API (5가지 추천 알고리즘)
-- [x] 쿼리 기반 추천 (참가자 수 TOP, Redis 캐싱)
-- [x] 콘텐츠 기반 추천 (태그 유사도 계산, 코사인 유사도)
-- [x] 협업 필터링 (공통 참여 챌린지 분석, User-Based CF)
-- [x] 개인화 추천 (사용자 행동 로그 분석, 난이도/카테고리 선호)
-- [x] 트렌드 추천 (24시간 급상승 챌린지, Redis Sorted Set)
-- [x] 추천 이유 생성 API (설명 텍스트)
+- [x] 추천 API (Gemini AI 기반)
+- [x] 기존 챌린지 추천 (참여 가능한 챌린지)
+- [x] 자연어 쿼리 기반 기존 챌린지 추천
+- [x] 추천 이유 생성 (reason 필드)
 - [ ] 사용자 행동 로그 수집 (조회, 참여, 완료)
 - [ ] 추천 결과 캐싱 (Redis, TTL 1시간)
 - [ ] 추천 성능 측정 (CTR, 참여율)
@@ -155,7 +152,6 @@
 - [x] 알림 삭제 API (개별/읽은 알림 일괄 삭제)
 - [ ] 알림 설정 API (타입별 수신 여부)
 - [x] SSE 기반 실시간 알림 푸시
-- [ ] 알림 만료 정책 (30일 후 자동 삭제)
 
 ### 11. 포인트 시스템 (Points System) - 완료
 - [x] 포인트(Point) 규칙 정의 (인증 +10, 댓글 +2, 좋아요 +1, 배지 +5) - 상점용 재화
@@ -198,8 +194,7 @@
 ### 15. 통계/분석 (Statistics & Analytics)
 - [x] 개인 통계 API (총 인증 수, 포인트, 배지, 스트릭)
 - [x] 챌린지 통계 API (참여자 수, 인증 수, 완료율, 조회수)
-- [ ] 차트 데이터 API (일별 인증 추이, 주별 포인트, 카테고리별 참여도)
-- [ ] 통계 집계 배치 작업 (매일 실행)
+- [x] 포인트 통계 차트 API (일별 획득, 누적 추이)
 - [ ] 통계 데이터 캐싱 (Redis, TTL 1시간)
 - [ ] CSV 내보내기 API (개인 데이터 다운로드)
 
@@ -216,7 +211,7 @@
 - [x] 대시보드 데이터 API (챌린지 수, 인증 수, 팔로워 수, 팔로잉 수)
 - [x] 참여 중인 챌린지 API (진행 중인 챌린지 목록)
 - [x] 최근 활동 피드 API (최근 3개 피드)
-- [x] 대시보드 추천 챌린지 API (AI 기반 5가지 알고리즘)
+- [x] 대시보드 추천 챌린지 API (Gemini AI 기반)
 - [x] 대시보드 프론트엔드 페이지 (통계 카드, 최근 피드)
 
 **참고**: 포인트, 배지, 스트릭은 각각의 전용 API 제공 (GET /api/points/me, /api/badges/my, /api/streaks)
@@ -262,37 +257,26 @@
 - [ ] 커넥션 풀 최적화 (HikariCP)
 - [ ] 트랜잭션 범위 최소화
 
-### 22. 배치 작업/스케줄링 (Batch Jobs & Scheduling) - 부분 완료
-- [ ] Spring Batch 설정
+### 22. 스케줄링 (Scheduling) - 완료
 - [x] 스케줄러 설정 (@Scheduled)
-- [x] 배치 작업 목록:
+- [x] 스케줄러 목록 (5개):
   - [x] 스트릭 검증 (매일 자정) - StreakScheduler
   - [x] 스트릭 리마인더 (매일 저녁 8시) - StreakScheduler
   - [x] 랭킹 동기화 (매일 새벽 4시, 5시) - RankingScheduler
   - [x] 랭킹 아카이브 (주간: 일요일 23:55, 월간: 월말 23:55) - RankingScheduler
   - [x] 파일 정리 (매일 새벽 3시, 고아 파일 삭제) - FileCleanupTask
-  - [ ] 통계 집계 (매일 새벽 2시)
-  - [ ] 만료 알림 삭제 (매주 일요일)
   - [x] 챌린지 종료 리마인더 (매일 9시: 1주일 전, 3일 전, 당일) - ChallengeReminderScheduler
   - [x] 조회수 동기화 (1시간마다) - ViewCountScheduler
-  - [ ] 주간 리포트 이메일 발송 (매주 월요일)
-- [ ] 배치 실행 이력 저장
-- [ ] 배치 실패 알림 (Slack, Discord)
-- [ ] 배치 작업 모니터링 (실행 시간, 성공/실패)
 
-### 23. AI 인증 분석 (AI Certification Analysis)
-- [ ] Google Cloud Vision API 연동
-- [ ] 이미지 업로드 시 비동기 분석 (백그라운드 작업)
-- [ ] 라벨 탐지 (Label Detection) 분석
-- [ ] 텍스트 탐지 (OCR) 분석
-- [ ] 안전 탐지 (Safe Search) 분석
-- [ ] AI 신뢰도 점수 계산 (0-100)
-- [ ] 분석 결과 저장 (DB)
-- [ ] AI 인증 배지 자동 부여 (신뢰도 80% 이상)
-- [ ] 분석 실패 시 재시도 로직
+### 23. AI 인증 분석 (AI Certification Analysis) - 완료
+- [x] Gemini AI 기반 이미지 분석
+- [x] 인증 사진 업로드 시 자동 분석
+- [x] 주제 적합성 판단 (isSuitable 필드)
+- [x] 분석 결과 저장 (analysisResult 필드)
+- [x] AI 인증 재분석 API
 
 ### 24. AI 동기부여 코치 (AI Motivational Coach)
-- [ ] AI 격려 메시지 생성 API (OpenAI GPT 연동)
+- [ ] AI 격려 메시지 생성 API (Gemini AI 연동)
 - [ ] 사용자 컨텍스트 수집 (레벨, 스트릭, 최근 활동)
 - [ ] 개인화 메시지 생성 (사용자 데이터 기반)
 - [ ] 메시지 템플릿 엔진 (다양한 표현)
@@ -300,17 +284,16 @@
 - [ ] 메시지 조회 API (최근 10개)
 - [ ] 알림 시스템 연동 (자동 발송)
 
-### 25. AI 챌린지 생성기 (AI Challenge Generator)
-- [ ] AI 챌린지 생성 API (OpenAI GPT 연동)
-- [ ] 키워드 기반 챌린지 자동 생성 (제목, 설명, 태그, 카테고리)
-- [ ] GPT 프롬프트 엔지니어링 (구조화된 출력)
-- [ ] 생성 결과 검증 (필수 필드, 길이 제한)
-- [ ] 생성 미리보기 API (저장 전 확인)
-- [ ] 생성된 챌린지 수정 API (제목, 설명, 태그 수정)
-- [ ] 챌린지 즉시 생성 API (검증 후 DB 저장)
+### 25. AI 챌린지 생성기 (AI Challenge Generator) - 부분 완료
+- [x] AI 챌린지 생성 API (Gemini AI 연동)
+- [x] 키워드 기반 챌린지 자동 생성 (제목, 설명, 카테고리, 난이도)
+- [x] 자연어 쿼리 기반 챌린지 생성
+- [x] 프롬프트 엔지니어링 (구조화된 출력)
+- [x] 생성 결과 검증 (TypeReference 기반 파싱)
+- [x] 생성 미리보기 (폼 자동 채우기)
 - [ ] 생성 이력 저장 (사용자별, 통계)
-- [ ] API 호출 제한 (Rate Limiting, 일일 10회)
-- [ ] 생성 실패 시 재시도 로직 (최대 3회)
+- [ ] API 호출 제한 (Rate Limiting)
+- [ ] 생성 실패 시 재시도 로직
 
 ---
 
@@ -322,9 +305,11 @@
 - `POST /api/auth/logout` - 로그아웃
 
 ### 사용자 관리 (UserController)
-- `GET /api/users/{loginId}` - 사용자 프로필 조회
-- `PUT /api/users/{loginId}` - 프로필 수정
-- `GET /api/users` - 사용자 목록 조회 (페이징)
+- `GET /api/users/me` - 현재 사용자 정보 조회
+- `GET /api/users/{loginId}/profile` - 사용자 프로필 조회
+- `PUT /api/users/me/update-profile` - 프로필 수정
+- `DELETE /api/users/me` - 회원 탈퇴
+- `GET /api/users` - 사용자 목록 조회 (페이지)
 
 ### 챌린지 관리 (ChallengeController)
 - `POST /api/challenge` - 챌린지 생성
@@ -339,6 +324,10 @@
 - `GET /api/challenge/{challengeId}/participants` - 참여자 목록
 - `GET /api/challenge/{challengeId}/statistics` - 통계
 - `GET /api/challenge/my` - 내 챌린지 목록
+- `GET /api/challenge/recommend` - AI 기존 챌린지 추천
+- `GET /api/challenge/recommend/query` - 자연어 기반 기존 챌린지 추천
+- `GET /api/challenge/recommend-existing` - AI 기존 챌린지 추천 (참여용)
+- `GET /api/challenge/recommend-existing/query` - 자연어 기반 기존 챌린지 추천 (참여용)
 
 ### 인증 관리 (CertificationController)
 - `POST /api/certifications` - 인증 생성
@@ -346,6 +335,15 @@
 - `GET /api/certifications/{certId}` - 상세 조회
 - `PUT /api/certifications/{certId}` - 수정
 - `DELETE /api/certifications/{certId}` - 삭제
+- `POST /api/certifications/{certId}/photo` - 인증 사진 업로드
+- `POST /api/certifications/{certId}/analyze` - AI 인증 재분석
+- `DELETE /api/certifications/{certId}/photo` - 인증 사진 삭제
+
+### 댓글 & 좋아요 (LikeCommentController)
+- `POST /api/certifications/{certId}/likes` - 좋아요 토글
+- `POST /api/certifications/{certId}/comments` - 댓글 생성
+- `GET /api/certifications/{certId}/comments` - 댓글 목록
+- `DELETE /api/certifications/{certId}/comments/{commentId}` - 댓글 삭제
 
 ### 팔로우 시스템 (FollowController)
 - `POST /api/follows/{followingLoginId}` - 팔로우
@@ -399,26 +397,29 @@
 
 ---
 
-## 구현된 프론트엔드 페이지 (15+)
+## 구현된 프론트엔드 페이지 (18+)
 
 - **홈페이지** `/` - 로그인 상태에 따라 대시보드 또는 랜딩 페이지
 - **인증** `/login`, `/signup` - 로그인/회원가입
 - **대시보드** `/dashboard` - 사용자 통계, 참여 중인 챌린지
 - **챌린지**
-  - `/challenge` - 챌린지 목록 (필터링, 페이징)
+  - `/challenge` - 챌린지 목록 (필터링, 페이지, AI 추천)
   - `/challenge/[id]` - 챌린지 상세보기
-  - `/challenge/create` - 챌린지 생성
+  - `/challenge/[id]/edit` - 챌린지 편집
+  - `/challenge/create` - 챌린지 생성 (AI 챌린지 생성기 연동)
   - `/challenge/my` - 내 챌린지 목록
 - **인증**
   - `/certification/[id]` - 인증 상세보기
   - `/certification/create` - 인증 생성
   - `/certification/my` - 내 인증 목록
-- **피드** `/feed` - 참여 중인 챌린지 및 팔로우 사용자의 실시간 인증 피드
+- **피드** `/feed` - 팔로우 사용자의 실시간 인증 피드 (무한 스크롤, SSE)
+- **랭킹** `/ranking` - 주간/월간/전체 랭킹 (실시간 SSE 업데이트, 포디움 UI)
 - **프로필**
-  - `/profile` - 내 프로필 (인증, 팔로워/팔로잉, 배지)
+  - `/profile` - 내 프로필 (인증, 팔로워/팔로잉, 배지, 스트릭)
   - `/profile/[loginId]` - 다른 사용자 프로필 (팔로우 가능)
-- **사용자** `/users` - 사용자 목록 (검색, 페이징, 팔로우 가능)
-- **통계** `/stats` - 포인트/경험치 통계 (일별 차트, 누적 추이, 레벨 변화)
+- **사용자** `/users` - 사용자 목록 (검색, 페이지, 팔로우 가능)
+- **통계** `/stats` - 포인트 통계 (일별 차트, 누적 추이)
+- **설정** `/settings` - 계정 설정
 
 ---
 
@@ -458,7 +459,7 @@ Streak (연속 기록)
 
 ---
 
-## 배치 작업 (8개)
+## 스케줄러 (7개)
 
 | 작업 | 실행 주기 | 설명 |
 |------|-----------|------|
@@ -469,7 +470,6 @@ Streak (연속 기록)
 | 파일 정리 | 매일 새벽 3시 | 고아 파일(DB 미연결) 삭제 |
 | 챌린지 리마인더 | 매일 오전 9시 | 종료 1주일 전, 3일 전, 당일 알림 |
 | 조회수 동기화 | 1시간마다 | Redis → DB 동기화 |
-| 통계 집계 | 매일 새벽 2시 | 일별 통계 데이터 생성 (계획 중) |
 
 ---
 
@@ -524,11 +524,8 @@ JWT_EXPIRATION=86400000
 FILE_UPLOAD_DIR=./uploads
 FILE_UPLOAD_URL_PATH=/images
 
-# Google GenAI
+# Google GenAI (Gemini AI)
 GOOGLE_GENAI_API_KEY=your-genai-api-key
-
-# Google Cloud Vision (계획 중)
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 
 # AWS S3 (선택 사항, 현재 미사용)
 # AWS_ACCESS_KEY_ID=your-access-key
@@ -543,13 +540,13 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
 | 항목 | 수치 |
 |------|------|
 | **구현된 API 엔드포인트** | 50+ |
-| **구현된 프론트엔드 페이지** | 16+ |
+| **구현된 프론트엔드 페이지** | 18+ |
 | **백엔드 컨트롤러** | 14개 (Auth, User, Challenge, Certification, Follow, Feed, Notification, LikeComment, Badge, Point, Ranking, RankingSse, Streak, Health) |
 | **스케줄러** | 5개 (Streak, Ranking, FileCleanup, ChallengeReminder, ViewCount) |
-| **구현된 기능** | 사용자 인증, 챌린지 관리, 인증 시스템, 팔로우, 실시간 피드, 알림, 포인트, 배지, 스트릭, 랭킹(실시간 SSE), AI 추천, 파일 관리 |
-| **완료율** | ~65% (주요 핵심 기능 완료, AI 추천 시스템 구현) |
-| **현재 기술 스택** | Spring Boot + Kotlin, Next.js 16, PostgreSQL, Redis, SSE, Recharts, Thumbnailator |
-| **외부 API 연동** | 1개 (Google GenAI SDK), 계획 중: Google Cloud Vision |
+| **구현된 기능** | 사용자 인증, 챌린지 관리, 인증 시스템, 팔로우, 실시간 피드, 알림, 포인트, 배지, 스트릭, 랭킹(실시간 SSE), AI 추천, AI 챌린지 생성, AI 인증 분석, 파일 관리 |
+| **완료율** | ~70% (핵심 기능 및 AI 기능 완료) |
+| **현재 기술 스택** | Spring Boot + Kotlin, Next.js 16, PostgreSQL, Redis, SSE, Gemini AI, Recharts, Thumbnailator |
+| **외부 API 연동** | 1개 (Google GenAI SDK) |
 
 ---
 
@@ -583,39 +580,39 @@ MIT License
 ### 완료된 기능
 
 #### 백엔드
-- **사용자 인증 & 프로필 관리**: 회원가입, 로그인, JWT, 프로필 조회/수정, 비밀번호 변경
+- **사용자 인증 & 프로필 관리**: 회원가입, 로그인, JWT, 프로필 조회/수정, 비밀번호 변경, 회원 탈퇴
 - **챌린지 시스템**: 생성, 조회(목록/상세), 수정, 삭제, 참여/탈퇴, 검색, 통계
-- **인증 시스템**: 생성, 조회, 수정, 삭제, 사용자별/챌린지별 목록
+- **인증 시스템**: 생성, 조회, 수정, 삭제, 사진 업로드, 사용자별/챌린지별/기간별 목록
 - **실시간 피드**: SSE 기반 실시간 알림 브로드캐스트, 하트비트, 연결 관리
 - **팔로우 시스템**: 팔로우/언팔로우, 팔로워/팔로잉 목록, 카운트 캐싱, 팔로잉 피드
 - **댓글 & 좋아요**: 댓글 생성/조회/삭제, 좋아요 토글, 중복 방지, 알림 발송
 - **알림 시스템**: DB 기반 알림 저장, SSE 실시간 푸시, 읽음 처리, 미읽음 카운트
 - **포인트**: 적립, 차감, 히스토리, 통계 조회
-- **통계 API**: 일별 포인트 데이터, 누적 추이 (날짜 범위 지정)
 - **배지 시스템**: 배지 정의, 조건 체크, 자동 부여, 알림 발송, BadgeChecker 패턴
-- **Redis 캐싱**: 조회수, 팔로우 수, 미읽음 알림 수
+- **스트릭 시스템**: 연속 인증 추적, 캘린더, 리더보드, 리마인더
+- **랭킹 시스템**: Redis Sorted Set 기반, SSE 실시간 업데이트, 주간/월간/전체
+- **AI 추천 엔진**: Gemini AI 기반 기존 챌린지 추천 (자연어 쿼리 지원)
+- **AI 챌린지 생성기**: Gemini AI 기반 키워드/자연어 챌린지 자동 생성
+- **AI 인증 분석**: Gemini AI 기반 인증 사진 분석 및 적합성 판단, 재분석
+- **Redis 캐싱**: 조회수, 팔로우 수, 미읽음 알림 수, 랭킹
 - **모니터링**: LoggingAspect (Service/Repository 로깅 + MDC)
-- **스케줄링**: 챌린지 알림 스케줄러
+- **스케줄링**: 5개 스케줄러 (스트릭, 랭킹, 챌린지 리마인더, 조회수 동기화, 파일 정리)
 
 #### 프론트엔드
 - **인증 페이지**: 로그인, 회원가입
 - **대시보드**: 사용자 통계, 참여 중인 챌린지
-- **챌린지**: 목록(필터링/페이징), 상세, 생성, 내 챌린지
+- **챌린지**: 목록(필터링/페이지, AI 추천), 상세, 편집, 생성(AI 생성기 연동), 내 챌린지
 - **인증**: 상세, 생성, 내 인증 목록
-- **피드**: 실시간 SSE 기반 피드, 팔로잉 피드
-- **프로필**: 내 프로필, 다른 사용자 프로필, 팔로우 기능, 인증/팔로워/팔로잉/배지 탭
-- **사용자 목록**: 검색, 페이징, 팔로우
+- **피드**: 실시간 SSE 기반 피드, 팔로잉 피드, 무한 스크롤
+- **랭킹**: 주간/월간/전체, SSE 실시간 업데이트, 포디움 UI, 순위 변동 표시
+- **프로필**: 내 프로필, 다른 사용자 프로필, 팔로우 기능, 인증/팔로워/팔로잉/배지/스트릭 탭
+- **사용자 목록**: 검색, 페이지, 팔로우
 - **통계 페이지**: Recharts 기반 차트 (일별 포인트, 누적 추이)
-- **UI 개선**: 프로필 탭 스타일 개선, 다크모드 제거, 일관된 디자인 시스템
+- **설정 페이지**: 계정 설정
 
 ### 진행 중 & 계획 중
 - 이미지 업로드 및 S3 연동
 - 댓글 수/좋아요 수 Redis 캐싱
-- 랭킹/리더보드 시스템
-- AI 기반 챌린지 추천 (5가지 알고리즘)
-- AI 챌린지 생성기 (GPT)
-- AI 이미지 검증 (Google Vision)
-- AI 동기부여 코치
-- 관리자 기능
-- 고급 검색 (정렬, 인덱싱, 자동완성)
-- 성능 최적화 (쿼리, 인덱싱, 페이징)
+- AI 동기부여 코치 (Gemini AI 기반)
+- 고급 검색 (인덱싱, 자동완성)
+- 성능 최적화 (쿼리, 인덱싱, 페이지)
