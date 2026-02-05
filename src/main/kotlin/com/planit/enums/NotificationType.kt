@@ -11,4 +11,5 @@ enum class NotificationType {
     LEVEL_UP,    // 레벨업 알림
     CHALLENGE,   // 챌린지 알림
     STREAK,      // 스트릭 알림
+    NEW_FEED,    // 새 피드 알림
 }

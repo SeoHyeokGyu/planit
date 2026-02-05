@@ -4,12 +4,16 @@ import com.planit.dto.CertificationAnalysisResponse
 import com.planit.dto.CertificationCreateRequest
 import com.planit.dto.CertificationResponse
 import com.planit.dto.CertificationUpdateRequest
+import com.planit.dto.NotificationResponse
 import com.planit.entity.Certification
+import com.planit.entity.User
 import com.planit.enums.BadgeType
+import com.planit.enums.NotificationType
 import com.planit.exception.*
 import com.planit.repository.CertificationRepository
 import com.planit.repository.ChallengeParticipantRepository
 import com.planit.repository.ChallengeRepository
+import com.planit.repository.FollowRepository
 import com.planit.repository.UserRepository
 import com.planit.service.badge.BadgeService
 import com.planit.service.storage.FileStorageService
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
+import java.util.UUID
 
 /** 챌린지 인증(Certification)과 관련된 비즈니스 로직을 처리하는 서비스 클래스입니다. */
 @Service
@@ -33,6 +38,8 @@ class CertificationService(
   private val streakService: StreakService,
   private val fileStorageService: FileStorageService,
   private val geminiService: GeminiService,
+  private val followRepository: FollowRepository,
+  private val notificationService: NotificationService,
 ) {
 
   private val logger = LoggerFactory.getLogger(CertificationService::class.java)
@@ -205,7 +212,60 @@ class CertificationService(
       logger.error("스트릭 기록 실패 - challengeId: ${challenge.id}, loginId: $userLoginId", e)
     }
 
+    // 팔로워들에게 새 피드 알림 전송
+    notifyFollowersAboutNewCertification(savedCertification, user)
+
     return CertificationResponse.from(savedCertification)
+  }
+
+  /**
+   * 인증 생성 시 팔로워들에게 NEW_FEED 알림을 전송합니다.
+   */
+  private fun notifyFollowersAboutNewCertification(certification: Certification, user: User) {
+    try {
+      // 팔로워 목록 조회
+      val followers = followRepository.findAllByFollowingId(
+        user.id!!,
+        Pageable.unpaged()
+      ).content
+
+      logger.info("새 인증 알림 전송 시작 - 인증ID: ${certification.id}, 팔로워 수: ${followers.size}")
+
+      var successCount = 0
+      var failCount = 0
+
+      // 각 팔로워에게 알림 전송
+      followers.forEach { follow ->
+        try {
+          notificationService.sendNotification(
+            NotificationResponse(
+              id = UUID.randomUUID().toString(),
+              receiverId = follow.follower.id!!,
+              receiverLoginId = follow.follower.loginId,
+              senderId = user.id,
+              senderLoginId = user.loginId,
+              senderNickname = user.nickname,
+              type = NotificationType.NEW_FEED,
+              message = "${user.nickname ?: user.loginId}님이 새로운 인증을 올렸습니다.",
+              relatedId = certification.id.toString(),
+              relatedType = "CERTIFICATION",
+              isRead = false,
+              createdAt = LocalDateTime.now()
+            )
+          )
+          successCount++
+        } catch (e: Exception) {
+          logger.error("팔로워 알림 전송 실패 - 팔로워ID: ${follow.follower.loginId}", e)
+          failCount++
+        }
+      }
+
+      logger.info("새 인증 알림 전송 완료 - 성공: $successCount, 실패: $failCount")
+
+    } catch (e: Exception) {
+      // 알림 전송 실패가 인증 생성을 롤백시키지 않도록 예외 처리
+      logger.error("새 인증 팔로워 알림 전송 중 오류 발생 - certificationId: ${certification.id}", e)
+    }
   }
 
   /**
