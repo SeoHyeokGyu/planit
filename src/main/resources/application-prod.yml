@@ -53,16 +53,16 @@ server:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
-    enabled: true
+    enabled: false
   api-docs:
-    enabled: true
+    enabled: false
     path: /v3/api-docs
 
 logging:
   level:
-    com.planit: DEBUG
+    com.planit: WARN
     org.springframework: WARN
-    org.springframework.web.cors: DEBUG
+    org.springframework.web.cors: WARN
     org.hibernate: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

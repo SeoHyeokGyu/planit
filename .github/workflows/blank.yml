@@ -1,11 +1,11 @@
 name: Discord Issue Notifier
 
 on:
-  issues:
-    types: [opened, closed, reopened, assigned, unassigned, labeled, unlabeled, edited, deleted, milestoned, demilestoned, locked, unlocked]
+  workflow_dispatch:  # 프로젝트 종료로 자동 트리거 비활성화 (수동 실행만 가능)
 
 jobs:
   notify:
+    if: false  # 프로젝트 종료로 비활성화
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Notification

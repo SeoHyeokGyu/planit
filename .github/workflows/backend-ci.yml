@@ -70,9 +70,9 @@ jobs:
 
   # Deploy Backend to Oracle Cloud
   deploy:
+    if: false  # 프로젝트 종료로 자동 배포 비활성화
     runs-on: ubuntu-latest
     needs: [ build ]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Verify SSH Secrets
